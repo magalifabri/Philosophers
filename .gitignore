@@ -1,4 +1,4 @@
 .DS_STORE
 *.swp
-a.out
-.pdf
+*.out
+*.pdf
