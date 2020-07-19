@@ -3,6 +3,7 @@
 #include <pthread.h>
 #include <stdlib.h>
 #include <sys/time.h> // required for gettimeofday()
+#include "philosophers.h"
 
 typedef struct s_frk
 {
@@ -12,17 +13,16 @@ typedef struct s_frk
 
 typedef struct s_phi
 {
-	int state;
-	int forks;
+	// int forks;
 	long long time_last_meal;
 	int n_times_eaten;
+	// int returned;
 } t_phi;
 
 typedef struct s_tab
 {
 	long long start_tp;
 	int phi_n;
-	char *state; // 'e' = eating, 's' = sleeping, 't' = thinking, 'i' = idle
 	int number_of_philosophers;
 	int time_to_die;   // time in ms before the next meal needs to start
 	int time_to_eat;   // duration in ms that the philo will spend eating
@@ -30,6 +30,7 @@ typedef struct s_tab
 	int number_of_times_each_philosopher_must_eat;
 	t_frk *forks;
 	t_phi *phis;
+	int phi_died;
 } t_tab;
 
 void *phi_f(void *arg)
@@ -39,58 +40,72 @@ void *phi_f(void *arg)
 	int phi_n = -1; // sentinel value for an uninitialized philosopher
 	int left_fork_held;
 	int right_fork_held;
-	int state;
+	int phi_state;
 	long long time_last_meal;
 	long long time_sleep_start;
+	struct timeval tp;
+	long long cur_tp;
 
 	// LIFE of a philosipher
 	while(1)
 	{
 		// GET current time for time stamp
-		struct timeval tp;
 		gettimeofday(&tp, 0);
-		long long cur_tp;
 		cur_tp = tp.tv_sec;
 		cur_tp *= 1000;
 		cur_tp += (tp.tv_usec / 1000);
 		
-		// if (phi_n == 0)
-		// 	printf("%lld\n", (cur_tp - tab->start_tp));
-
 		// INITIALIZE philosopher parameters
 		if (phi_n == -1)
 		{
 			phi_n = tab->phi_n;
 			left_fork_held = 0;
 			right_fork_held = 0;
-			state = 's';
+			phi_state = 's'; // 's' = sleep, 't' = thinking, 'e' = eating
 			time_sleep_start = cur_tp;
 			time_last_meal = cur_tp; // let's be nice and assume the philo's start on a full stomach
-			// tab->state[phi_n] = 'i';
 		}
+
+// TEST -----------------------------------------------------------------------
+		// if (phi_n == 1)
+		// 	tab->phis[1].n_times_eaten = 2;
 		// printf("fork availability: %d, %d, %d\n", tab->forks[0].available, tab->forks[1].available, tab->forks[2].available);
+// ----------------------------------------------------------------------------
+
 		// DETERMINE activity
-		// death if time_to_die has elapsed
+		// DEATH, if time_to_die has elapsed
 		if (time_last_meal + tab->time_to_die <= cur_tp)
 		{
 			printf("%lld, %d, died\n", (cur_tp - tab->start_tp), phi_n);
-			if (left_fork_held)
-			{
-				left_fork_held = 0;
-				if (phi_n == 0)
-					tab->forks[tab->number_of_philosophers - 1].available = 1;
-				else
-					tab->forks[phi_n].available = 1;
-			}
+			tab->phi_died = 1;
 			if (right_fork_held)
 			{
+				pthread_mutex_lock(&tab->forks[phi_n].lock);
+				tab->forks[phi_n].available = 1;
+				pthread_mutex_unlock(&tab->forks[phi_n].lock);
 				right_fork_held = 0;
-				tab->forks[phi_n - 1].available = 1;
 			}
+			if (left_fork_held)
+			{
+				if (phi_n == 0)
+				{
+					pthread_mutex_lock(&tab->forks[tab->number_of_philosophers - 1].lock);
+					tab->forks[tab->number_of_philosophers - 1].available = 1;
+					pthread_mutex_unlock(&tab->forks[tab->number_of_philosophers - 1].lock);
+				}
+				else
+				{
+					pthread_mutex_lock(&tab->forks[phi_n - 1].lock);
+					tab->forks[phi_n - 1].available = 1;
+					pthread_mutex_unlock(&tab->forks[phi_n - 1].lock);
+				}
+				left_fork_held = 0;
+			}
+			return (NULL);
 		}
 
-		// thinking -> grab forks if available 
-		if (state == 't')
+		// THINKING: grab forks if available 
+		if (phi_state == 't')
 		{
 			pthread_mutex_lock(&tab->forks[phi_n].lock);
 			if (tab->forks[phi_n].available == 1)
@@ -122,34 +137,53 @@ void *phi_f(void *arg)
 				}
 				pthread_mutex_unlock(&tab->forks[phi_n - 1].lock);
 			}
-			// 2 forks are in the philosophers posession -> eating 
+			// EATING, if 2 forks are in the philosophers posession: 
 			if (left_fork_held && right_fork_held)
 			{
-				state = 'e';
+				phi_state = 'e';
 				time_last_meal = cur_tp;
-				printf("%lld, %d obtained two forks and is attacking the spaghetti\n", (cur_tp - tab->start_tp), phi_n);
+				printf("%lld, %d has two forks and is nomming the spaghetti\n", (cur_tp - tab->start_tp), phi_n);
 			}
 		}
 
-		// eating -> sleeping if time_to_eat has elapsed
-		if (state == 'e' && time_last_meal + tab->time_to_eat <= cur_tp)
+		// EATING -> sleeping, if time_to_eat has elapsed
+		if (phi_state == 'e' && time_last_meal + tab->time_to_eat <= cur_tp)
 		{
+			pthread_mutex_lock(&tab->forks[phi_n].lock);
 			tab->forks[phi_n].available = 1;
-			if (phi_n == 0)
-				tab->forks[tab->number_of_philosophers - 1].available = 1;
-			else
-				tab->forks[phi_n - 1].available = 1;
-			left_fork_held = 0;
+			pthread_mutex_unlock(&tab->forks[phi_n].lock);
 			right_fork_held = 0;
-			state = 's';
+			if (phi_n == 0)
+			{
+				pthread_mutex_lock(&tab->forks[tab->number_of_philosophers - 1].lock);
+				tab->forks[tab->number_of_philosophers - 1].available = 1;
+				pthread_mutex_unlock(&tab->forks[tab->number_of_philosophers - 1].lock);
+			}
+			else
+			{
+				pthread_mutex_lock(&tab->forks[phi_n - 1].lock);
+				tab->forks[phi_n - 1].available = 1;
+				pthread_mutex_unlock(&tab->forks[phi_n - 1].lock);
+			}
+			left_fork_held = 0;
+			// check if philo has eaten enough times yet
+			tab->phis[phi_n].n_times_eaten++;
+			if (tab->number_of_times_each_philosopher_must_eat != -1
+			&& tab->phis[phi_n].n_times_eaten
+			>= tab->number_of_times_each_philosopher_must_eat)
+			{
+				printf("%lld, %d has fattened up enough\n", (cur_tp - tab->start_tp), phi_n);
+				return (NULL);
+			}
+			phi_state = 's';
 			time_sleep_start = cur_tp;
 			printf("%lld, %d finished eating -> going to bed\n", (cur_tp - tab->start_tp), phi_n);
 		}
 
-		// sleep -> thinking if time_to_sleep has elapsed
-		if (state == 's' && time_sleep_start + tab->time_to_sleep < cur_tp)
+		// SLEEPING -> thinking, if time_to_sleep has elapsed
+		if (phi_state == 's' && time_sleep_start + tab->time_to_sleep < cur_tp)
 		{
-			state = 't';
+			phi_state = 't';
 			printf("%lld, %d woke up -> Thinker's pose on the toilet\n", (cur_tp - tab->start_tp), phi_n);
 		}
 		usleep(5000);
@@ -159,17 +193,8 @@ void *phi_f(void *arg)
 
 int philo_one(t_tab tab)
 {
-	// t_tab tab;
+	tab.phi_died = 0;
 
-	// INITIALIZE struct values
-	// tab.number_of_philosophers = 3;
-	// tab.time_to_die = 16000;
-	// tab.time_to_eat = 3000;
-	// tab.time_to_sleep = 8000; // 1000ms = 1s
-	// tab.state = malloc(tab.number_of_philosophers + 1);
-	// tab.state[tab.number_of_philosophers] = '\0';
-	// tab.available_forks = tab.number_of_philosophers;
-	
 	// CREATE fork struct & initialize locks
 	tab.forks = malloc(sizeof(t_frk) * tab.number_of_philosophers);
 	int n = -1;
@@ -184,19 +209,16 @@ int philo_one(t_tab tab)
 	n = -1;
 	while (++n < tab.number_of_philosophers)
 	{
-		tab.phis[n].forks = 0;
-		tab.phis[n].state = 'i';
+		// tab.phis[n].forks = 0;
 		tab.phis[n].n_times_eaten = 0;
 	}
 
 	// GET starting time for time stamp
 	struct timeval tp;
 	gettimeofday(&tp, 0);
-	// printf("tp: %ld.%d\n", tp.tv_sec, tp.tv_usec);
 	tab.start_tp = tp.tv_sec;
 	tab.start_tp *= 1000;
 	tab.start_tp += (tp.tv_usec / 1000);
-	// printf("start_tp: %lld\n", tab.start_tp);
 
 	// CREATE threads / start philosophers
 	pthread_t *phi_t;
@@ -208,9 +230,32 @@ int philo_one(t_tab tab)
 		tab.phi_n = (int)i;
 		pthread_create(&phi_t[(int)i], NULL, phi_f, &tab);
 		i++;
-		usleep(5000); // can only create threads as quickly as the phi_f function processes them
+		usleep(5000); // tab.phi_n needs to be copied over in each phi_f thread, so we can only create threads as quickly as phi_f can copy
 	}
-	pthread_join(*phi_t, NULL);
+
+	int returned = 0;
+	while (returned < tab.number_of_philosophers)
+	{
+		n = 0;
+		returned = 0;
+		usleep(100);
+		if (tab.phi_died)
+		{
+			write(1, B_RED"A philosopher has starved! Game over.\n\033[0m"RESET, 50);
+			return (0);
+		}
+		while (n < tab.number_of_philosophers)
+		{
+			if (tab.phis[n].n_times_eaten == tab.number_of_times_each_philosopher_must_eat)
+				returned++;
+			if (returned == tab.number_of_philosophers)
+			{
+				write(1, B_GREEN"They're all fat. Welcome to America!\n"RESET, 49);
+				return (0);
+			}
+			n++;
+		}
+	}
 	return (0);
 }
 
