@@ -15,6 +15,7 @@ typedef struct s_phi
 	int state;
 	int forks;
 	long long time_last_meal;
+	int n_times_eaten;
 } t_phi;
 
 typedef struct s_tab
@@ -26,6 +27,7 @@ typedef struct s_tab
 	int time_to_die;   // time in ms before the next meal needs to start
 	int time_to_eat;   // duration in ms that the philo will spend eating
 	int time_to_sleep; // duration in ms that the philosopher will spend sleeping
+	int number_of_times_each_philosopher_must_eat;
 	t_frk *forks;
 	t_phi *phis;
 } t_tab;
@@ -150,25 +152,25 @@ void *phi_f(void *arg)
 			state = 't';
 			printf("%lld, %d woke up -> Thinker's pose on the toilet\n", (cur_tp - tab->start_tp), phi_n);
 		}
-		usleep(5);
+		usleep(5000);
 	}
 	return (NULL);
 }
 
-int main()
+int philo_one(t_tab tab)
 {
-	t_tab tab;
+	// t_tab tab;
 
 	// INITIALIZE struct values
-	tab.number_of_philosophers = 3;
-	tab.time_to_die = 16000;
-	tab.time_to_eat = 3000;
-	tab.time_to_sleep = 8000; // 1000ms = 1s
-	tab.state = malloc(tab.number_of_philosophers + 1);
-	tab.state[tab.number_of_philosophers] = '\0';
+	// tab.number_of_philosophers = 3;
+	// tab.time_to_die = 16000;
+	// tab.time_to_eat = 3000;
+	// tab.time_to_sleep = 8000; // 1000ms = 1s
+	// tab.state = malloc(tab.number_of_philosophers + 1);
+	// tab.state[tab.number_of_philosophers] = '\0';
 	// tab.available_forks = tab.number_of_philosophers;
 	
-	// CREATE & initialize fork locks
+	// CREATE fork struct & initialize locks
 	tab.forks = malloc(sizeof(t_frk) * tab.number_of_philosophers);
 	int n = -1;
 	while (++n < tab.number_of_philosophers)
@@ -176,15 +178,15 @@ int main()
 		pthread_mutex_init(&tab.forks[n].lock, NULL);
 		tab.forks[n].available = 1;
 	}
-	// pthread_mutex_init(&tab.lock, NULL);
 
 	// CREATE & initialize philosophers
 	tab.phis = malloc(sizeof(t_phi) * tab.number_of_philosophers);
 	n = -1;
 	while (++n < tab.number_of_philosophers)
 	{
-		tab.phis[tab.phi_n].forks = 0;
-		tab.phis[tab.phi_n].state = 'i';
+		tab.phis[n].forks = 0;
+		tab.phis[n].state = 'i';
+		tab.phis[n].n_times_eaten = 0;
 	}
 
 	// GET starting time for time stamp
@@ -203,35 +205,38 @@ int main()
 	void *i = 0;
 	while ((int)i < tab.number_of_philosophers)
 	{
-		usleep(1000); // can only create threads as quickly as the phi_f function processes them
 		tab.phi_n = (int)i;
 		pthread_create(&phi_t[(int)i], NULL, phi_f, &tab);
 		i++;
+		usleep(5000); // can only create threads as quickly as the phi_f function processes them
 	}
 	pthread_join(*phi_t, NULL);
 	return (0);
 }
 
+int main(int ac, char **av)
+{
+	if (ac < 5 || ac > 6)
+	{
+		printf("error: too few or too many arguments\n");
+		return (0);
+	}
 
+	t_tab tab;
+	tab.number_of_philosophers = atoi(av[1]);
+	printf("number_of_philosophers: %d\n", tab.number_of_philosophers);
+	tab.time_to_die = atoi(av[2]);
+	printf("time_to_die: %d milliseconds\n", tab.time_to_die);
+	tab.time_to_eat = atoi(av[3]);
+	printf("time_to_eat: %d milliseconds\n", tab.time_to_eat);
+	tab.time_to_sleep = atoi(av[4]);
+	printf("time_to_sleep: %d milliseconds\n", tab.time_to_sleep);
+	if (ac == 6)
+		tab.number_of_times_each_philosopher_must_eat = atoi(av[5]);
+	else
+		tab.number_of_times_each_philosopher_must_eat = -1; // sentinel value for absence of value
+	printf("number_of_times_each_philosopher_must_eat: %d\n", tab.number_of_times_each_philosopher_must_eat);
 
-// int main(int ac, char **av)
-// {
-// 	// TESTING ----------------------------------------------------------------
-// 	int i = -1;
-// 	while (++i <= ac)
-// 		printf("av %d: %s\n", i, *av);
-	
-// 	if (ac < 3 || ac > 5)
-// 		return (0);
-	
-// 	number_of_philosophers
-// 	time_to_die
-// 	time_to_eat
-// 	time_to_sleep
-// 	number_of_times_each_philosopher_must_eat
-
-// 	int number_of_philosophers = 3;
-// 	int time_to_die = 16000; // 1000ms = 1s
-// 	int time_to_eat = 3000;
-// 	int time_to_sleep = 8000;
-// }
+	philo_one(tab);
+	return (0);
+}
