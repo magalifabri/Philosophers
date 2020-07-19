@@ -7,3 +7,8 @@
 
 
 [stackoverflow: passing struct to pthread as an argument](https://stackoverflow.com/questions/20196121/passing-struct-to-pthread-as-an-argument)
+
+## Tests
+
+- 3 15000 5000 8000: 3rd should die after ±15s
+- 3 15000 3000 8000 3: they're all done after ±39s
