@@ -102,12 +102,12 @@ int put_status_msg(long long time, int phi_n, char *message)
 		free(c_time);
 		return (0);
 	}
-	if (!(concat = concatenate_strings(5, c_time, " ", c_phi_n, " ", message)))
-	{
-		free(c_time);
-		free(c_phi_n);
+	concat = concatenate_strings(5, c_time, " ", c_phi_n, " ", message);
+	free(c_time);
+	free(c_phi_n);
+	if (!concat)
 		return (0);
-	}
 	write(1, concat, get_len(concat));
+	free(concat);
 	return (1);
 }
