@@ -1,5 +1,7 @@
 #ifndef _PHILOSOPHERS_H
 
+#define BOLD "\033[1m"
+#define UNDERLINE "\033[4m"
 #define RED "\033[0;31m"	
 #define B_RED "\033[1;31m"	
 #define GREEN "\033[0;32m"	
