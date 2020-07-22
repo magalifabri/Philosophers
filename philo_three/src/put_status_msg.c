@@ -95,10 +95,19 @@ int put_status_msg(long long time, int phi_n, char *message)
 	char *c_phi_n;
 	char *concat;
 
-	c_time = ft_itoa((int)time);
-	c_phi_n = ft_itoa(phi_n);
-	concat = concatenate_strings(5, c_time, " ", c_phi_n, " ", message);
-	// ft_putstring(concat);
+	if (!(c_time = ft_itoa((int)time)))
+		return (0);
+	if (!(c_phi_n = ft_itoa(phi_n)))
+	{
+		free(c_time);
+		return (0);
+	}
+	if (!(concat = concatenate_strings(5, c_time, " ", c_phi_n, " ", message)))
+	{
+		free(c_time);
+		free(c_phi_n);
+		return (0);
+	}
 	write(1, concat, get_len(concat));
-	return (0);
+	return (1);
 }

@@ -8,12 +8,13 @@
 #define ERROR_GETTIMEOFDAY 2
 #define ERROR_MALLOC 3
 #define ERROR_PTHREAD_CREATE 4
-// #define ERROR_
+#define ERROR_TIMES_TO_EAT 5
 // #define ERROR_
 
 typedef struct s_tab
 {
-	long long start_tp;
+	long long start_time;
+	long long current_time;
 	int phi_n;
 	int number_of_philosophers;
 	int time_to_die;   // time in ms before the next meal needs to start
@@ -39,7 +40,7 @@ void *return_error(t_tab *tab, int error_num)
 	return (NULL);
 }
 
-long long get_passed_time(t_tab *tab)
+long long get_current_time(t_tab *tab)
 {
 	struct timeval tp;
 	long long passed_time;
@@ -52,163 +53,153 @@ long long get_passed_time(t_tab *tab)
 	return (passed_time);
 }
 
+/*
+Philosophers may die of starvation while standing in the dining room queue (semaphore) and it is important to report on their unfortunate demise within 10ms of its occurrance and halt the program immediately afterwards. But while they are waiting, they are incapable of doing anything else, and the other philosophers or the parent process also isn't aware of whether or not the philosopher has actually starved. Therefore a pthread is created within the child process to keep an eye on things.
+*/
+
 void *death_signaller(void *arg)
 {
 	t_tab *tab;
+	// long long current_time;
 	tab = (t_tab *)arg;
 
 	while (1)
 	{
-		if (tab->time_last_meal[tab->phi_n] + tab->time_to_die <= get_passed_time(tab))
+		usleep(5000);
+		if ((tab->current_time = get_current_time(tab)) == -1)
+			exit(EXIT_ERROR);
+		if (tab->time_last_meal[tab->phi_n] + tab->time_to_die <= tab->current_time)
 		{
-			put_status_msg((get_passed_time(tab) - tab->start_tp), tab->phi_n + 1, "died\n");
+			if (!(put_status_msg((tab->current_time - tab->start_time), tab->phi_n + 1, B_RED"died, exiting\n"RESET)))
+				exit(EXIT_ERROR);
 			tab->phi_died = 1;
 			exit(EXIT_DEATH);
 		}
-		usleep(5000);
 	}
 }
+
+/*
+difference between philo_one and philo_two
+- don't share the struct
+- Here, the semaphore is like a dining room. The room can only hold so many people. So when the room is full, any new philosopher that wants to enter, has to wait outside. This means that a philosopher (process) makes use of (part of) the semaphore for the entire duration of it's meal, instead of only for the time that it takes to see if there are any forks and to possible grab one or two. And other philosophers (processes) that the semaphore can no longer accommodate, are held up at the dining room entrance queue for as long as it takes for space to become available.
+- Because of this the current time for the status message has to be gotten both before eating (for messages that are posted before) as well as after (for messages that are posted after), because eating itself takes a long time.
+*/
 
 void phi_f(void *arg)
 {
 	t_tab *tab = (t_tab *)arg;
 
-	int phi_n = -1; // sentinel value for an uninitialized philosopher
-	int forks_held;
+	// int phi_n = -1; // sentinel value for an uninitialized philosopher
 	int phi_state;
-	long long time_last_meal;
 	long long time_sleep_start;
-
-	// STARVATION monitor
+	long long current_time;
+	
+	if ((current_time = get_current_time(tab)) == -1)
+		exit(EXIT_ERROR);
+	phi_state = 't'; // 's' = sleep, 't' = thinking, 'e' = eating
+	time_sleep_start = current_time;
+	tab->time_last_meal[tab->phi_n] = current_time; // let's be nice and assume the philo's start on a full stomach
+	
 	pthread_t death_signaller_t;
 	pthread_create(&death_signaller_t, NULL, death_signaller, tab);
 
 	// LIFE of a philosipher
 	while(1)
 	{
-		// // GET current time for time stamp
-		// if (gettimeofday(&tp, 0) == -1)
-		// 	return (return_error(tab, 2));
-		// cur_tp = tp.tv_sec;
-		// cur_tp *= 1000;
-		// cur_tp += (tp.tv_usec / 1000);
-		
-		// INITIALIZE philosopher parameters
-		if (phi_n == -1)
-		{
-			phi_n = tab->phi_n;
-			// forks_held = 0;
-			phi_state = 's'; // 's' = sleep, 't' = thinking, 'e' = eating
-			time_sleep_start = get_passed_time(tab);
-			tab->time_last_meal[phi_n] = get_passed_time(tab); // let's be nice and assume the philo's start on a full stomach
-		}
-
-// TEST -----------------------------------------------------------------------
-		// if (phi_n == 1)
-		// 	tab->phis[1].n_times_eaten = 2;
-			// printf("fork availability: %d\n", tab->fork_availability;
-// ----------------------------------------------------------------------------
+		if ((current_time = get_current_time(tab)) == -1)
+			exit(EXIT_ERROR);
 
 		// DETERMINE activity
-		// DEATH, if time_to_die has elapsed
-		if (tab->time_last_meal[phi_n] + tab->time_to_die <= get_passed_time(tab))
-		{
-			// printf("%lld %d died\n", (cur_tp - tab->start_tp), phi_n + 1);
-			put_status_msg((get_passed_time(tab) - tab->start_tp), phi_n + 1, "died\n");
-			tab->phi_died = 1;
-			exit(EXIT_DEATH);
-		}
 
 		// THINKING: eat when <= half of the philosophers are eating (then enough forks are available)
 		if (phi_state == 't')
 		{
-			sem_wait(tab->fork_availability);
-			if (tab->phi_died)
-				exit(EXIT_DEATH);
-			phi_state = 'e';
-			tab->time_last_meal[phi_n] = get_passed_time(tab);
-			put_status_msg((get_passed_time(tab) - tab->start_tp), phi_n + 1, "is eating\n");
-			// sem_post(tab->fork_availability);
-		}
-
-		// EATING -> sleeping, if time_to_eat has elapsed
-		if (phi_state == 'e' && tab->time_last_meal[phi_n] + tab->time_to_eat <= get_passed_time(tab))
-		{
-			// sem_post(tab->fork_availability);
+			if (sem_wait(tab->fork_availability) == -1)
+				exit(EXIT_ERROR);
+			if ((current_time = get_current_time(tab)) == -1)
+				exit(EXIT_ERROR);
+			tab->time_last_meal[tab->phi_n] = current_time;
+			if (!(put_status_msg((current_time - tab->start_time), tab->phi_n + 1, "is eating\n")))
+				exit(EXIT_ERROR);
+			if (usleep(tab->time_to_eat * 1000) == -1)
+				exit(EXIT_ERROR);
+			if ((current_time = get_current_time(tab)) == -1)
+				exit(EXIT_ERROR);
 			// CHECK if philo has eaten enough times yet
-			tab->n_times_eaten[phi_n]++;
+			tab->n_times_eaten[tab->phi_n]++;
 			if (tab->number_of_times_each_philosopher_must_eat != -1
-			&& tab->n_times_eaten[phi_n]
+			&& tab->n_times_eaten[tab->phi_n]
 			>= tab->number_of_times_each_philosopher_must_eat)
 			{
 				// TESTING ----------------------------------------------------
-				printf("%lld, %d has fattened up enough\n", (get_passed_time(tab) - tab->start_tp), phi_n + 1);
+				printf("%lld %d has fattened up enough\n", (current_time - tab->start_time), tab->phi_n + 1);
 				// ------------------------------------------------------------
-				sem_post(tab->fork_availability);
+				if (sem_post(tab->fork_availability) == -1)
+					exit(EXIT_ERROR);
 				exit(EXIT_EATEN_ENOUGH);
 			}
 			phi_state = 's';
-			time_sleep_start = get_passed_time(tab);
-			put_status_msg((get_passed_time(tab) - tab->start_tp), phi_n + 1, "is sleeping\n");
-			sem_post(tab->fork_availability);
+			time_sleep_start = current_time;
+			if (!(put_status_msg((current_time - tab->start_time), tab->phi_n + 1, "is sleeping\n")))
+				exit(EXIT_ERROR);
+			if (sem_post(tab->fork_availability) == -1)
+				exit(EXIT_ERROR);
 		}
 
 		// SLEEPING -> thinking, if time_to_sleep has elapsed
-		if (phi_state == 's' && time_sleep_start + tab->time_to_sleep < get_passed_time(tab))
+		if (phi_state == 's' && time_sleep_start + tab->time_to_sleep < current_time)
 		{
 			phi_state = 't';
-			put_status_msg((get_passed_time(tab) - tab->start_tp), phi_n + 1, "is thinking\n");
-			// printf("%lld %d is thinking (on the toilet)\n", (cur_tp - tab->start_tp), phi_n + 1);
+			if (!(put_status_msg((current_time - tab->start_time), tab->phi_n + 1, "is thinking\n")))
+				exit(EXIT_ERROR);
 		}
 		usleep(5000);
 	}
 	// exit(0);
 }
 
+	// CHECK number of arguments
+	// DECLARE struct and initialize variables
+	// tab.number_of_times_each_philosopher_must_eat = -1; // sentinel value for absence of value
+
 int main(int ac, char **av)
 {
-	// CHECK number of arguments
 	if (ac < 5 || ac > 6)
 	{
 		write(2, B_RED"ERROR: "RESET"too few or too many arguments\n", 49);
 		return (0);
 	}
 
-	// DECLARE struct and initialize variables
 	t_tab tab;
 	tab.number_of_philosophers = ft_atoi(av[1]);
-	write(1, UNDERLINE"Program Configurations:\n"RESET, 33);
-	printf("number_of_philosophers: %d\n", tab.number_of_philosophers);
 	tab.time_to_die = ft_atoi(av[2]);
-	printf("time_to_die: %d milliseconds\n", tab.time_to_die);
 	tab.time_to_eat = ft_atoi(av[3]);
-	printf("time_to_eat: %d milliseconds\n", tab.time_to_eat);
 	tab.time_to_sleep = ft_atoi(av[4]);
-	printf("time_to_sleep: %d milliseconds\n", tab.time_to_sleep);
-	if (ac == 6)
-		tab.number_of_times_each_philosopher_must_eat = ft_atoi(av[5]);
-	else
-		tab.number_of_times_each_philosopher_must_eat = -1; // sentinel value for absence of value
-	printf("number_of_times_each_philosopher_must_eat: %d\n", tab.number_of_times_each_philosopher_must_eat);
+	if (ac == 5)
+		tab.number_of_times_each_philosopher_must_eat = -1;
+	else if ((tab.number_of_times_each_philosopher_must_eat = ft_atoi(av[5])) == 0)
+		return ((int)return_error(&tab, ERROR_TIMES_TO_EAT));
 	tab.phi_died = 0;
+	
+	// TESTING ----------------------------------------------------------------
+	// write(1, UNDERLINE"Program Configurations:\n"RESET, 33);
+	// printf("number_of_philosophers: %d\n", tab.number_of_philosophers);
+	// printf("time_to_die: %d milliseconds\n", tab.time_to_die);
+	// printf("time_to_eat: %d milliseconds\n", tab.time_to_eat);
+	// printf("time_to_sleep: %d milliseconds\n", tab.time_to_sleep);
+	// printf("number_of_times_each_philosopher_must_eat: %d\n", tab.number_of_times_each_philosopher_must_eat);
+	// ------------------------------------------------------------------------
 
 	// CREATE semaphore
 	sem_unlink("fork_availability");
 	tab.fork_availability = sem_open("fork_availability", O_CREAT, 0644, tab.number_of_philosophers / 2);
-
 	tab.n_times_eaten = malloc(sizeof(int) * tab.number_of_philosophers);
 	int i = -1;
 	while (++i < tab.number_of_philosophers)
 		tab.n_times_eaten[i] = 0;
-
-	// GET starting time for time stamp
-	struct timeval tp;
-	if (gettimeofday(&tp, 0) == -1)
+	// GET start time
+	if ((tab.start_time = get_current_time(&tab)) == -1)
 		return (0);
-	tab.start_tp = tp.tv_sec;
-	tab.start_tp *= 1000;
-	tab.start_tp += (tp.tv_usec / 1000);
-
 	// MALLOC space for t_philosopher struct variables
 	tab.time_last_meal = malloc(sizeof(long long) * tab.number_of_philosophers);
 	tab.phi_pid = malloc(sizeof(int) * tab.number_of_philosophers);
@@ -226,7 +217,7 @@ int main(int ac, char **av)
 		else if (fork_ret > 0)
 		{
 			// TESTING --------------------------------------------------------
-			printf("pid of child %d is %d\n", i, (int)fork_ret);
+			// printf("pid of child %d is %d\n", i, (int)fork_ret);
 			// ----------------------------------------------------------------
 			tab.phi_pid[i] = fork_ret;
 		}
@@ -240,96 +231,24 @@ int main(int ac, char **av)
 	while (philosophers_left--)
 	{
 		pid = wait(&exit_status);
-		printf("philosopher with id %d exited with status %d\n", (int)pid, WEXITSTATUS(exit_status));
+		// printf("philosopher with id %d exited with status %d\n", (int)pid, WEXITSTATUS(exit_status));
 		// while
 		if (WEXITSTATUS(exit_status) == EXIT_DEATH)
 		{
 			while (--tab.number_of_philosophers > -1)
 			{
-				printf("kill'ing philosopher with pid %d\n", tab.phi_pid[tab.number_of_philosophers]);
+				// printf("kill'ing philosopher with pid %d\n", tab.phi_pid[tab.number_of_philosophers]);
 				kill(tab.phi_pid[tab.number_of_philosophers], SIGKILL);
 
 			}
-			printf("all philosophers kill'ed\n");
+			// printf("all philosophers kill'ed\n");
 			break;
 		}
 		// As soon as wait() returns with a pid, we know a philospopher has exited, either because he's fat or because he's dead. If he's fat, we let the other philosopher's continue; if he's dead, we kill the other philosophers. In order to kill the other philosophers we have to 
 	}
-	printf("all philosophers are done\n");
+	// printf("all philosophers are done\n");
 
 	// sem_unlink("fork_availability");
 
-	return (0);
+	return (1);
 }
-
-
-
-/* 
-#include <stdio.h>
-#include <stdarg.h>
-
-
-int get_len(char *s)
-{
-  int len;
-  
-  len = 0;
-  while (*s++)
-    len++;
-  return (len);
-}
-
-int var_func(int num, ...)
-{
-  va_list args;
-  int i;
-  char **args_ptrs;
-  int *args_lens;
-  int total_len;
-  
-  // MALLOC space for 
-  args_ptrs = malloc(sizeof(char *) * num);
-  args_lens = malloc(sizeof(int) * num);
-  
-  va_start(args, num);
-  
-  // GET pointers to strings, length of strings and total length of all strings
-  total_len = 0;
-  i = -1;
-  while (++i < num)
-  {
-    args_ptrs[i] = va_arg(args, char*);
-    args_lens[i] = get_len(args_ptrs[i]);
-    total_len += args_lens[i];
-    printf("%d: %s\n", i, args_ptrs[i]);
-  }
-  
-  // MALLOC space for concatenated string
-  char *cat_string = malloc(total_len + 1);
-  
-  // COPY strings over into cat_string
-  i = -1;
-  int i2;
-  char *cat_string_start_ptr;
-  cat_string_start_ptr = cat_string;
-  while (++i < num)
-  {
-    i2 = -1;
-    while (args_ptrs[i][++i2])
-    {
-      *cat_string++ = args_ptrs[i][i2];
-    }
-  }
-  *cat_string = '\0';
-  
-  va_end(args);
-  return (cat_string_start_ptr);
-}
-
-int main()
-{
-  printf("%s\n", var_func(3, "one,", " two and ", "three"));
-  
-  return 0;
-}
- */
