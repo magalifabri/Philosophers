@@ -1,4 +1,13 @@
-#ifndef _PHILOSOPHERS_H
+#ifndef PHILO_THREE_H
+#define PHILO_THREE_H
+
+#include <stdio.h>
+#include <unistd.h>
+#include <pthread.h>
+#include <stdlib.h>
+#include <sys/time.h> // required for gettimeofday()
+#include <semaphore.h> 
+#include <signal.h> // required for kill()
 
 #define BOLD "\033[1m"
 #define UNDERLINE "\033[4m"
@@ -15,5 +24,9 @@
 #define CYAN "\033[0;36m"	
 #define B_CYAN "\033[1;36m"	
 #define RESET "\033[0m"	
+
+int			ft_atoi(const char *str);
+// char *concatenate_strings(int num, ...);
+int put_status_msg(long long time, int phi_n, char *message);
 
 #endif

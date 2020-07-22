@@ -1,11 +1,4 @@
-#include <stdio.h>
-#include <unistd.h>
-#include <pthread.h>
-#include <stdlib.h>
-#include <sys/time.h> // required for gettimeofday()
-#include "philosophers.h"
-#include <semaphore.h> 
-#include <signal.h> // required for kill()
+#include "../philo_three.h"
 
 #define EXIT_EATEN_ENOUGH 0
 #define EXIT_DEATH 3
@@ -18,13 +11,6 @@
 // #define ERROR_
 // #define ERROR_
 
-
-// typedef struct s_philosophers
-// {
-// 	// int phi_pid;
-// 	// int time_last_eaten;
-// } t_philosophers;
-
 typedef struct s_tab
 {
 	long long start_tp;
@@ -35,100 +21,12 @@ typedef struct s_tab
 	int time_to_sleep; // duration in ms that the philosopher will spend sleeping
 	int number_of_times_each_philosopher_must_eat;
 	sem_t *fork_availability;
-	// t_philosophers *phis;
-	// int forks_available;
 	long long *time_last_meal;
 	int phi_died;
 	int *n_times_eaten;
 	int *phi_pid;
 	int error_encountered;
 } t_tab;
-
-size_t	ft_strlen_2(const char *s)
-{
-	int i;
-
-	i = 0;
-	while (s[i])
-		i++;
-	return (i);
-}
-
-char	*ft_strjoin_2(char const *s1, char const *s2)
-{
-	unsigned int	s1_len;
-	unsigned int	s2_len;
-	char			*s3;
-	unsigned int	i;
-
-	if (!s1 || !s2)
-		return (NULL);
-	s1_len = ft_strlen_2(s1);
-	s2_len = ft_strlen_2(s2);
-	if (!(s3 = (char *)malloc(sizeof(char) * (s1_len + s2_len + 1))))
-		return (NULL);
-	i = 0;
-	while (i < s1_len)
-		s3[i++] = *s1++;
-	while (i < (s1_len + s2_len))
-		s3[i++] = *s2++;
-	s3[i] = '\0';
-	return (s3);
-}
-
-char	*ft_itoa(int n)
-{
-	int		neg;
-	char	*str;
-	int		len;
-	long	n_cpy;
-
-	n_cpy = n;
-	neg = (n < 0) ? (1) : (0);
-	n_cpy = (n_cpy < 0) ? (-n_cpy) : (n_cpy);
-	len = 0;
-	(n <= 0) && (len++);
-	while (n)
-		n = len++ ? n / 10 : n / 10;
-	if (!(str = malloc(sizeof(char) * (len + 1))))
-		return (NULL);
-	str[len--] = '\0';
-	(!n_cpy) && (str[len--] = '0');
-	while (n_cpy)
-	{
-		str[len--] = (n_cpy % 10) + '0';
-		n_cpy /= 10;
-	}
-	(neg == 1) && (str[len--] = '-');
-	return (str);
-}
-
-void ft_putstring(char *s)
-{
-	int len = ft_strlen_2(s);
-	// while (*s)
-		write(1, s, len);
-}
-
-int put_timestamp(long long time, int phi_n, char *message)
-{
-	char *c_time;
-	char *c_phi_n;
-	char *concat;
-
-	c_time = ft_itoa((int)time);
-	c_phi_n = ft_itoa(phi_n);
-	c_time = ft_strjoin_2(c_time, " ");
-	c_phi_n = ft_strjoin_2(c_phi_n, " ");
-	concat = ft_strjoin_2(c_time, c_phi_n);
-	concat = ft_strjoin_2(concat, message);
-	// ft_putstring(c_time);
-	// write(1, " ", 1);
-	// ft_putstring(c_phi_n);
-	ft_putstring(concat);
-	// write(1, "\n", 2);
-	return (0);
-}
 
 void *return_error(t_tab *tab, int error_num)
 {
@@ -138,7 +36,6 @@ void *return_error(t_tab *tab, int error_num)
 		write(2, "pthread_mutex_(un)lock() returned -1\n", 38);
 	else if (error_num == ERROR_GETTIMEOFDAY)
 		write(2, "gettimeofday() returned -1\n", 38);
-
 	return (NULL);
 }
 
@@ -164,7 +61,7 @@ void *death_signaller(void *arg)
 	{
 		if (tab->time_last_meal[tab->phi_n] + tab->time_to_die <= get_passed_time(tab))
 		{
-			put_timestamp((get_passed_time(tab) - tab->start_tp), tab->phi_n + 1, "died\n");
+			put_status_msg((get_passed_time(tab) - tab->start_tp), tab->phi_n + 1, "died\n");
 			tab->phi_died = 1;
 			exit(EXIT_DEATH);
 		}
@@ -217,7 +114,7 @@ void phi_f(void *arg)
 		if (tab->time_last_meal[phi_n] + tab->time_to_die <= get_passed_time(tab))
 		{
 			// printf("%lld %d died\n", (cur_tp - tab->start_tp), phi_n + 1);
-			put_timestamp((get_passed_time(tab) - tab->start_tp), phi_n + 1, "died\n");
+			put_status_msg((get_passed_time(tab) - tab->start_tp), phi_n + 1, "died\n");
 			tab->phi_died = 1;
 			exit(EXIT_DEATH);
 		}
@@ -230,7 +127,7 @@ void phi_f(void *arg)
 				exit(EXIT_DEATH);
 			phi_state = 'e';
 			tab->time_last_meal[phi_n] = get_passed_time(tab);
-			put_timestamp((get_passed_time(tab) - tab->start_tp), phi_n + 1, "is eating\n");
+			put_status_msg((get_passed_time(tab) - tab->start_tp), phi_n + 1, "is eating\n");
 			// sem_post(tab->fork_availability);
 		}
 
@@ -252,7 +149,7 @@ void phi_f(void *arg)
 			}
 			phi_state = 's';
 			time_sleep_start = get_passed_time(tab);
-			put_timestamp((get_passed_time(tab) - tab->start_tp), phi_n + 1, "is sleeping\n");
+			put_status_msg((get_passed_time(tab) - tab->start_tp), phi_n + 1, "is sleeping\n");
 			sem_post(tab->fork_availability);
 		}
 
@@ -260,7 +157,7 @@ void phi_f(void *arg)
 		if (phi_state == 's' && time_sleep_start + tab->time_to_sleep < get_passed_time(tab))
 		{
 			phi_state = 't';
-			put_timestamp((get_passed_time(tab) - tab->start_tp), phi_n + 1, "is thinking\n");
+			put_status_msg((get_passed_time(tab) - tab->start_tp), phi_n + 1, "is thinking\n");
 			// printf("%lld %d is thinking (on the toilet)\n", (cur_tp - tab->start_tp), phi_n + 1);
 		}
 		usleep(5000);
@@ -279,17 +176,17 @@ int main(int ac, char **av)
 
 	// DECLARE struct and initialize variables
 	t_tab tab;
-	tab.number_of_philosophers = atoi(av[1]);
+	tab.number_of_philosophers = ft_atoi(av[1]);
 	write(1, UNDERLINE"Program Configurations:\n"RESET, 33);
 	printf("number_of_philosophers: %d\n", tab.number_of_philosophers);
-	tab.time_to_die = atoi(av[2]);
+	tab.time_to_die = ft_atoi(av[2]);
 	printf("time_to_die: %d milliseconds\n", tab.time_to_die);
-	tab.time_to_eat = atoi(av[3]);
+	tab.time_to_eat = ft_atoi(av[3]);
 	printf("time_to_eat: %d milliseconds\n", tab.time_to_eat);
-	tab.time_to_sleep = atoi(av[4]);
+	tab.time_to_sleep = ft_atoi(av[4]);
 	printf("time_to_sleep: %d milliseconds\n", tab.time_to_sleep);
 	if (ac == 6)
-		tab.number_of_times_each_philosopher_must_eat = atoi(av[5]);
+		tab.number_of_times_each_philosopher_must_eat = ft_atoi(av[5]);
 	else
 		tab.number_of_times_each_philosopher_must_eat = -1; // sentinel value for absence of value
 	printf("number_of_times_each_philosopher_must_eat: %d\n", tab.number_of_times_each_philosopher_must_eat);
@@ -362,30 +259,77 @@ int main(int ac, char **av)
 
 	// sem_unlink("fork_availability");
 
-	// // CHECK if one has died or all have returned
-	// int returned = 0;
-	// while (returned < tab.number_of_philosophers)
-	// {
-	// 	usleep(100);
-	// 	if (tab.phi_died)
-	// 	{
-	// 		write(1, B_RED"A philosopher has starved! Game over.\n\033[0m"RESET, 50);
-	// 		return (0);
-	// 	}
-	// 	if (tab.error_encountered)
-	// 		return (0);
-	// 	i = -1;
-	// 	returned = 0;
-	// 	while (++i < tab.number_of_philosophers)
-	// 	{
-	// 		if (tab.n_times_eaten[i] == tab.number_of_times_each_philosopher_must_eat)
-	// 			returned++;
-	// 		if (returned == tab.number_of_philosophers)
-	// 		{
-	// 			write(1, B_GREEN"They're all fat. Welcome to America!\n"RESET, 49);
-	// 			return (0);
-	// 		}
-	// 	}
-	// }
 	return (0);
 }
+
+
+
+/* 
+#include <stdio.h>
+#include <stdarg.h>
+
+
+int get_len(char *s)
+{
+  int len;
+  
+  len = 0;
+  while (*s++)
+    len++;
+  return (len);
+}
+
+int var_func(int num, ...)
+{
+  va_list args;
+  int i;
+  char **args_ptrs;
+  int *args_lens;
+  int total_len;
+  
+  // MALLOC space for 
+  args_ptrs = malloc(sizeof(char *) * num);
+  args_lens = malloc(sizeof(int) * num);
+  
+  va_start(args, num);
+  
+  // GET pointers to strings, length of strings and total length of all strings
+  total_len = 0;
+  i = -1;
+  while (++i < num)
+  {
+    args_ptrs[i] = va_arg(args, char*);
+    args_lens[i] = get_len(args_ptrs[i]);
+    total_len += args_lens[i];
+    printf("%d: %s\n", i, args_ptrs[i]);
+  }
+  
+  // MALLOC space for concatenated string
+  char *cat_string = malloc(total_len + 1);
+  
+  // COPY strings over into cat_string
+  i = -1;
+  int i2;
+  char *cat_string_start_ptr;
+  cat_string_start_ptr = cat_string;
+  while (++i < num)
+  {
+    i2 = -1;
+    while (args_ptrs[i][++i2])
+    {
+      *cat_string++ = args_ptrs[i][i2];
+    }
+  }
+  *cat_string = '\0';
+  
+  va_end(args);
+  return (cat_string_start_ptr);
+}
+
+int main()
+{
+  printf("%s\n", var_func(3, "one,", " two and ", "three"));
+  
+  return 0;
+}
+ */
