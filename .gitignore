@@ -5,3 +5,5 @@
 *.gch
 sem_test.c
 obj
+philo_three
+!philo_three/
