@@ -1,7 +1,7 @@
 NAME = philo_three
 
 SRC_DIR = ./src/
-SRC_FILES = main.c utils.c put_status_msg.c
+SRC_FILES = main.c utils.c put_status_msg.c initialize_variables.c
 
 OBJ_DIR = ./obj/
 OBJ_FILES = $(addprefix $(OBJ_DIR), $(SRC_FILES:.c=.o))
