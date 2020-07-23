@@ -11,7 +11,7 @@ static int get_len(char *s)
 	return (len);
 }
 
-static char *copy_strings(int total_len, char **arg_ptrs, int num, va_list args)
+static char *copy_strings(int total_len, char **arg_ptrs, int n, va_list args)
 {
 	char *cat_string;
 	int i;
@@ -22,7 +22,7 @@ static char *copy_strings(int total_len, char **arg_ptrs, int num, va_list args)
 		return (NULL);
 	i = -1;
 	i3 = -1;
-	while (++i < num)
+	while (++i < n)
 	{
 		i2 = -1;
 		while (arg_ptrs[i][++i2])

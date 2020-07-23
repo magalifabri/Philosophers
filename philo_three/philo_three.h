@@ -38,6 +38,7 @@
 #define ERROR_SEM_OPEN 7
 #define ERROR_SEM_UNLINK 8
 #define ERROR_AC 9
+#define ERROR_CHILD 10
 
 typedef struct s_tab
 {
@@ -50,12 +51,9 @@ typedef struct s_tab
 	int time_to_sleep; // duration in ms that the philosopher will spend sleeping
 	int number_of_times_each_philosopher_must_eat;
 	sem_t *fork_availability;
-	long long *time_last_meal;
-	int times_eaten;
 	int *phi_pid;
-
-	int malloc_times_eaten;
-	int malloc_time_last_meal;
+	int times_eaten;
+	long long time_last_meal;
 	int malloc_phi_pid;
 } t_tab;
 
@@ -66,5 +64,6 @@ int initialize_variables(t_tab *tab, int ac, char **av);
 void initialize_malloc_indicators(t_tab *tab);
 void *return_error(t_tab *tab, int error_num);
 long long get_current_time(t_tab *tab);
+void free_malloced_variables(t_tab *tab);
 
 #endif
