@@ -25,8 +25,46 @@
 #define B_CYAN "\033[1;36m"	
 #define RESET "\033[0m"	
 
+#define EXIT_EATEN_ENOUGH 0
+#define EXIT_DEATH 1
+#define EXIT_ERROR 2
+
+#define ERROR_MUTEX 1
+#define ERROR_GETTIMEOFDAY 2
+#define ERROR_MALLOC 3
+#define ERROR_FORK 4
+#define ERROR_BAD_ARGS 5
+#define ERROR_USLEEP 6
+#define ERROR_SEM_OPEN 7
+#define ERROR_SEM_UNLINK 8
+#define ERROR_AC 9
+
+typedef struct s_tab
+{
+	long long start_time;
+	long long current_time;
+	int phi_n;
+	int number_of_philosophers;
+	int time_to_die;   // time in ms before the next meal needs to start
+	int time_to_eat;   // duration in ms that the philo will spend eating
+	int time_to_sleep; // duration in ms that the philosopher will spend sleeping
+	int number_of_times_each_philosopher_must_eat;
+	sem_t *fork_availability;
+	long long *time_last_meal;
+	int times_eaten;
+	int *phi_pid;
+
+	int malloc_times_eaten;
+	int malloc_time_last_meal;
+	int malloc_phi_pid;
+} t_tab;
+
 int			ft_atoi(const char *str);
 // char *concatenate_strings(int num, ...);
 int put_status_msg(long long time, int phi_n, char *message);
+int initialize_variables(t_tab *tab, int ac, char **av);
+void initialize_malloc_indicators(t_tab *tab);
+void *return_error(t_tab *tab, int error_num);
+long long get_current_time(t_tab *tab);
 
 #endif

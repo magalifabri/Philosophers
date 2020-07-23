@@ -1,40 +1,17 @@
 #include "../philo_three.h"
 
-#define EXIT_EATEN_ENOUGH 0
-#define EXIT_DEATH 1
-#define EXIT_ERROR 2
-
-#define ERROR_MUTEX 1
-#define ERROR_GETTIMEOFDAY 2
-#define ERROR_MALLOC 3
-#define ERROR_FORK 4
-#define ERROR_TIMES_TO_EAT 5
-#define ERROR_USLEEP 6
-#define ERROR_SEM_OPEN 7
-#define ERROR_SEM_UNLINK 8
-#define ERROR_AC 9
-
-typedef struct s_tab
+void free_malloced_variables(t_tab *tab)
 {
-	long long start_time;
-	long long current_time;
-	int phi_n;
-	int number_of_philosophers;
-	int time_to_die;   // time in ms before the next meal needs to start
-	int time_to_eat;   // duration in ms that the philo will spend eating
-	int time_to_sleep; // duration in ms that the philosopher will spend sleeping
-	int number_of_times_each_philosopher_must_eat;
-	sem_t *fork_availability;
-	long long *time_last_meal;
-	// int phi_died;
-	int *n_times_eaten;
-	int *phi_pid;
-	int error_encountered;
-} t_tab;
+	if (tab->malloc_phi_pid)
+		free(tab->phi_pid);
+	// if (tab->malloc_n_times_eaten)
+	// 	free(tab->n_times_eaten);
+	if (tab->malloc_time_last_meal)
+		free(tab->time_last_meal);
+}
 
 void *return_error(t_tab *tab, int error_num)
 {
-	tab->error_encountered = 1;
 	write(2, B_RED"ERROR: "RESET, 19);
 	if (error_num == ERROR_MUTEX)
 		write(2, "pthread_mutex_(un)lock() returned -1\n", 38);
@@ -44,8 +21,8 @@ void *return_error(t_tab *tab, int error_num)
 		write(2, "malloc() returned NULL\n", 24);
 	else if (error_num == ERROR_USLEEP)
 		write(2, "usleep() returned -1\n", 22);
-	else if (error_num == ERROR_TIMES_TO_EAT)
-		write(2, "number_of_times_each_philosopher_must_eat can't be 0\n", 54);
+	else if (error_num == ERROR_BAD_ARGS)
+		write(2, "bad arguments. Try again.\n", 27);
 	else if (error_num == ERROR_FORK)
 		write(2, "fork() returned < 0\n", 21);
 	else if (error_num == ERROR_SEM_OPEN)
@@ -54,6 +31,8 @@ void *return_error(t_tab *tab, int error_num)
 		write(2, "sem_unlink() returned -1\n", 26);
 	else if (error_num == ERROR_AC)
 		write(2, "too few or too many arguments\n", 31);
+	free_malloced_variables(tab);
+	sem_unlink("fork_availability");
 	return (NULL);
 }
 
@@ -89,7 +68,6 @@ void *death_signaller(void *arg)
 		{
 			if (!(put_status_msg((tab->current_time - tab->start_time), tab->phi_n + 1, B_RED"died\n"RESET)))
 				exit(EXIT_ERROR);
-			// tab->phi_died = 1;
 			exit(EXIT_DEATH);
 		}
 	}
@@ -108,7 +86,6 @@ void phi_f(void *arg)
 	pthread_t death_signaller_t;
 	int phi_state;
 	long long time_sleep_start;
-	long long current_time;
 	
 	if ((tab->current_time = get_current_time(tab)) == -1)
 		exit(EXIT_ERROR);
@@ -128,14 +105,14 @@ void phi_f(void *arg)
 			tab->time_last_meal[tab->phi_n] = tab->current_time;
 			if (usleep(tab->time_to_eat * 1000) == -1)
 				exit(EXIT_ERROR);
-			// CHECK if philo has eaten enough times yet
-			tab->n_times_eaten[tab->phi_n]++;
-			if (tab->number_of_times_each_philosopher_must_eat != -1
-			&& tab->n_times_eaten[tab->phi_n]
-			>= tab->number_of_times_each_philosopher_must_eat)
+			tab->times_eaten++;
+			if (tab->number_of_times_each_philosopher_must_eat != -1 &&
+			tab->times_eaten >= tab->number_of_times_each_philosopher_must_eat)
 			{
 				// TESTING ----------------------------------------------------
-				printf(GREEN"%lld %d has fattened up enough\n"RESET, (tab->current_time - tab->start_time), tab->phi_n + 1);
+				if (!(put_status_msg((tab->current_time - tab->start_time),
+				tab->phi_n + 1, B_GREEN"is fat enough\n"RESET)))
+					exit(EXIT_ERROR);
 				// ------------------------------------------------------------
 				if (sem_post(tab->fork_availability) == -1)
 					exit(EXIT_ERROR);
@@ -154,8 +131,6 @@ void phi_f(void *arg)
 			if (!(put_status_msg((tab->current_time - tab->start_time), tab->phi_n + 1, "is thinking\n")))
 				exit(EXIT_ERROR);
 		}
-		// if (usleep(5000) == -1)
-		// 	exit(EXIT_ERROR);
 	}
 }
 
@@ -163,50 +138,9 @@ void phi_f(void *arg)
 	// DECLARE struct and initialize variables
 	// tab.number_of_times_each_philosopher_must_eat = -1; // sentinel value for absence of value
 
-int initialize_variables_part_2(t_tab *tab)
-{
-	if (sem_unlink("fork_availability") == -1)
-		return((int)return_error(tab, ERROR_SEM_UNLINK));
-	if ((tab->fork_availability = sem_open("fork_availability", O_CREAT, 0644, tab->number_of_philosophers / 2)) == SEM_FAILED)
-		return ((int)return_error(tab, ERROR_SEM_OPEN));
-	if (!(tab->n_times_eaten = malloc(sizeof(int) * tab->number_of_philosophers)))
-		return ((int)return_error(tab, ERROR_MALLOC));
-	int i = -1;
-	while (++i < tab->number_of_philosophers)
-		tab->n_times_eaten[i] = 0;
-	if ((tab->start_time = get_current_time(tab)) == -1)
-		return (0);
-	if (!(tab->time_last_meal = malloc(sizeof(long long) * tab->number_of_philosophers)))
-		return ((int)return_error(tab, ERROR_MALLOC));
-	if (!(tab->phi_pid = malloc(sizeof(int) * tab->number_of_philosophers)))
-		return ((int)return_error(tab, ERROR_MALLOC));
-	return (1);
-}
 
-int initialize_variables(t_tab *tab, int ac, char **av)
-{
-	tab->number_of_philosophers = ft_atoi(av[1]);
-	tab->time_to_die = ft_atoi(av[2]);
-	tab->time_to_eat = ft_atoi(av[3]);
-	tab->time_to_sleep = ft_atoi(av[4]);
-	if (ac == 5)
-		tab->number_of_times_each_philosopher_must_eat = -1;
-	else if ((tab->number_of_times_each_philosopher_must_eat = ft_atoi(av[5])) == 0)
-		return ((int)return_error(tab, ERROR_TIMES_TO_EAT));
-	// tab->phi_died = 0;
-	initialize_variables_part_2(tab);
 
-	// TESTING ----------------------------------------------------------------
-	// write(1, UNDERLINE"Program Configurations:\n"RESET, 33);
-	// printf("number_of_philosophers: %d\n", tab.number_of_philosophers);
-	// printf("time_to_die: %d milliseconds\n", tab.time_to_die);
-	// printf("time_to_eat: %d milliseconds\n", tab.time_to_eat);
-	// printf("time_to_sleep: %d milliseconds\n", tab.time_to_sleep);
-	// printf("number_of_times_each_philosopher_must_eat: %d\n", tab.number_of_times_each_philosopher_must_eat);
-	// ------------------------------------------------------------------------
-
-	return (1);
-}
+// As soon as wait() returns with a pid, we know a philospopher has exited, either because he's fat or because he's dead. If he's fat, we let the other philosopher's continue; if he's dead, we kill the other philosophers. In order to kill the other philosophers we have to 
 
 int monitor_child_processes(t_tab *tab)
 {
@@ -221,16 +155,16 @@ int monitor_child_processes(t_tab *tab)
 		if (WEXITSTATUS(exit_status) == EXIT_DEATH)
 		{
 			while (tab->number_of_philosophers--)
-			{
-				// printf(RED"kill'ing philosopher with pid %d\n"RESET, tab->phi_pid[tab->number_of_philosophers]);
 				kill(tab->phi_pid[tab->number_of_philosophers], SIGKILL);
-
-			}
-			// printf("all philosophers kill'ed\n");
 			break;
 		}
-		// As soon as wait() returns with a pid, we know a philospopher has exited, either because he's fat or because he's dead. If he's fat, we let the other philosopher's continue; if he's dead, we kill the other philosophers. In order to kill the other philosophers we have to 
+		// if (WEXITSTATUS(exit_status) == EXIT_EATEN_ENOUGH)
+		// 	write(1, B_GREEN"is fat enough\n"RESET, 26);
 	}
+	if (philosophers_left == -1)
+		write(1, B_GREEN"Good job. They're all fat.\n"RESET, 39);
+	else
+		write(1, B_RED"One starved. The rest murdered.\n"RESET, 42);
 	return (1);
 }
 
@@ -238,9 +172,12 @@ int main(int ac, char **av)
 {
 	t_tab tab;
 	int i;
+
+	initialize_malloc_indicators(&tab);
 	if (ac < 5 || ac > 6)
 		return ((int)return_error(&tab, ERROR_AC));
-	initialize_variables(&tab, ac, av);
+	if (!initialize_variables(&tab, ac, av))
+		return (0);
 	i = -1;
 	while (++i < tab.number_of_philosophers)
 	{
@@ -253,8 +190,9 @@ int main(int ac, char **av)
 		else
 			return ((int)return_error(&tab, ERROR_FORK));
 	}
-
 	monitor_child_processes(&tab);
-	sem_unlink("fork_availability");
+	if (sem_unlink("fork_availability") == -1)
+		return ((int)return_error(&tab, ERROR_SEM_UNLINK));
+	free_malloced_variables(&tab);
 	return (1);
 }
