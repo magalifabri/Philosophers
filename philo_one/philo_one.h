@@ -39,7 +39,8 @@ typedef struct s_frk
 
 typedef struct s_tab
 {
-	long long start_tp;
+	long long start_time;
+	long long current_time;
 	int phi_n;
 	int number_of_philosophers;
 	int time_to_die;   // time in ms before the next meal needs to start
@@ -50,12 +51,19 @@ typedef struct s_tab
 	int phi_died;
 	int *n_times_eaten;
 	int error_encountered;
+
+	int malloc_forks;
+	int malloc_n_times_eaten;
+	int malloc_phi_t;
 } t_tab;
 
 int put_status_msg(long long time, int phi_n, char *message);
 int ft_atoi(const char *str);
 long long get_current_time(t_tab *tab);
 void *return_error(t_tab *tab, int error_num);
+void initialize_malloc_indicators(t_tab *tab);
+int initialize_variables(t_tab *tab, int ac, char **av);
+void *phi_f(void *arg);
 
 
 #endif
