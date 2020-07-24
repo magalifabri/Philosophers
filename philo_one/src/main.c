@@ -52,13 +52,13 @@ int monitor_philosophers(t_tab *tab)
 			return ((int)return_error(tab, ERROR_USLEEP));
 		if (!(tab->current_time = get_current_time(tab)))
 			return (0);
+		if (tab->error_encountered)
+			return (0);
 		if (tab->phi_died)
 		{
 			write(1, B_RED"A philosopher has starved! Game over.\n"RESET, 50);
 			return (1);
 		}
-		if (tab->error_encountered)
-			return (0);
 		if (check_if_all_have_returned(tab))
 			return (1);
 	}
@@ -80,7 +80,6 @@ int create_philosophers(t_tab *tab)
 		if (!(tab->current_time = get_current_time(tab)))
 			return (0);
 		tab->phi_n = i;
-		// printf("%d starting\n", i);
 		if (pthread_create(&phi_t[i], NULL, phi_f, tab) != 0)
 			return ((int)return_error(tab, ERROR_PTHREAD_CREATE));
 		if (usleep(5000) == -1)
@@ -88,6 +87,11 @@ int create_philosophers(t_tab *tab)
 	}
 	return (1);
 }
+
+/*
+Each fork is protected for a mutex lock. The mutex is locked only while the availability of the fork is checked and changed (if the fork is indeed available). While the fork is being used, the mutex isn't locked, so that other threads can check on the availability of the fork and continue on their way if it's not, instead of having to wait right there for it to actually become available again.
+Keeping the mutex locked while the fork is in use should result in much less locking and unlocking and with that, shorter and better readable code. So I'll probably do it like that in the future.
+*/
 
 int main(int ac, char **av)
 {
@@ -107,11 +111,11 @@ int main(int ac, char **av)
 		tab.forks[i].available = 1;
 	}
 	i = -1;
-
 	while (++i < tab.number_of_philosophers)
 		tab.n_times_eaten[i] = 0;
 	if (!create_philosophers(&tab))
 		return (0);
-	monitor_philosophers(&tab);
+	if (!monitor_philosophers(&tab))
+		return (0);
 	return (1);
 }

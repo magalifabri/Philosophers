@@ -10,42 +10,6 @@ typedef struct s_phi_t_variable_struct
 	long long time_sleep_start;
 } t_phi_t_variable_struct;
 
-void *death(t_tab *tab, t_phi_t_variable_struct *s)
-{
-	printf("%lld %d died\n", (tab->current_time - tab->start_time), s->phi_n + 1);
-	tab->phi_died = 1;
-	if (s->right_fork_held)
-	{
-		if (pthread_mutex_lock(&tab->forks[s->phi_n].lock) == -1)
-			return (return_error(tab, ERROR_MUTEX_LOCK));
-		tab->forks[s->phi_n].available = 1;
-		if (pthread_mutex_unlock(&tab->forks[s->phi_n].lock) == -1)
-			return (return_error(tab, ERROR_MUTEX_UNLOCK));
-		s->right_fork_held = 0;
-	}
-	if (s->left_fork_held)
-	{
-		if (s->phi_n == 0)
-		{
-			if (pthread_mutex_lock(&tab->forks[tab->number_of_philosophers - 1].lock) == -1)
-				return (return_error(tab, ERROR_MUTEX_LOCK));
-			tab->forks[tab->number_of_philosophers - 1].available = 1;
-			if (pthread_mutex_unlock(&tab->forks[tab->number_of_philosophers - 1].lock) == -1)
-				return (return_error(tab, ERROR_MUTEX_UNLOCK));
-		}
-		else
-		{
-			if (pthread_mutex_lock(&tab->forks[s->phi_n - 1].lock) == -1)
-				return (return_error(tab, ERROR_MUTEX_LOCK));
-			tab->forks[s->phi_n - 1].available = 1;
-			if (pthread_mutex_unlock(&tab->forks[s->phi_n - 1].lock) == -1)
-				return (return_error(tab, ERROR_MUTEX_UNLOCK));
-		}
-		s->left_fork_held = 0;
-	}
-	return (NULL);
-}
-
 // THINKING TO EATING
 
 int grab_right_fork_if_available(t_tab *tab, t_phi_t_variable_struct *s)
@@ -106,7 +70,6 @@ int thinking_to_eating(t_tab *tab, t_phi_t_variable_struct *s)
 		grab_left_fork_if_available_1(tab, s);
 	else
 		grab_left_fork_if_available_2(tab, s);
-	// EATING, if 2 forks are in the philosophers posession: 
 	if (s->left_fork_held && s->right_fork_held)
 	{
 		s->phi_state = 'e';
@@ -120,20 +83,23 @@ int thinking_to_eating(t_tab *tab, t_phi_t_variable_struct *s)
 	return (1);
 }
 
-int eating_to_sleeping(t_tab *tab, t_phi_t_variable_struct *s)
+// EATING TO SLEEPING
+
+int lay_down_forks(t_tab *tab, t_phi_t_variable_struct *s)
 {
 	if (pthread_mutex_lock(&tab->forks[s->phi_n].lock) == -1)
 		return ((int)return_error(tab, ERROR_MUTEX_LOCK));
 	tab->forks[s->phi_n].available = 1;
 	if (pthread_mutex_unlock(&tab->forks[s->phi_n].lock) == -1)
 		return ((int)return_error(tab, ERROR_MUTEX_UNLOCK));
-	s->right_fork_held = 0;
 	if (s->phi_n == 0)
 	{
-		if (pthread_mutex_lock(&tab->forks[tab->number_of_philosophers - 1].lock) == -1)
+		if (pthread_mutex_lock(
+		&tab->forks[tab->number_of_philosophers - 1].lock) == -1)
 			return ((int)return_error(tab, ERROR_MUTEX_LOCK));
 		tab->forks[tab->number_of_philosophers - 1].available = 1;
-		if (pthread_mutex_unlock(&tab->forks[tab->number_of_philosophers - 1].lock) == -1)
+		if (pthread_mutex_unlock(
+		&tab->forks[tab->number_of_philosophers - 1].lock) == -1)
 			return ((int)return_error(tab, ERROR_MUTEX_UNLOCK));
 	}
 	else
@@ -144,39 +110,55 @@ int eating_to_sleeping(t_tab *tab, t_phi_t_variable_struct *s)
 		if (pthread_mutex_unlock(&tab->forks[s->phi_n - 1].lock) == -1)
 			return ((int)return_error(tab, ERROR_MUTEX_UNLOCK));
 	}
+	return (1);
+}
+
+int finish_eating_and_obesity_check(t_tab *tab, t_phi_t_variable_struct *s)
+{
+	if (!lay_down_forks(tab, s))
+		return (0);
+	s->right_fork_held = 0;
 	s->left_fork_held = 0;
-	// check if philo has eaten enough times yet
+	if (!put_status_msg((tab->current_time - tab->start_time)
+	, s->phi_n + 1, "put his forks down\n"))
+		return (0);
 	tab->n_times_eaten[s->phi_n]++;
 	if (tab->number_of_times_each_philosopher_must_eat != -1
 	&& tab->n_times_eaten[s->phi_n]
 	>= tab->number_of_times_each_philosopher_must_eat)
 	{
-		// TESTING ----------------------------------------------------
 		if (!put_status_msg((tab->current_time - tab->start_time)
 		, s->phi_n + 1, B_GREEN"is fat\n"RESET))
 			return (0);
-		// ------------------------------------------------------------
 		return (0);
 	}
-	s->phi_state = 's';
-	s->time_sleep_start = tab->current_time;
+	return (1);
+}
+
+int eating_to_thinking(t_tab *tab, t_phi_t_variable_struct *s)
+{
+	if (!finish_eating_and_obesity_check(tab, s))
+		return (0);
 	if (!put_status_msg((tab->current_time - tab->start_time)
 	, s->phi_n + 1, "is sleeping\n"))
 		return (0);
 	if (usleep(tab->time_to_sleep * 1000) == -1)
 		return ((int)return_error(tab, ERROR_USLEEP));
+	s->phi_state = 't';
+	if (!put_status_msg((tab->current_time - tab->start_time)
+	, s->phi_n + 1, "is thinking\n"))
+		return (0);
 	return (1);
 }
 
-static int initialize_variables_phi_f(t_tab *tab, t_phi_t_variable_struct *s)
+static void initialize_variables_phi_f(t_tab *tab, t_phi_t_variable_struct *s)
 {
 	s->phi_n = tab->phi_n;
 	s->left_fork_held = 0;
 	s->right_fork_held = 0;
-	s->phi_state = 't'; // 's' = sleep, 't' = thinking, 'e' = eating
+	s->phi_state = 't';
 	s->time_sleep_start = tab->current_time;
-	s->time_last_meal = tab->current_time; // let's be nice and assume the philo's start on a full stomach
-	return (1);
+	s->time_last_meal = tab->current_time;
 }
 
 void *phi_f(void *arg)
@@ -189,21 +171,18 @@ void *phi_f(void *arg)
 	while (1)
 	{
 		if (s.time_last_meal + tab->time_to_die <= tab->current_time)
-			return (death(tab, &s));
+		{
+			tab->phi_died = 1;
+			put_status_msg((tab->current_time - tab->start_time)
+			, s.phi_n + 1, B_RED"died\n"RESET);
+			return (NULL);
+		}
 		if (s.phi_state == 't' && !thinking_to_eating(tab, &s))
 			return (NULL);
 		if (s.phi_state == 'e'
 		&& s.time_last_meal + tab->time_to_eat <= tab->current_time
-		&& !eating_to_sleeping(tab, &s))
+		&& !eating_to_thinking(tab, &s))
 			return (NULL);
-		if (s.phi_state == 's'
-		&& s.time_sleep_start + tab->time_to_sleep < tab->current_time)
-		{
-			s.phi_state = 't';
-			if (!put_status_msg((tab->current_time - tab->start_time)
-			, s.phi_n + 1, "is thinking\n"))
-				return (0);
-		}
 		if (usleep(5000) == -1)
 			return (return_error(tab, ERROR_USLEEP));
 	}
