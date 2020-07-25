@@ -24,12 +24,23 @@
 #define ERROR_MUTEX_LOCK 1
 #define ERROR_MUTEX_UNLOCK 2
 #define ERROR_MUTEX_INIT 8
+#define ERROR_MUTEX_DESTROY 10
 #define ERROR_PTHREAD_CREATE 9
 #define ERROR_GETTIMEOFDAY 3
 #define ERROR_MALLOC 4
 #define ERROR_BAD_ARGS 5
 #define ERROR_AC 6
 #define ERROR_USLEEP 7
+
+typedef struct s_thread_variable_struct
+{
+	int phi_n; // sentinel value for an uninitialized philosopher
+	int left_fork_held;
+	int right_fork_held;
+	int phi_state;
+	long long time_last_meal;
+	long long time_sleep_start;
+} t_thread_var_struct;
 
 typedef struct s_frk
 {
@@ -51,7 +62,7 @@ typedef struct s_tab
 	int phi_died;
 	int *n_times_eaten;
 	int error_encountered;
-
+	pthread_t *phi_t;
 	int malloc_forks;
 	int malloc_n_times_eaten;
 	int malloc_phi_t;
@@ -62,8 +73,11 @@ int ft_atoi(const char *str);
 long long get_current_time(t_tab *tab);
 void *return_error(t_tab *tab, int error_num);
 void initialize_malloc_indicators(t_tab *tab);
-int initialize_variables(t_tab *tab, int ac, char **av);
+int initialize_variables_and_locks(t_tab *tab, int ac, char **av);
 void *phi_f(void *arg);
-
+int thinking_to_eating(t_tab *tab, t_thread_var_struct *s);
+void *death(t_tab *tab, t_thread_var_struct *s);
+void initialize_variables_phi_f(t_tab *tab, t_thread_var_struct *s);
+int eating_to_thinking(t_tab *tab, t_thread_var_struct *s);
 
 #endif
