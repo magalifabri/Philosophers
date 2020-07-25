@@ -1,5 +1,31 @@
 #include "../philo_one.h"
 
+void free_malloced_variables(t_tab *tab)
+{
+	write(1, CYAN"freeing allocated memory... "RESET, 40);
+	if (tab->malloc_forks)
+		free(tab->forks);
+	if (tab->malloc_n_times_eaten)
+		free(tab->n_times_eaten);
+	if (tab->malloc_phi_t)
+		free(tab->phi_t);
+	write(1, CYAN"done.\n"RESET, 17);
+}
+
+int destroy_locks(t_tab *tab)
+{
+	int i;
+
+	usleep(10000);
+	write(1, CYAN"destroying mutex locks... "RESET, 38);
+	i = -1;
+	while (++i < tab->number_of_philosophers)
+		if (pthread_mutex_destroy(&tab->forks[i].lock) != 0)
+			return ((int)return_error(tab, ERROR_MUTEX_DESTROY));
+	write(1, CYAN"done.\n"RESET, 18);
+	return (1);
+}
+
 void *return_error(t_tab *tab, int error_num)
 {
 	tab->error_encountered = 1;
@@ -10,6 +36,8 @@ void *return_error(t_tab *tab, int error_num)
 		write(2, "pthread_mutex_unlock() returned -1\n", 36);
 	if (error_num == ERROR_MUTEX_INIT)
 		write(2, "pthread_mutex_init() didn't return 0\n", 38);
+	if (error_num == ERROR_MUTEX_DESTROY)
+		write(2, "pthread_mutex_destroy() didn't return 0\n", 41);
 	if (error_num == ERROR_PTHREAD_CREATE)
 		write(2, "pthread_create() didn't return 0\n", 34);
 	else if (error_num == ERROR_GETTIMEOFDAY)
@@ -20,7 +48,7 @@ void *return_error(t_tab *tab, int error_num)
 		write(2, "bad arguments. Try again.\n", 27);
 	else if (error_num == ERROR_AC)
 		write(2, "too few or too many arguments\n", 31);
-	// free_malloced_variables(tab);
+	free_malloced_variables(tab);
 	return (NULL);
 }
 
@@ -33,7 +61,8 @@ int check_if_all_have_returned(t_tab *tab)
 	returned = 0;
 	while (++i < tab->number_of_philosophers)
 	{
-		if (tab->n_times_eaten[i] == tab->number_of_times_each_philosopher_must_eat)
+		if (tab->n_times_eaten[i]
+		== tab->number_of_times_each_philosopher_must_eat)
 			returned++;
 		if (returned == tab->number_of_philosophers)
 		{
@@ -65,25 +94,30 @@ int monitor_philosophers(t_tab *tab)
 	return (0);
 }
 
+/*
+Reason for usleep(): tab.phi_n needs to be copied over in each phi_f thread, so we can only create threads as quickly as phi_f can copy
+*/
+
 int create_philosophers(t_tab *tab)
 {
-	pthread_t *phi_t;
 	int i;
 
-	if (!(phi_t = malloc(sizeof(pthread_t) * tab->number_of_philosophers + 1)))
+	if (!(tab->phi_t
+	= malloc(sizeof(pthread_t) * tab->number_of_philosophers + 1)))
 		return ((int)return_error(tab, ERROR_MALLOC));
 	tab->malloc_phi_t = 1;
-	phi_t[tab->number_of_philosophers] = NULL;
+	tab->phi_t[tab->number_of_philosophers] = NULL;
 	i = -1;
 	while (++i < tab->number_of_philosophers)
 	{
 		if (!(tab->current_time = get_current_time(tab)))
 			return (0);
 		tab->phi_n = i;
-		if (pthread_create(&phi_t[i], NULL, phi_f, tab) != 0)
+		if (pthread_create(&tab->phi_t[i], NULL, phi_f, tab) != 0)
 			return ((int)return_error(tab, ERROR_PTHREAD_CREATE));
-		if (usleep(5000) == -1)
-			return ((int)return_error(tab, ERROR_USLEEP)); // tab.phi_n needs to be copied over in each phi_f thread, so we can only create threads as quickly as phi_f can copy
+		pthread_detach(tab->phi_t[i]);
+		if (usleep(100) == -1)
+			return ((int)return_error(tab, ERROR_USLEEP));
 	}
 	return (1);
 }
@@ -101,15 +135,8 @@ int main(int ac, char **av)
 	initialize_malloc_indicators(&tab);
 	if (ac < 5 || ac > 6)
 		return ((int)return_error(&tab, ERROR_AC));
-	if (!initialize_variables(&tab, ac, av))
+	if (!initialize_variables_and_locks(&tab, ac, av))
 		return (0);
-	i = -1;
-	while (++i < tab.number_of_philosophers)
-	{
-		if (pthread_mutex_init(&tab.forks[i].lock, NULL) != 0)
-			return ((int)return_error(&tab, ERROR_MUTEX_INIT));
-		tab.forks[i].available = 1;
-	}
 	i = -1;
 	while (++i < tab.number_of_philosophers)
 		tab.n_times_eaten[i] = 0;
@@ -117,5 +144,8 @@ int main(int ac, char **av)
 		return (0);
 	if (!monitor_philosophers(&tab))
 		return (0);
+	if (!destroy_locks(&tab))
+		return (0);
+	free_malloced_variables(&tab);
 	return (1);
 }
