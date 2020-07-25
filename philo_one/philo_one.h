@@ -32,9 +32,12 @@
 #define ERROR_AC 6
 #define ERROR_USLEEP 7
 
+/*
+struct for variables used in phi_f() (the threads)
+*/
 typedef struct s_thread_variable_struct
 {
-	int phi_n; // sentinel value for an uninitialized philosopher
+	int phi_n;
 	int left_fork_held;
 	int right_fork_held;
 	int phi_state;
@@ -42,21 +45,27 @@ typedef struct s_thread_variable_struct
 	long long time_sleep_start;
 } t_thread_var_struct;
 
+/*
+struct for variables related to the forks (cutlery)
+*/
 typedef struct s_frk
 {
 	int available;
 	pthread_mutex_t lock;
 } t_frk;
 
+/*
+main struct for variables used all throughout the source code
+*/
 typedef struct s_tab
 {
 	long long start_time;
 	long long current_time;
 	int phi_n;
 	int number_of_philosophers;
-	int time_to_die;   // time in ms before the next meal needs to start
-	int time_to_eat;   // duration in ms that the philo will spend eating
-	int time_to_sleep; // duration in ms that the philosopher will spend sleeping
+	int time_to_die;
+	int time_to_eat;
+	int time_to_sleep;
 	int number_of_times_each_philosopher_must_eat;
 	t_frk *forks;
 	int phi_died;
@@ -66,18 +75,38 @@ typedef struct s_tab
 	int malloc_forks;
 	int malloc_n_times_eaten;
 	int malloc_phi_t;
+	int mutexes_initialized;
 } t_tab;
 
+/*
+put_status_msg.c
+*/
 int put_status_msg(long long time, int phi_n, char *message);
-int ft_atoi(const char *str);
-long long get_current_time(t_tab *tab);
+
+/*
+main.c
+*/
 void *return_error(t_tab *tab, int error_num);
-void initialize_malloc_indicators(t_tab *tab);
+
+/*
+initialize_variables.c
+*/
+void initialize_malloc_and_mutex_indicators(t_tab *tab);
 int initialize_variables_and_locks(t_tab *tab, int ac, char **av);
-void *phi_f(void *arg);
-int thinking_to_eating(t_tab *tab, t_thread_var_struct *s);
-void *death(t_tab *tab, t_thread_var_struct *s);
 void initialize_variables_phi_f(t_tab *tab, t_thread_var_struct *s);
+
+/*
+phi_f.c
+*/
+void *phi_f(void *arg);
 int eating_to_thinking(t_tab *tab, t_thread_var_struct *s);
+
+/*
+utils.c
+*/
+long long get_current_time(t_tab *tab);
+int ft_atoi(const char *str);
+int destroy_locks(t_tab *tab);
+void free_malloced_variables(t_tab *tab);
 
 #endif

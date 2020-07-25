@@ -1,31 +1,5 @@
 #include "../philo_one.h"
 
-void free_malloced_variables(t_tab *tab)
-{
-	write(1, CYAN"freeing allocated memory... "RESET, 40);
-	if (tab->malloc_forks)
-		free(tab->forks);
-	if (tab->malloc_n_times_eaten)
-		free(tab->n_times_eaten);
-	if (tab->malloc_phi_t)
-		free(tab->phi_t);
-	write(1, CYAN"done.\n"RESET, 17);
-}
-
-int destroy_locks(t_tab *tab)
-{
-	int i;
-
-	usleep(10000);
-	write(1, CYAN"destroying mutex locks... "RESET, 38);
-	i = -1;
-	while (++i < tab->number_of_philosophers)
-		if (pthread_mutex_destroy(&tab->forks[i].lock) != 0)
-			return ((int)return_error(tab, ERROR_MUTEX_DESTROY));
-	write(1, CYAN"done.\n"RESET, 18);
-	return (1);
-}
-
 void *return_error(t_tab *tab, int error_num)
 {
 	tab->error_encountered = 1;
@@ -48,23 +22,25 @@ void *return_error(t_tab *tab, int error_num)
 		write(2, "bad arguments. Try again.\n", 27);
 	else if (error_num == ERROR_AC)
 		write(2, "too few or too many arguments\n", 31);
+	if (tab->mutexes_initialized)
+		destroy_locks(tab);
 	free_malloced_variables(tab);
 	return (NULL);
 }
 
-int check_if_all_have_returned(t_tab *tab)
+int check_if_all_are_sated(t_tab *tab)
 {
 	int i;
-	int returned;
+	int number_of_fat_philosophers;
 
 	i = -1;
-	returned = 0;
+	number_of_fat_philosophers = 0;
 	while (++i < tab->number_of_philosophers)
 	{
 		if (tab->n_times_eaten[i]
 		== tab->number_of_times_each_philosopher_must_eat)
-			returned++;
-		if (returned == tab->number_of_philosophers)
+			number_of_fat_philosophers++;
+		if (number_of_fat_philosophers == tab->number_of_philosophers)
 		{
 			write(1, B_GREEN"They're all fat. Welcome to America!\n"RESET, 49);
 			return (1);
@@ -72,6 +48,14 @@ int check_if_all_have_returned(t_tab *tab)
 	}
 	return (0);
 }
+
+/*
+Note(s) on monitor_philosophers():
+
+Instead of using pthread_join() to make sure the main process doesn't exit before the threads are done, we trap the main process in a loop that it will only exit when the threads are done (a philosopher dies, all are fat or an error occurs).
+
+This function supplies the value to the tab.current_time variable that is used by the threads. This is done so that they don't each have to do this individually.
+*/
 
 int monitor_philosophers(t_tab *tab)
 {
@@ -88,25 +72,22 @@ int monitor_philosophers(t_tab *tab)
 			write(1, B_RED"A philosopher has starved! Game over.\n"RESET, 50);
 			return (1);
 		}
-		if (check_if_all_have_returned(tab))
+		if (check_if_all_are_sated(tab))
 			return (1);
 	}
 	return (0);
 }
 
 /*
-Reason for usleep(): tab.phi_n needs to be copied over in each phi_f thread, so we can only create threads as quickly as phi_f can copy
+Note(s) on create_philosophers():
+
+Reason for usleep(): tab.phi_n needs to be copied over in each phi_f thread to tell the thread the number of the philosopher it represents. So we want to give each thread a bit of time to copy this value.
 */
 
 int create_philosophers(t_tab *tab)
 {
 	int i;
 
-	if (!(tab->phi_t
-	= malloc(sizeof(pthread_t) * tab->number_of_philosophers + 1)))
-		return ((int)return_error(tab, ERROR_MALLOC));
-	tab->malloc_phi_t = 1;
-	tab->phi_t[tab->number_of_philosophers] = NULL;
 	i = -1;
 	while (++i < tab->number_of_philosophers)
 	{
@@ -122,24 +103,16 @@ int create_philosophers(t_tab *tab)
 	return (1);
 }
 
-/*
-Each fork is protected for a mutex lock. The mutex is locked only while the availability of the fork is checked and changed (if the fork is indeed available). While the fork is being used, the mutex isn't locked, so that other threads can check on the availability of the fork and continue on their way if it's not, instead of having to wait right there for it to actually become available again.
-Keeping the mutex locked while the fork is in use should result in much less locking and unlocking and with that, shorter and better readable code. So I'll probably do it like that in the future.
-*/
-
 int main(int ac, char **av)
 {
 	t_tab tab;
 	int i;
 
-	initialize_malloc_indicators(&tab);
+	initialize_malloc_and_mutex_indicators(&tab);
 	if (ac < 5 || ac > 6)
 		return ((int)return_error(&tab, ERROR_AC));
 	if (!initialize_variables_and_locks(&tab, ac, av))
 		return (0);
-	i = -1;
-	while (++i < tab.number_of_philosophers)
-		tab.n_times_eaten[i] = 0;
 	if (!create_philosophers(&tab))
 		return (0);
 	if (!monitor_philosophers(&tab))

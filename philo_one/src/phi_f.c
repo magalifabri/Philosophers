@@ -1,8 +1,5 @@
 #include "../philo_one.h"
 
-
-
-
 static int grab_right_fork_if_available(t_tab *tab, t_thread_var_struct *s)
 {
 	if (pthread_mutex_lock(&tab->forks[s->phi_n].lock) == -1)
@@ -54,7 +51,7 @@ static int grab_left_fork_if_available_2(t_tab *tab, t_thread_var_struct *s)
 	return (1);
 }
 
-int thinking_to_eating(t_tab *tab, t_thread_var_struct *s)
+static int thinking_to_eating(t_tab *tab, t_thread_var_struct *s)
 {
 	if (!grab_right_fork_if_available(tab, s))
 		return (0);
@@ -80,12 +77,13 @@ int thinking_to_eating(t_tab *tab, t_thread_var_struct *s)
 }
 
 /*
-name: phi_f
+Note(s) on phi_f()
 
 parameters:
 	void *arg: t_tab *tab in void* form
 
 description: 
+	This is the function the threads are send to.
 	The while loop functions as the routine of each philosopher with a cycle of thinking, eating (if forks are available) and sleeping.
 
 return values:
