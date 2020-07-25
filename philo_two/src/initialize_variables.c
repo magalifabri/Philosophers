@@ -53,6 +53,11 @@ Note(s) on initialize_variables_and_locks():
 "tab->number_of_times_each_philosopher_must_eat = -1": -1 is a sentinel value for an absence of value
 */
 
+void *err_msg(t_tab *tab, char *msg, int len)
+{
+	
+}
+
 int initialize_variables(t_tab *tab, int ac, char **av)
 {
 	tab->number_of_philosophers = ft_atoi(av[1]);
