@@ -1,5 +1,4 @@
 #include "../philo_three.h"
-#include <stdarg.h>
 
 static int get_len(char *s)
 {

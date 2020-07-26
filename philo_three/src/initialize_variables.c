@@ -1,9 +1,11 @@
 #include "../philo_three.h"
 
 /*
-ABOUT initialize_variables_part_2()
-
-"sem_unlink("fork_availability");" is required in case the program was exited badly the previous time and the semaphore wasn't unlinked. Possible errors are irrelevant enough to ignore them.
+** Note(s) on initialize_variables_part_2():
+** 
+** "sem_unlink("fork_availability");" is required in case the program was
+** exited badly the previous time and the semaphore wasn't unlinked. Possible
+** errors are irrelevant enough to ignore them.
 */
 
 int initialize_variables_part_2(t_tab *tab)
@@ -25,9 +27,10 @@ int initialize_variables_part_2(t_tab *tab)
 }
 
 /*
-ABOUT initialize_variables()
-
-"tab->number_of_times_each_philosopher_must_eat = -1" is a sentinel value, as an indication that no input for the variable was given.
+** Note(s) on initialize_variables():
+** 
+** "tab->number_of_times_each_philosopher_must_eat = -1" is a sentinel value,
+** as an indication that no input for the variable was given.
 */
 
 int initialize_variables(t_tab *tab, int ac, char **av)
@@ -46,16 +49,6 @@ int initialize_variables(t_tab *tab, int ac, char **av)
 	|| tab->time_to_eat < 1
 	|| tab->time_to_sleep < 1)
 		return ((int)return_error(tab, ERROR_BAD_ARGS));
-
-	// TESTING ----------------------------------------------------------------
-	write(1, UNDERLINE"Program Configurations:\n"RESET, 33);
-	printf("number_of_philosophers: %d\n", tab->number_of_philosophers);
-	printf("time_to_die: %d milliseconds\n", tab->time_to_die);
-	printf("time_to_eat: %d milliseconds\n", tab->time_to_eat);
-	printf("time_to_sleep: %d milliseconds\n", tab->time_to_sleep);
-	printf("number_of_times_each_philosopher_must_eat: %d\n", tab->number_of_times_each_philosopher_must_eat);
-	// ------------------------------------------------------------------------
-
 	initialize_variables_part_2(tab);
 	return (1);
 }

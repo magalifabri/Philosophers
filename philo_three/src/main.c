@@ -1,9 +1,16 @@
 #include "../philo_three.h"
 
 /*
-ABOUT grimreaper()
-
-Philosophers may die of starvation while standing in the "dining room queue" (semaphore) and it's important to report on their unfortunate demise within 10ms of its occurrance and halt the program immediately afterwards. But while they are waiting, they are incapable of doing anything else, and the other philosophers and the parent process also aren't aware of whether or not the philosopher has actually starved. Therefore a pthread is created within the child process to keep an eye on things and quit the process if the philosopher doesn't manage to eat in time.
+** Note(s) on grimreaper():
+** 
+** Philosophers may die of starvation while standing in the "dining room queue"
+** (semaphore) and it's important to report on their unfortunate demise within
+** 10ms of its occurrance (and halt the program immediately afterwards?). But
+** while they are waiting, they are incapable of doing anything else, and the
+** other philosophers and the parent process also aren't aware of whether or
+** not the philosopher has actually starved. Therefore a pthread is created
+** within the child process to keep an eye on things and quit the process if
+** the philosopher doesn't manage to eat in time.
 */
 
 void *grimreaper(void *arg)
@@ -78,9 +85,12 @@ void phi_f(void *arg)
 }
 
 /*
-ABOUT monitor_child_processes()
-
-As soon as wait() returns with a pid, we know a philospopher has exited, either because he's fat or because he's dead (or because an error occurred). If he's fat, we let the other philosopher's continue; if he's dead (or an error occurred), we kill the other philosophers.
+** Note(s) on monitor_child_processes():
+** 
+** As soon as wait() returns with a pid, we know a philospopher has exited,
+** either because he's fat or because he's dead (or because an error occurred).
+** If he's fat, we let the other philosopher's continue; if he's dead (or an
+** error occurred), we kill the other philosophers.
 */
 
 int monitor_child_processes(t_tab *tab)
@@ -109,13 +119,6 @@ int monitor_child_processes(t_tab *tab)
 		write(1, B_GREEN"Good job! They're all fat.\n"RESET, 39);
 	return (1);
 }
-
-
-/*
-difference with philo_one and philo_two
-- At the time the process is created, they make their own copy of the struct; so it's not shared between the child processes or with the parent
-- Here, the semaphore is like a dining room. The room can only hold so many people. So when the room is full, any new philosopher that wants to enter, has to wait outside. This means that a philosopher (process) makes use of (part of) the semaphore for the entire duration of it's meal, instead of only for the time that it takes to see if there are any forks and to possible grab one or two. And other philosophers (processes) that the semaphore can no longer accommodate, are held up at the dining room entrance queue for as long as it takes for space to become available.
-*/
 
 int main(int ac, char **av)
 {
