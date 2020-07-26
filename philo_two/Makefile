@@ -6,7 +6,6 @@ SRC_FILES = main.c utils.c put_status_msg.c initialize_variables.c phi_f.c
 OBJ_DIR = ./obj/
 OBJ_FILES = $(addprefix $(OBJ_DIR), $(SRC_FILES:.c=.o))
 
-# INCLUDE_DIR = ./
 INCLUDE_FILES = philo_two.h
 
 CC = gcc
@@ -26,10 +25,10 @@ $(OBJ_DIR):
 
 # make .o files for NAME dependency
 $(OBJ_DIR)%.o: $(SRC_DIR)%.c
-	gcc -I$(INCLUDE_FILES) -c -o $@ $<
+	$(CC) $(FLAGS) -I$(INCLUDE_FILES) -c -o $@ $<
 
 clean:
-	$(RM) $(OBJ)
+	$(RM) $(OBJ_FILES)
 veryclean: clean
 	$(RMDIR) $(OBJ_DIR)
 fclean: clean

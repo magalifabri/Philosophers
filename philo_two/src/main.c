@@ -114,7 +114,6 @@ int create_philosophers(t_tab *tab)
 int main(int ac, char **av)
 {
 	t_tab tab;
-	int i;
 
 	initialize_malloc_indicators(&tab);
 	if (ac < 5 || ac > 6)

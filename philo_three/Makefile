@@ -26,10 +26,10 @@ $(OBJ_DIR):
 
 # make .o files for NAME dependency
 $(OBJ_DIR)%.o: $(SRC_DIR)%.c
-	gcc -I$(INCLUDE_FILES) -c -o $@ $<
+	$(CC) $(FLAGS) -I$(INCLUDE_FILES) -c -o $@ $<
 
 clean:
-	$(RM) $(OBJ)
+	$(RM) $(OBJ_FILES)
 veryclean: clean
 	$(RMDIR) $(OBJ_DIR)
 fclean: clean
