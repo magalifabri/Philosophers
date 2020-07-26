@@ -50,11 +50,16 @@ int check_if_all_are_sated(t_tab *tab)
 }
 
 /*
-Note(s) on monitor_philosophers():
-
-Instead of using pthread_join() to make sure the main process doesn't exit before the threads are done, we trap the main process in a loop that it will only exit when the threads are done (a philosopher dies, all are fat or an error occurs).
-
-This function supplies the value to the tab.current_time variable that is used by the threads. This is done so that they don't each have to do this individually.
+** Note(s) on monitor_philosophers():
+** 
+** Instead of using pthread_join() to make sure the main process doesn't exit
+** before the threads are done, we trap the main process in a loop that it will
+** only exit when the threads are done (a philosopher dies, all are fat or an
+** error occurs).
+** 
+** This function supplies the value to the tab.current_time variable that is
+** used by the threads. This is done so that they don't each have to do this
+** individually.
 */
 
 int monitor_philosophers(t_tab *tab)
@@ -79,9 +84,11 @@ int monitor_philosophers(t_tab *tab)
 }
 
 /*
-Note(s) on create_philosophers():
-
-Reason for usleep(): tab.phi_n needs to be copied over in each phi_f thread to tell the thread the number of the philosopher it represents. So we want to give each thread a bit of time to copy this value.
+** Note(s) on create_philosophers():
+** 
+** Reason for usleep(): tab.phi_n needs to be copied over in each phi_f thread
+** to tell the thread the number of the philosopher it represents. So we want
+** to give each thread a bit of time to copy this value.
 */
 
 int create_philosophers(t_tab *tab)

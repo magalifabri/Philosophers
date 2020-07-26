@@ -1,4 +1,6 @@
 .DS_STORE
+.vscode
+study_notes.md
 *.swp
 *.out
 *.pdf
@@ -11,3 +13,4 @@ philo_one
 !philo_one/
 philo_two
 !philo_two/
+old

@@ -1,12 +1,13 @@
 #ifndef PHILO_TWO_H
 #define PHILO_TWO_H
 
-#include <stdio.h>
+#include <stdio.h> // used by printf during testing
 #include <unistd.h>
 #include <pthread.h>
 #include <stdlib.h>
 #include <sys/time.h> // required for gettimeofday()
 #include <semaphore.h>
+#include <stdarg.h> // required by put_status_msg()
 
 #define RED "\033[0;31m"	
 #define B_RED "\033[1;31m"	
@@ -34,29 +35,16 @@
 #define ERROR_SEM_POST 10
 
 /*
-struct for variables used in phi_f() (the threads)
+** struct for variables used in phi_f() (the threads)
 */
-// typedef struct s_thread_variable_struct
-// {
-// 	int phi_n;
-// 	int left_fork_held;
-// 	int right_fork_held;
-// 	int phi_state;
-// 	long long time_last_meal;
-// 	long long time_sleep_start;
-// } t_thread_var_struct;
+typedef struct s_thread_variable_struct
+{
+	int phi_n;
+	long long time_last_meal;
+} t_thread_var_struct;
 
 /*
-struct for variables related to the forks (cutlery)
-*/
-// typedef struct s_frk
-// {
-// 	int available;
-// 	pthread_mutex_t lock;
-// } t_frk;
-
-/*
-main struct for variables used all throughout the source code
+** main struct for variables used all throughout the source code
 */
 typedef struct s_tab
 {
@@ -68,7 +56,6 @@ typedef struct s_tab
 	int time_to_eat;
 	int time_to_sleep;
 	int number_of_times_each_philosopher_must_eat;
-	// t_frk *forks;
 	sem_t *fork_availability;
 	int phi_died;
 	int *n_times_eaten;
@@ -77,38 +64,34 @@ typedef struct s_tab
 	int malloc_forks;
 	int malloc_n_times_eaten;
 	int malloc_phi_t;
-	// int mutexes_initialized;
 } t_tab;
 
 /*
-put_status_msg.c
+** put_status_msg.c
 */
-int put_status_msg(long long time, int phi_n, char *message);
+int put_status_msg(t_tab *tab, long long time, int phi_n, char *message);
 
 /*
-main.c
+** main.c
 */
 void *return_error(t_tab *tab, int error_num);
 
 /*
-initialize_variables.c
+** initialize_variables.c
 */
 void initialize_malloc_indicators(t_tab *tab);
 int initialize_variables(t_tab *tab, int ac, char **av);
-// void initialize_variables_phi_f(t_tab *tab, t_thread_var_struct *s);
 
 /*
-phi_f.c
+** phi_f.c
 */
 void *phi_f(void *arg);
-// int eating_to_thinking(t_tab *tab, t_thread_var_struct *s);
 
 /*
-utils.c
+** utils.c
 */
 long long get_current_time(t_tab *tab);
 int ft_atoi(const char *str);
-// int destroy_locks(t_tab *tab);
 void free_malloced_variables(t_tab *tab);
 
 #endif

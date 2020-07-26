@@ -61,9 +61,10 @@ void free_malloced_variables(t_tab *tab)
 }
 
 /*
-Note(s) on destroy_locks():
-
-Reason for usleep(): give threads the time to exit (so no mutex locks are being used) before destroying the mutexes.
+** Note(s) on destroy_locks():
+** 
+** Reason for usleep(): give threads the time to exit (so no mutex locks are
+** being used) before destroying the mutexes.
 */
 
 int destroy_locks(t_tab *tab)

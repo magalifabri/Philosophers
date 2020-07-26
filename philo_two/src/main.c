@@ -1,18 +1,5 @@
 #include "../philo_two.h"
 
-/*
-#define ERROR_AC 1
-#define ERROR_BAD_ARGS 2
-#define ERROR_MALLOC 3
-#define ERROR_GETTIMEOFDAY 4
-#define ERROR_USLEEP 5
-#define ERROR_PTHREAD_CREATE 6
-#define ERROR_SEM_OPEN 7
-#define ERROR_SEM_UNLINK 8
-#define ERROR_SEM_WAIT 9
-#define ERROR_SEM_POST 10
-*/
-
 void *return_error(t_tab *tab, int error_num)
 {
 	tab->error_encountered = 1;
@@ -64,11 +51,16 @@ int check_if_all_are_sated(t_tab *tab)
 }
 
 /*
-Note(s) on monitor_philosophers():
-
-Instead of using pthread_join() to make sure the main process doesn't exit before the threads are done, we trap the main process in a loop that it will only exit when the threads are done (a philosopher dies, all are fat or an error occurs).
-
-This function supplies the value to the tab.current_time variable that is used by the threads. This is done so that they don't each have to do this individually.
+** Note(s) on monitor_philosophers():
+** 
+** Instead of using pthread_join() to make sure the main process doesn't exit
+** before the threads are done, we trap the main process in a loop that it will
+** only exit when the threads are done (a philosopher dies, all are fat or an
+** error occurs).
+** 
+** This function supplies the value to the tab.current_time variable that is
+** used by the threads. This is done so that they don't each have to do this
+** individually.
 */
 
 int monitor_philosophers(t_tab *tab)
@@ -93,9 +85,11 @@ int monitor_philosophers(t_tab *tab)
 }
 
 /*
-Note(s) on create_philosophers():
-
-Reason for usleep(): tab.phi_n needs to be copied over in each phi_f thread to tell the thread the number of the philosopher it represents. So we want to give each thread a bit of time to copy this value.
+** Note(s) on create_philosophers():
+** 
+** Reason for usleep(): tab.phi_n needs to be copied over in each phi_f thread
+** to tell the thread the number of the philosopher it represents. So we want
+** to give each thread a bit of time to copy this value.
 */
 
 int create_philosophers(t_tab *tab)

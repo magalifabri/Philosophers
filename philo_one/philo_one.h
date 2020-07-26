@@ -1,11 +1,12 @@
 #ifndef PHILO_ONE_H
 #define PHILO_ONE_H
 
-#include <stdio.h>
+#include <stdio.h> // used by printf during testing
 #include <unistd.h>
 #include <pthread.h>
 #include <stdlib.h>
 #include <sys/time.h> // required for gettimeofday()
+#include <stdarg.h> // required by put_status_msg()
 
 #define RED "\033[0;31m"	
 #define B_RED "\033[1;31m"	
@@ -81,7 +82,7 @@ typedef struct s_tab
 /*
 put_status_msg.c
 */
-int put_status_msg(long long time, int phi_n, char *message);
+int put_status_msg(t_tab *tab, long long time, int phi_n, char *message);
 
 /*
 main.c

@@ -8,9 +8,9 @@ static int grab_right_fork_if_available(t_tab *tab, t_thread_var_struct *s)
 	{
 		tab->forks[s->phi_n].available = 0;
 		s->right_fork_held = 1;
-		if (!put_status_msg((tab->current_time - tab->start_time)
+		if (!put_status_msg(tab, (tab->current_time - tab->start_time)
 		, s->phi_n + 1, "has taken a fork (right)\n"))
-			return (0);
+			return ((int)return_error(tab, ERROR_MALLOC));
 	}
 	if (pthread_mutex_unlock(&tab->forks[s->phi_n].lock) == -1)
 		return ((int)return_error(tab, ERROR_MUTEX_UNLOCK));
@@ -25,9 +25,9 @@ static int grab_left_fork_if_available_1(t_tab *tab, t_thread_var_struct *s)
 	{
 		tab->forks[tab->number_of_philosophers - 1].available = 0;
 		s->left_fork_held = 1;
-		if (!put_status_msg((tab->current_time - tab->start_time)
+		if (!put_status_msg(tab, (tab->current_time - tab->start_time)
 		, s->phi_n + 1, "has taken a fork (left)\n"))
-			return (0);
+			return ((int)return_error(tab, ERROR_MALLOC));
 	}
 	if (pthread_mutex_unlock(&tab->forks[tab->number_of_philosophers - 1].lock) == -1)
 		return ((int)return_error(tab, ERROR_MUTEX_UNLOCK));
@@ -42,9 +42,9 @@ static int grab_left_fork_if_available_2(t_tab *tab, t_thread_var_struct *s)
 	{
 		tab->forks[s->phi_n - 1].available = 0;
 		s->left_fork_held = 1;
-		if (!put_status_msg((tab->current_time - tab->start_time)
+		if (!put_status_msg(tab, (tab->current_time - tab->start_time)
 		, s->phi_n + 1, "has taken a fork (left)\n"))
-			return (0);
+			return ((int)return_error(tab, ERROR_MALLOC));
 	}
 	if (pthread_mutex_unlock(&tab->forks[s->phi_n - 1].lock) == -1)
 		return ((int)return_error(tab, ERROR_MUTEX_UNLOCK));
@@ -63,11 +63,9 @@ static int thinking_to_eating(t_tab *tab, t_thread_var_struct *s)
 	{
 		s->phi_state = 'e';
 		s->time_last_meal = tab->current_time;
-		if (tab->phi_died || tab->error_encountered)
-			return (0);
-		if (!put_status_msg((tab->current_time - tab->start_time)
+		if (!put_status_msg(tab, (tab->current_time - tab->start_time)
 		, s->phi_n + 1, "is eating\n"))
-			return (0);
+			return ((int)return_error(tab, ERROR_MALLOC));
 		if (usleep(tab->time_to_eat * 1000) == -1)
 			return ((int)return_error(tab, ERROR_USLEEP));
 	}
@@ -77,18 +75,20 @@ static int thinking_to_eating(t_tab *tab, t_thread_var_struct *s)
 }
 
 /*
-Note(s) on phi_f()
-
-parameters:
-	void *arg: t_tab *tab in void* form
-
-description: 
-	This is the function the threads are send to.
-	The while loop functions as the routine of each philosopher with a cycle of thinking, eating (if forks are available) and sleeping.
-
-return values:
-	When a philosopher dies, tab.phi_died is set to 1, which signals to the other threads and the main process, that a philosopher has died and things ought to be wrapped up. The same happens if an error is occurred via the variable tab.error_encountered. In both cases, NULL is returned.
-	When a philosopher has reached number_of_times_each_philosopher_must_eat, it also returns NULL.
+** Note(s) on phi_f()
+** 
+** parameters: void *arg: t_tab *tab in void* form
+** 
+** description: This is the function the threads are send to. The while loop
+**     functions as the routine of each philosopher with a cycle of thinking,
+**     eating (if forks are available) and sleeping.
+** 
+** return values: When a philosopher dies, tab.phi_died is set to 1, which
+**     signals to the other threads and the main process, that a philosopher
+**     has died and things ought to be wrapped up. The same happens if an error
+**     is occurred via the variable tab.error_encountered. In both cases, NULL
+**     is returned. When a philosopher has reached
+**     number_of_times_each_philosopher_must_eat, it also returns NULL.
 */
 
 void *phi_f(void *arg)
@@ -102,8 +102,9 @@ void *phi_f(void *arg)
 	{
 		if (s.time_last_meal + tab->time_to_die <= tab->current_time)
 		{
-			put_status_msg((tab->current_time - tab->start_time)
-			, s.phi_n + 1, B_RED"died\n"RESET);
+			if (!put_status_msg(tab, (tab->current_time - tab->start_time)
+			, s.phi_n + 1, B_RED"died\n"RESET))
+				return (return_error(tab, ERROR_MALLOC));
 			tab->phi_died = 1;
 			return (NULL);
 		}

@@ -5,21 +5,20 @@ void initialize_malloc_indicators(t_tab *tab)
 	tab->malloc_forks = 0;
 	tab->malloc_n_times_eaten = 0;
 	tab->malloc_phi_t = 0;
-	// tab->mutexes_initialized = 0;
 }
 
 /*
-Note(s) on initialize_variables_part_2():
-
-"sem_unlink("fork_availability");" is required in case the program was exited badly the previous time and the semaphore wasn't unlinked. Possible errors are irrelevant enough to ignore them.
+** Note(s) on initialize_variables_part_2():
+** 
+** "sem_unlink("fork_availability");" is required in case the program was
+** exited badly the previous time and the semaphore wasn't unlinked. Possible
+** errors are irrelevant enough to ignore them.
 */
 
 static int initialize_more(t_tab *tab)
 {
 	int i;
 
-	// if (!(tab->forks = malloc(sizeof(t_frk) * tab->number_of_philosophers)))
-	// 	return ((int)return_error(tab, ERROR_MALLOC));
 	tab->malloc_forks = 1;
 	if (!(tab->n_times_eaten
 	= malloc(sizeof(int) * tab->number_of_philosophers)))
@@ -37,26 +36,15 @@ static int initialize_more(t_tab *tab)
 	if ((tab->fork_availability = sem_open("fork_availability", O_CREAT, 0644
 	, tab->number_of_philosophers / 2)) == SEM_FAILED)
 		return ((int)return_error(tab, ERROR_SEM_OPEN));
-	// while (++i < tab->number_of_philosophers)
-	// {
-	// 	if (pthread_mutex_init(&tab->forks[i].lock, NULL) != 0)
-	// 		return ((int)return_error(tab, ERROR_MUTEX_INIT));
-	// 	tab->forks[i].available = 1;
-	// }
-	// tab->mutexes_initialized = 1;
 	return (1);
 }
 
 /*
-Note(s) on initialize_variables_and_locks():
-
-"tab->number_of_times_each_philosopher_must_eat = -1": -1 is a sentinel value for an absence of value
+** Note(s) on initialize_variables_and_locks():
+** 
+** "tab->number_of_times_each_philosopher_must_eat = -1": -1 is a sentinel
+** value for an absence of value (a value for it wasn't supplied with av)
 */
-
-void *err_msg(t_tab *tab, char *msg, int len)
-{
-	
-}
 
 int initialize_variables(t_tab *tab, int ac, char **av)
 {
@@ -80,13 +68,3 @@ int initialize_variables(t_tab *tab, int ac, char **av)
 		return (0);
 	return (1);
 }
-
-// void initialize_variables_phi_f(t_tab *tab, t_thread_var_struct *s)
-// {
-// 	s->phi_n = tab->phi_n;
-// 	s->left_fork_held = 0;
-// 	s->right_fork_held = 0;
-// 	s->phi_state = 't';
-// 	s->time_sleep_start = tab->current_time;
-// 	s->time_last_meal = tab->current_time;
-// }

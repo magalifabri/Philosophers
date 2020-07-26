@@ -1,5 +1,4 @@
 #include "../philo_one.h"
-#include <stdarg.h>
 
 static int get_len(char *s)
 {
@@ -89,7 +88,7 @@ char	*ft_itoa(int n)
 	return (str);
 }
 
-int put_status_msg(long long time, int phi_n, char *message)
+int put_status_msg(t_tab *tab, long long time, int phi_n, char *message)
 {
 	char *c_time;
 	char *c_phi_n;
@@ -107,7 +106,8 @@ int put_status_msg(long long time, int phi_n, char *message)
 	free(c_phi_n);
 	if (!concat)
 		return (0);
-	write(1, concat, get_len(concat));
+	if (!tab->phi_died && !tab->error_encountered)
+		write(1, concat, get_len(concat));
 	free(concat);
 	return (1);
 }
