@@ -75,10 +75,10 @@ void				*return_error(t_tab *tab, int error_num);
 
 // initialize_variables.c
 void				initialize_malloc_and_mutex_indicators(t_tab *tab);
-int					initialize_variables_and_locks(t_tab *tab, int ac
-					, char **av);
-void				initialize_variables_phi_f(t_tab *tab
-					, t_thread_var_struct *s);
+int					initialize_variables_and_locks(t_tab *tab, int ac,
+						char **av);
+void				initialize_variables_phi_f(t_tab *tab,
+						t_thread_var_struct *s);
 
 // phi_f.c
 void				*phi_f(void *arg);
