@@ -1,16 +1,28 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   utils.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: mfabri <mfabri@student.s19.be>             +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/04/15 07:30:53 by mfabri            #+#    #+#             */
+/*   Updated: 2021/04/15 09:40:26 by mfabri           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../philo_one.h"
 
-static int ft_isspace(char c)
+static int	ft_isspace(char c)
 {
 	return (c == ' ' || c == '\n' || c == '\t' || c == '\v' || c == '\f'
-	|| c == '\r') ? (1) : (0);
+	|| c == '\r');
 }
 
-int ft_atoi(const char *str)
+int	ft_atoi(const char *str)
 {
-	int i;
-	int neg;
-	unsigned long int res;
+	int					i;
+	int					neg;
+	unsigned long int	res;
 
 	i = 0;
 	while (str[i] && ft_isspace(str[i]))
@@ -35,10 +47,10 @@ int ft_atoi(const char *str)
 	return (res * neg);
 }
 
-long long get_current_time(t_tab *tab)
+long long	get_current_time(t_tab *tab)
 {
-	struct timeval tp;
-	long long passed_time;
+	struct timeval	tp;
+	long long		passed_time;
 
 	if (gettimeofday(&tp, 0) == -1)
 		return ((long long)return_error(tab, ERROR_GETTIMEOFDAY));
@@ -48,7 +60,7 @@ long long get_current_time(t_tab *tab)
 	return (passed_time);
 }
 
-void free_malloced_variables(t_tab *tab)
+void	free_malloced_variables(t_tab *tab)
 {
 	write(1, CYAN"freeing allocated memory... "RESET, 40);
 	if (tab->malloc_forks)
@@ -67,9 +79,9 @@ void free_malloced_variables(t_tab *tab)
 ** being used) before destroying the mutexes.
 */
 
-int destroy_locks(t_tab *tab)
+int	destroy_locks(t_tab *tab)
 {
-	int i;
+	int	i;
 
 	usleep(10000);
 	write(1, CYAN"destroying mutex locks... "RESET, 38);

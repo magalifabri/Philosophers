@@ -1,6 +1,18 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: mfabri <mfabri@student.s19.be>             +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/04/15 07:30:35 by mfabri            #+#    #+#             */
+/*   Updated: 2021/04/15 09:41:19 by mfabri           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../philo_one.h"
 
-void *return_error(t_tab *tab, int error_num)
+void	*return_error(t_tab *tab, int error_num)
 {
 	tab->error_encountered = 1;
 	write(2, B_RED"ERROR: "RESET, 19);
@@ -28,10 +40,10 @@ void *return_error(t_tab *tab, int error_num)
 	return (NULL);
 }
 
-int check_if_all_are_sated(t_tab *tab)
+int	check_if_all_are_sated(t_tab *tab)
 {
-	int i;
-	int number_of_fat_philosophers;
+	int	i;
+	int	number_of_fat_philosophers;
 
 	i = -1;
 	number_of_fat_philosophers = 0;
@@ -62,13 +74,14 @@ int check_if_all_are_sated(t_tab *tab)
 ** individually.
 */
 
-int monitor_philosophers(t_tab *tab)
+int	monitor_philosophers(t_tab *tab)
 {
 	while (1)
 	{
 		if (usleep(1000) == -1)
 			return ((int)return_error(tab, ERROR_USLEEP));
-		if (!(tab->current_time = get_current_time(tab)))
+		tab->current_time = get_current_time(tab);
+		if (!tab->current_time)
 			return (0);
 		if (tab->error_encountered)
 			return (0);
@@ -91,14 +104,15 @@ int monitor_philosophers(t_tab *tab)
 ** to give each thread a bit of time to copy this value.
 */
 
-int create_philosophers(t_tab *tab)
+int	create_philosophers(t_tab *tab)
 {
-	int i;
+	int	i;
 
 	i = -1;
 	while (++i < tab->number_of_philosophers)
 	{
-		if (!(tab->current_time = get_current_time(tab)))
+		tab->current_time = get_current_time(tab);
+		if (!tab->current_time)
 			return (0);
 		tab->phi_n = i;
 		if (pthread_create(&tab->phi_t[i], NULL, phi_f, tab) != 0)
@@ -109,10 +123,10 @@ int create_philosophers(t_tab *tab)
 	}
 	return (1);
 }
-
-int main(int ac, char **av)
+ 
+int	main(int ac, char **av)
 {
-	t_tab tab;
+	t_tab	tab;
 
 	initialize_malloc_and_mutex_indicators(&tab);
 	if (ac < 5 || ac > 6)

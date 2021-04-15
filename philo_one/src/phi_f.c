@@ -1,6 +1,18 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   phi_f.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: mfabri <mfabri@student.s19.be>             +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/04/15 07:30:45 by mfabri            #+#    #+#             */
+/*   Updated: 2021/04/15 07:34:27 by mfabri           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../philo_one.h"
 
-static int grab_right_fork_if_available(t_tab *tab, t_thread_var_struct *s)
+static int	grab_right_fork_if_available(t_tab *tab, t_thread_var_struct *s)
 {
 	if (pthread_mutex_lock(&tab->forks[s->phi_n].lock) == -1)
 		return ((int)return_error(tab, ERROR_MUTEX_LOCK));
@@ -17,7 +29,7 @@ static int grab_right_fork_if_available(t_tab *tab, t_thread_var_struct *s)
 	return (1);
 }
 
-static int grab_left_fork_if_available_1(t_tab *tab, t_thread_var_struct *s)
+static int	grab_left_fork_if_available_1(t_tab *tab, t_thread_var_struct *s)
 {
 	if (pthread_mutex_lock(&tab->forks[tab->number_of_philosophers - 1].lock) == -1)
 		return ((int)return_error(tab, ERROR_MUTEX_LOCK));
@@ -34,7 +46,7 @@ static int grab_left_fork_if_available_1(t_tab *tab, t_thread_var_struct *s)
 	return (1);
 }
 
-static int grab_left_fork_if_available_2(t_tab *tab, t_thread_var_struct *s)
+static int	grab_left_fork_if_available_2(t_tab *tab, t_thread_var_struct *s)
 {
 	if (pthread_mutex_lock(&tab->forks[s->phi_n - 1].lock) == -1)
 		return ((int)return_error(tab, ERROR_MUTEX_LOCK));
@@ -51,7 +63,7 @@ static int grab_left_fork_if_available_2(t_tab *tab, t_thread_var_struct *s)
 	return (1);
 }
 
-static int thinking_to_eating(t_tab *tab, t_thread_var_struct *s)
+static int	thinking_to_eating(t_tab *tab, t_thread_var_struct *s)
 {
 	if (!grab_right_fork_if_available(tab, s))
 		return (0);
@@ -91,7 +103,7 @@ static int thinking_to_eating(t_tab *tab, t_thread_var_struct *s)
 **     number_of_times_each_philosopher_must_eat, it also returns NULL.
 */
 
-void *phi_f(void *arg)
+void	*phi_f(void *arg)
 {
 	t_tab *tab;
 	t_thread_var_struct s;
