@@ -6,7 +6,7 @@
 /*   By: mfabri <mfabri@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/04/15 07:30:45 by mfabri            #+#    #+#             */
-/*   Updated: 2021/04/15 19:02:39 by mfabri           ###   ########.fr       */
+/*   Updated: 2021/04/15 19:04:38 by mfabri           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ static int	grab_right_fork_if_available(t_tab *tab, t_thread_var_struct *s)
 		s->right_fork_held = 1;
 		if (!tab->phi_died && !tab->error_encountered)
 			printf("%lld %d has taken a fork (right)\n",
-					(tab->current_time - tab->start_time), s->phi_n + 1);
+				(tab->current_time - tab->start_time), s->phi_n + 1);
 	}
 	if (pthread_mutex_unlock(&tab->forks[s->phi_n].lock) == -1)
 		return ((int)return_error(tab, ERROR_MUTEX_UNLOCK));
@@ -40,7 +40,7 @@ static int	grab_left_fork_if_available_1(t_tab *tab, t_thread_var_struct *s)
 		s->left_fork_held = 1;
 		if (!tab->phi_died && !tab->error_encountered)
 			printf("%lld %d has taken a fork (left)\n",
-					(tab->current_time - tab->start_time), s->phi_n + 1);
+				(tab->current_time - tab->start_time), s->phi_n + 1);
 	}
 	if (pthread_mutex_unlock(&tab->forks[tab->number_of_philosophers - 1].lock)
 		== -1)
@@ -58,7 +58,7 @@ static int	grab_left_fork_if_available_2(t_tab *tab, t_thread_var_struct *s)
 		s->left_fork_held = 1;
 		if (!tab->phi_died && !tab->error_encountered)
 			printf("%lld %d has taken a fork (left)\n",
-					(tab->current_time - tab->start_time), s->phi_n + 1);
+				(tab->current_time - tab->start_time), s->phi_n + 1);
 	}
 	if (pthread_mutex_unlock(&tab->forks[s->phi_n - 1].lock) == -1)
 		return ((int)return_error(tab, ERROR_MUTEX_UNLOCK));
@@ -79,7 +79,7 @@ static int	thinking_to_eating(t_tab *tab, t_thread_var_struct *s)
 		s->time_last_meal = tab->current_time;
 		if (!tab->phi_died && !tab->error_encountered)
 			printf("%lld %d is eating\n",
-					(tab->current_time - tab->start_time), s->phi_n + 1);
+				(tab->current_time - tab->start_time), s->phi_n + 1);
 		if (usleep(tab->time_to_eat * 1000) == -1)
 			return ((int)return_error(tab, ERROR_USLEEP));
 	}
@@ -118,7 +118,7 @@ void	*phi_f(void *arg)
 		{
 			if (!tab->phi_died && !tab->error_encountered)
 				printf("%lld %d died\n",
-						(tab->current_time - tab->start_time), s.phi_n + 1);
+					(tab->current_time - tab->start_time), s.phi_n + 1);
 			tab->phi_died = 1;
 			return (NULL);
 		}
