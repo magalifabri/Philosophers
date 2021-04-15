@@ -6,7 +6,7 @@
 /*   By: mfabri <mfabri@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/04/15 07:30:45 by mfabri            #+#    #+#             */
-/*   Updated: 2021/04/15 09:56:36 by mfabri           ###   ########.fr       */
+/*   Updated: 2021/04/15 10:51:06 by mfabri           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ static int	grab_right_fork_if_available(t_tab *tab, t_thread_var_struct *s)
 		tab->forks[s->phi_n].available = 0;
 		s->right_fork_held = 1;
 		if (!put_status_msg(tab, (tab->current_time - tab->start_time)
-			, s->phi_n + 1, "has taken a fork (right)\n"))
+				, s->phi_n + 1, "has taken a fork (right)\n"))
 			return ((int)return_error(tab, ERROR_MALLOC));
 	}
 	if (pthread_mutex_unlock(&tab->forks[s->phi_n].lock) == -1)
@@ -39,7 +39,7 @@ static int	grab_left_fork_if_available_1(t_tab *tab, t_thread_var_struct *s)
 		tab->forks[tab->number_of_philosophers - 1].available = 0;
 		s->left_fork_held = 1;
 		if (!put_status_msg(tab, (tab->current_time - tab->start_time)
-			, s->phi_n + 1, "has taken a fork (left)\n"))
+				, s->phi_n + 1, "has taken a fork (left)\n"))
 			return ((int)return_error(tab, ERROR_MALLOC));
 	}
 	if (pthread_mutex_unlock(&tab->forks[tab->number_of_philosophers - 1].lock)
@@ -57,7 +57,7 @@ static int	grab_left_fork_if_available_2(t_tab *tab, t_thread_var_struct *s)
 		tab->forks[s->phi_n - 1].available = 0;
 		s->left_fork_held = 1;
 		if (!put_status_msg(tab, (tab->current_time - tab->start_time)
-			, s->phi_n + 1, "has taken a fork (left)\n"))
+				, s->phi_n + 1, "has taken a fork (left)\n"))
 			return ((int)return_error(tab, ERROR_MALLOC));
 	}
 	if (pthread_mutex_unlock(&tab->forks[s->phi_n - 1].lock) == -1)
@@ -78,7 +78,7 @@ static int	thinking_to_eating(t_tab *tab, t_thread_var_struct *s)
 		s->phi_state = 'e';
 		s->time_last_meal = tab->current_time;
 		if (!put_status_msg(tab, (tab->current_time - tab->start_time)
-			, s->phi_n + 1, "is eating\n"))
+				, s->phi_n + 1, "is eating\n"))
 			return ((int)return_error(tab, ERROR_MALLOC));
 		if (usleep(tab->time_to_eat * 1000) == -1)
 			return ((int)return_error(tab, ERROR_USLEEP));
@@ -109,7 +109,7 @@ void	*phi_f(void *arg)
 {
 	t_tab				*tab;
 	t_thread_var_struct	s;
-	
+
 	tab = (t_tab *)arg;
 	initialize_variables_phi_f(tab, &s);
 	while (1)
@@ -117,7 +117,7 @@ void	*phi_f(void *arg)
 		if (s.time_last_meal + tab->time_to_die <= tab->current_time)
 		{
 			if (!put_status_msg(tab, (tab->current_time - tab->start_time)
-				, s.phi_n + 1, B_RED"died\n"RESET))
+					, s.phi_n + 1, B_RED"died\n"RESET))
 				return (return_error(tab, ERROR_MALLOC));
 			tab->phi_died = 1;
 			return (NULL);

@@ -6,7 +6,7 @@
 /*   By: mfabri <mfabri@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/04/15 07:30:49 by mfabri            #+#    #+#             */
-/*   Updated: 2021/04/15 09:42:06 by mfabri           ###   ########.fr       */
+/*   Updated: 2021/04/15 10:49:10 by mfabri           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,33 +46,53 @@ static char	*copy_strings(int total_len, char **arg_ptrs, int n, va_list args)
 	return (cat_string);
 }
 
+// static char	*concatenate_strings(int num, ...)
+// {
+// 	va_list	args;
+// 	int		i;
+// 	char	**arg_ptrs;
+// 	int		*arg_lengths;
+// 	int		total_len;
+
+// 	arg_ptrs = malloc(sizeof(char *) * num);
+// 	if (!arg_ptrs)
+// 		return (NULL);
+// 	arg_lengths = malloc(sizeof(int) * num);
+// 	if (!arg_lengths)
+// 	{
+// 		free(arg_ptrs);
+// 		return (NULL);
+// 	}
+// 	va_start(args, num);
+// 	total_len = 0;
+// 	i = -1;
+// 	while (++i < num)
+// 	{
+// 		arg_ptrs[i] = va_arg(args, char *);
+// 		arg_lengths[i] = get_len(arg_ptrs[i]);
+// 		total_len += arg_lengths[i];
+// 	}
+// 	free(arg_lengths);
+// 	return (copy_strings(total_len, arg_ptrs, num, args));
+// }
 static char	*concatenate_strings(int num, ...)
 {
 	va_list	args;
 	int		i;
 	char	**arg_ptrs;
-	int		*arg_lengths;
 	int		total_len;
 
 	arg_ptrs = malloc(sizeof(char *) * num);
 	if (!arg_ptrs)
 		return (NULL);
-	arg_lengths = malloc(sizeof(int) * num);
-	if (!arg_lengths)
-	{
-		free(arg_ptrs);
-		return (NULL);
-	}
 	va_start(args, num);
 	total_len = 0;
 	i = -1;
 	while (++i < num)
 	{
 		arg_ptrs[i] = va_arg(args, char *);
-		arg_lengths[i] = get_len(arg_ptrs[i]);
-		total_len += arg_lengths[i];
+		total_len += get_len(arg_ptrs[i]);
 	}
-	free(arg_lengths);
 	return (copy_strings(total_len, arg_ptrs, num, args));
 }
 
