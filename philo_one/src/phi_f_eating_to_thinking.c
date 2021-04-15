@@ -6,7 +6,7 @@
 /*   By: mfabri <mfabri@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/04/15 07:30:42 by mfabri            #+#    #+#             */
-/*   Updated: 2021/04/15 07:32:15 by mfabri           ###   ########.fr       */
+/*   Updated: 2021/04/15 09:53:42 by mfabri           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,11 +22,11 @@ static int	lay_down_forks(t_tab *tab, t_thread_var_struct *s)
 	if (s->phi_n == 0)
 	{
 		if (pthread_mutex_lock(
-		&tab->forks[tab->number_of_philosophers - 1].lock) == -1)
+			&tab->forks[tab->number_of_philosophers - 1].lock) == -1)
 			return ((int)return_error(tab, ERROR_MUTEX_LOCK));
 		tab->forks[tab->number_of_philosophers - 1].available = 1;
 		if (pthread_mutex_unlock(
-		&tab->forks[tab->number_of_philosophers - 1].lock) == -1)
+			&tab->forks[tab->number_of_philosophers - 1].lock) == -1)
 			return ((int)return_error(tab, ERROR_MUTEX_UNLOCK));
 	}
 	else
@@ -47,15 +47,15 @@ static int	finish_eating_and_obesity_check(t_tab *tab, t_thread_var_struct *s)
 	s->right_fork_held = 0;
 	s->left_fork_held = 0;
 	if (!put_status_msg(tab, (tab->current_time - tab->start_time)
-	, s->phi_n + 1, "put his forks down\n"))
+		, s->phi_n + 1, "put his forks down\n"))
 		return ((int)return_error(tab, ERROR_MALLOC));
 	tab->n_times_eaten[s->phi_n]++;
 	if (tab->number_of_times_each_philosopher_must_eat != -1
-	&& tab->n_times_eaten[s->phi_n]
-	>= tab->number_of_times_each_philosopher_must_eat)
+		&& tab->n_times_eaten[s->phi_n]
+		>= tab->number_of_times_each_philosopher_must_eat)
 	{
 		if (!put_status_msg(tab, (tab->current_time - tab->start_time)
-		, s->phi_n + 1, B_GREEN"is fat\n"RESET))
+			, s->phi_n + 1, B_GREEN"is fat\n"RESET))
 			return ((int)return_error(tab, ERROR_MALLOC));
 		return (0);
 	}
@@ -67,13 +67,13 @@ int	eating_to_thinking(t_tab *tab, t_thread_var_struct *s)
 	if (!finish_eating_and_obesity_check(tab, s))
 		return (0);
 	if (!put_status_msg(tab, (tab->current_time - tab->start_time)
-	, s->phi_n + 1, "is sleeping\n"))
+		, s->phi_n + 1, "is sleeping\n"))
 		return ((int)return_error(tab, ERROR_MALLOC));
 	if (usleep(tab->time_to_sleep * 1000) == -1)
 		return ((int)return_error(tab, ERROR_USLEEP));
 	s->phi_state = 't';
 	if (!put_status_msg(tab, (tab->current_time - tab->start_time)
-	, s->phi_n + 1, "is thinking\n"))
+		, s->phi_n + 1, "is thinking\n"))
 		return ((int)return_error(tab, ERROR_MALLOC));
 	return (1);
 }

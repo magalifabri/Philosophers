@@ -6,7 +6,7 @@
 /*   By: mfabri <mfabri@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/04/15 07:30:35 by mfabri            #+#    #+#             */
-/*   Updated: 2021/04/15 09:41:19 by mfabri           ###   ########.fr       */
+/*   Updated: 2021/04/15 09:54:07 by mfabri           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ int	check_if_all_are_sated(t_tab *tab)
 	while (++i < tab->number_of_philosophers)
 	{
 		if (tab->n_times_eaten[i]
-		== tab->number_of_times_each_philosopher_must_eat)
+			== tab->number_of_times_each_philosopher_must_eat)
 			number_of_fat_philosophers++;
 		if (number_of_fat_philosophers == tab->number_of_philosophers)
 		{
@@ -123,7 +123,7 @@ int	create_philosophers(t_tab *tab)
 	}
 	return (1);
 }
- 
+
 int	main(int ac, char **av)
 {
 	t_tab	tab;

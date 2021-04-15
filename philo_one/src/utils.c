@@ -6,7 +6,7 @@
 /*   By: mfabri <mfabri@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/04/15 07:30:53 by mfabri            #+#    #+#             */
-/*   Updated: 2021/04/15 09:40:26 by mfabri           ###   ########.fr       */
+/*   Updated: 2021/04/15 10:02:45 by mfabri           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 static int	ft_isspace(char c)
 {
 	return (c == ' ' || c == '\n' || c == '\t' || c == '\v' || c == '\f'
-	|| c == '\r');
+		|| c == '\r');
 }
 
 int	ft_atoi(const char *str)
@@ -63,11 +63,11 @@ long long	get_current_time(t_tab *tab)
 void	free_malloced_variables(t_tab *tab)
 {
 	write(1, CYAN"freeing allocated memory... "RESET, 40);
-	if (tab->malloc_forks)
+	if (tab->forks)
 		free(tab->forks);
-	if (tab->malloc_n_times_eaten)
+	if (tab->n_times_eaten)
 		free(tab->n_times_eaten);
-	if (tab->malloc_phi_t)
+	if (tab->phi_t)
 		free(tab->phi_t);
 	write(1, CYAN"done.\n"RESET, 17);
 }

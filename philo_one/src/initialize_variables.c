@@ -6,7 +6,7 @@
 /*   By: mfabri <mfabri@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/04/15 07:30:39 by mfabri            #+#    #+#             */
-/*   Updated: 2021/04/15 07:30:40 by mfabri           ###   ########.fr       */
+/*   Updated: 2021/04/15 10:04:20 by mfabri           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,27 +14,25 @@
 
 void	initialize_malloc_and_mutex_indicators(t_tab *tab)
 {
-	tab->malloc_forks = 0;
-	tab->malloc_n_times_eaten = 0;
-	tab->malloc_phi_t = 0;
+	tab->forks = NULL;
+	tab->n_times_eaten = NULL;
+	tab->phi_t = NULL;
 	tab->mutexes_initialized = 0;
 }
 
 static int	initialize_more(t_tab *tab)
 {
-	int i;
+	int	i;
 
-	if (!(tab->forks = malloc(sizeof(t_frk) * tab->number_of_philosophers)))
+	tab->forks = malloc(sizeof(t_frk) * tab->number_of_philosophers);
+	if (!tab->forks)
 		return ((int)return_error(tab, ERROR_MALLOC));
-	tab->malloc_forks = 1;
-	if (!(tab->n_times_eaten
-	= malloc(sizeof(int) * tab->number_of_philosophers)))
+	tab->n_times_eaten = malloc(sizeof(int) * tab->number_of_philosophers);
+	if (!tab->n_times_eaten)
 		return ((int)return_error(tab, ERROR_MALLOC));
-	tab->malloc_n_times_eaten = 1;
-	if (!(tab->phi_t
-	= malloc(sizeof(pthread_t) * tab->number_of_philosophers)))
+	tab->phi_t = malloc(sizeof(pthread_t) * tab->number_of_philosophers);
+	if (!tab->phi_t)
 		return ((int)return_error(tab, ERROR_MALLOC));
-	tab->malloc_phi_t = 1;
 	i = -1;
 	while (++i < tab->number_of_philosophers)
 		tab->n_times_eaten[i] = 0;
@@ -63,7 +61,7 @@ int	initialize_variables_and_locks(t_tab *tab, int ac, char **av)
 	tab->time_to_eat = ft_atoi(av[3]);
 	tab->time_to_sleep = ft_atoi(av[4]);
 	if (tab->number_of_philosophers < 2 || tab->time_to_die < 1
-	|| tab->time_to_eat < 1 || tab->time_to_sleep < 1)
+		|| tab->time_to_eat < 1 || tab->time_to_sleep < 1)
 		return ((int)return_error(tab, ERROR_BAD_ARGS));
 	if (ac == 5)
 		tab->number_of_times_each_philosopher_must_eat = -1;

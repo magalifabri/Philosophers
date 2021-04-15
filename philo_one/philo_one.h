@@ -73,9 +73,6 @@ typedef struct s_tab
 	int *n_times_eaten;
 	int error_encountered;
 	pthread_t *phi_t;
-	int malloc_forks;
-	int malloc_n_times_eaten;
-	int malloc_phi_t;
 	int mutexes_initialized;
 } t_tab;
 
