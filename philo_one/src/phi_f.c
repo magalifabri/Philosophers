@@ -6,7 +6,7 @@
 /*   By: mfabri <mfabri@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/04/15 07:30:45 by mfabri            #+#    #+#             */
-/*   Updated: 2021/04/15 19:04:38 by mfabri           ###   ########.fr       */
+/*   Updated: 2021/04/15 19:13:16 by mfabri           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,7 +117,7 @@ void	*phi_f(void *arg)
 		if (s.time_last_meal + tab->time_to_die <= tab->current_time)
 		{
 			if (!tab->phi_died && !tab->error_encountered)
-				printf("%lld %d died\n",
+				printf("%lld %d \033[1;31mdied\033[0m\n",
 					(tab->current_time - tab->start_time), s.phi_n + 1);
 			tab->phi_died = 1;
 			return (NULL);
