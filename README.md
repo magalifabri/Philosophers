@@ -21,7 +21,7 @@ Keeping the mutex locked while the fork is in use should result in much less loc
 
 We use a semaphore to limit the number of threads or processes that are able to access certain parts of the code.
 
-The part of the code it limits of for us is the part in which philosophers eat.
+The part of the code it limits off for us is the part in which philosophers eat.
 
 The number of threads or processes allowed, is set to the number of forks (which is equal to the number of philosophers) divided by two (because a philosopher needs two forks to eat).
 
@@ -33,7 +33,7 @@ This one works very similarly to philo_two, but instead of the philosophers bein
 
 1. cd into philo_one, philo_two or philo_three.
 2. run `make` to compile
-3. execute the philo_one, philo_two or philo_three file with the following arguments given as numbers:
+3. execute the philo_one, philo_two or philo_three executable with the following arguments given as numbers:
 	- number of philosophers
 	- how much time in milliseconds can elapse since the start of a philosopher's last meal before the philosopher dies
 	- time in milliseconds it takes to eat
