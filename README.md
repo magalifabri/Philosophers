@@ -40,7 +40,7 @@ This one works very similarly to philo_two, but instead of the philosophers bein
 	- time in milliseconds it takes to sleep
 	- optional: number of times each philosopher must eat for the program to quit. If this argument is not supplied the program runs until a philosopher dies
 	
-	e.g.: `3, 16000 3000 8000 2`
+	e.g.: `./philo_one 3 16000 3000 8000 2`
 
 ## Resources
 - [video: How to create and join threads in C (pthreads).](https://www.youtube.com/watch?v=uA8X5zNOGw8&list=PL9IEJIKnBJjFZxuqyJ9JqVYmuFZHr7CFM)
