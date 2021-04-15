@@ -34,7 +34,7 @@
 # define ERROR_USLEEP 7
 
 // struct for variables used in phi_f() (the threads)
-typedef struct		s_thread_variable_struct
+typedef struct s_thread_variable_struct
 {
 	int				phi_n;
 	int				left_fork_held;
@@ -45,14 +45,14 @@ typedef struct		s_thread_variable_struct
 }					t_thread_var_struct;
 
 // struct for variables related to the forks (cutlery)
-typedef struct		s_frk
+typedef struct s_frk
 {
 	int				available;
 	pthread_mutex_t	lock;
 }					t_frk;
 
 // main struct for variables used all throughout the source code
-typedef struct		s_tab
+typedef struct s_tab
 {
 	long long		start_time;
 	long long		current_time;
@@ -62,7 +62,7 @@ typedef struct		s_tab
 	int				time_to_eat;
 	int				time_to_sleep;
 	int				number_of_times_each_philosopher_must_eat;
-	t_frk 			*forks;
+	t_frk			*forks;
 	int				phi_died;
 	int				*n_times_eaten;
 	int				error_encountered;
@@ -75,8 +75,10 @@ void				*return_error(t_tab *tab, int error_num);
 
 // initialize_variables.c
 void				initialize_malloc_and_mutex_indicators(t_tab *tab);
-int					initialize_variables_and_locks(t_tab *tab, int ac, char **av);
-void				initialize_variables_phi_f(t_tab *tab, t_thread_var_struct *s);
+int					initialize_variables_and_locks(t_tab *tab, int ac
+					, char **av);
+void				initialize_variables_phi_f(t_tab *tab
+					, t_thread_var_struct *s);
 
 // phi_f.c
 void				*phi_f(void *arg);
