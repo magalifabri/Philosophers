@@ -6,7 +6,7 @@
 /*   By: mfabri <mfabri@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/04/15 07:30:42 by mfabri            #+#    #+#             */
-/*   Updated: 2021/04/15 09:53:42 by mfabri           ###   ########.fr       */
+/*   Updated: 2021/04/15 10:43:21 by mfabri           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,7 +73,7 @@ int	eating_to_thinking(t_tab *tab, t_thread_var_struct *s)
 		return ((int)return_error(tab, ERROR_USLEEP));
 	s->phi_state = 't';
 	if (!put_status_msg(tab, (tab->current_time - tab->start_time)
-		, s->phi_n + 1, "is thinking\n"))
+			, s->phi_n + 1, "is thinking\n"))
 		return ((int)return_error(tab, ERROR_MALLOC));
 	return (1);
 }
