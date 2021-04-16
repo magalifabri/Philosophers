@@ -6,7 +6,7 @@
 /*   By: mfabri <mfabri@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/04/15 07:30:35 by mfabri            #+#    #+#             */
-/*   Updated: 2021/04/15 21:17:35 by mfabri           ###   ########.fr       */
+/*   Updated: 2021/04/16 10:52:01 by mfabri           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,5 +141,5 @@ int	main(int ac, char **av)
 		return (0);
 	free_malloced_variables(&tab);
 	system("leaks philo_one > leaks-report.git-ign.txt");
-	return (1);
+	return (0);
 }

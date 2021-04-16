@@ -146,5 +146,5 @@ int main(int ac, char **av)
 	if (sem_unlink("fork_availability") == -1)
 		return ((int)return_error(&tab, ERROR_SEM_UNLINK));
 	free_malloced_variables(&tab);
-	return (1);
+	return (0);
 }

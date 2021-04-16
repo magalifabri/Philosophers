@@ -6,7 +6,7 @@
 /*   By: mfabri <mfabri@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/04/15 20:59:30 by mfabri            #+#    #+#             */
-/*   Updated: 2021/04/16 07:28:44 by mfabri           ###   ########.fr       */
+/*   Updated: 2021/04/16 10:55:23 by mfabri           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,7 +55,7 @@ int	check_if_all_are_sated(t_tab *tab)
 			number_of_fat_philosophers++;
 		if (number_of_fat_philosophers == tab->number_of_philosophers)
 		{
-			write(1, B_GREEN"They're all fat. Good job!\n"RESET, 49);
+			printf(B_GREEN"They're all fat. Good job!\n"RESET);
 			return (1);
 		}
 	}
@@ -86,10 +86,9 @@ int	monitor_philosophers(t_tab *tab)
 			return (0);
 		if (tab->error_encountered)
 			return (0);
-		if (tab->phi_died)
+		if (tab->phi_died == 1)
 		{
-			printf("\033[1;31mA philosopher has starved! Game over.\033[0m\n");
-			// write(1, B_RED"A philosopher has starved! Game over.\n"RESET, 50);
+			printf(B_RED"A philosopher has starved! Game over.\n"RESET);
 			return (1);
 		}
 		if (check_if_all_are_sated(tab))
@@ -141,5 +140,5 @@ int	main(int ac, char **av)
 	if (sem_unlink("fork_availability") == -1)
 		return ((int)return_error(&tab, ERROR_SEM_UNLINK));
 	free_malloced_variables(&tab);
-	return (1);
+	return (0);
 }

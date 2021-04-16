@@ -16,3 +16,4 @@ philo_two
 old
 *.dSYM
 *.git-ign.*
+*/src/put_status_msg.c
