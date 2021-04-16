@@ -1,6 +1,18 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: mfabri <mfabri@student.s19.be>             +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/04/15 20:59:30 by mfabri            #+#    #+#             */
+/*   Updated: 2021/04/16 07:28:44 by mfabri           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../philo_two.h"
 
-void *return_error(t_tab *tab, int error_num)
+void	*return_error(t_tab *tab, int error_num)
 {
 	tab->error_encountered = 1;
 	write(2, B_RED"ERROR: "RESET, 19);
@@ -29,21 +41,21 @@ void *return_error(t_tab *tab, int error_num)
 	return (NULL);
 }
 
-int check_if_all_are_sated(t_tab *tab)
+int	check_if_all_are_sated(t_tab *tab)
 {
-	int i;
-	int number_of_fat_philosophers;
+	int	i;
+	int	number_of_fat_philosophers;
 
 	i = -1;
 	number_of_fat_philosophers = 0;
 	while (++i < tab->number_of_philosophers)
 	{
 		if (tab->n_times_eaten[i]
-		== tab->number_of_times_each_philosopher_must_eat)
+			== tab->number_of_times_each_philosopher_must_eat)
 			number_of_fat_philosophers++;
 		if (number_of_fat_philosophers == tab->number_of_philosophers)
 		{
-			write(1, B_GREEN"They're all fat. Welcome to America!\n"RESET, 49);
+			write(1, B_GREEN"They're all fat. Good job!\n"RESET, 49);
 			return (1);
 		}
 	}
@@ -63,19 +75,21 @@ int check_if_all_are_sated(t_tab *tab)
 ** individually.
 */
 
-int monitor_philosophers(t_tab *tab)
+int	monitor_philosophers(t_tab *tab)
 {
 	while (1)
 	{
 		if (usleep(1000) == -1)
 			return ((int)return_error(tab, ERROR_USLEEP));
-		if (!(tab->current_time = get_current_time(tab)))
+		tab->current_time = get_current_time(tab);
+		if (!tab->current_time)
 			return (0);
 		if (tab->error_encountered)
 			return (0);
 		if (tab->phi_died)
 		{
-			write(1, B_RED"A philosopher has starved! Game over.\n"RESET, 50);
+			printf("\033[1;31mA philosopher has starved! Game over.\033[0m\n");
+			// write(1, B_RED"A philosopher has starved! Game over.\n"RESET, 50);
 			return (1);
 		}
 		if (check_if_all_are_sated(tab))
@@ -92,14 +106,15 @@ int monitor_philosophers(t_tab *tab)
 ** to give each thread a bit of time to copy this value.
 */
 
-int create_philosophers(t_tab *tab)
+int	create_philosophers(t_tab *tab)
 {
-	int i;
+	int	i;
 
 	i = -1;
 	while (++i < tab->number_of_philosophers)
 	{
-		if (!(tab->current_time = get_current_time(tab)))
+		tab->current_time = get_current_time(tab);
+		if (!tab->current_time)
 			return (0);
 		tab->phi_n = i;
 		if (pthread_create(&tab->phi_t[i], NULL, phi_f, tab) != 0)
@@ -111,11 +126,10 @@ int create_philosophers(t_tab *tab)
 	return (1);
 }
 
-int main(int ac, char **av)
+int	main(int ac, char **av)
 {
-	t_tab tab;
+	t_tab	tab;
 
-	initialize_malloc_indicators(&tab);
 	if (ac < 5 || ac > 6)
 		return ((int)return_error(&tab, ERROR_AC));
 	if (!initialize_variables(&tab, ac, av))

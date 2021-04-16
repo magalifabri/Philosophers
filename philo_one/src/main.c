@@ -6,7 +6,7 @@
 /*   By: mfabri <mfabri@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/04/15 07:30:35 by mfabri            #+#    #+#             */
-/*   Updated: 2021/04/15 10:54:03 by mfabri           ###   ########.fr       */
+/*   Updated: 2021/04/15 21:17:35 by mfabri           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,7 @@ int	check_if_all_are_sated(t_tab *tab)
 			number_of_fat_philosophers++;
 		if (number_of_fat_philosophers == tab->number_of_philosophers)
 		{
-			write(1, B_GREEN"They're all fat. Welcome to America!\n"RESET, 49);
+			write(1, B_GREEN"They're all fat. Good job!\n"RESET, 49);
 			return (1);
 		}
 	}
