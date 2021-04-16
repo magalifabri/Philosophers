@@ -6,7 +6,7 @@
 /*   By: mfabri <mfabri@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/04/15 07:30:35 by mfabri            #+#    #+#             */
-/*   Updated: 2021/04/16 13:58:43 by mfabri           ###   ########.fr       */
+/*   Updated: 2021/04/16 14:24:45 by mfabri           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,7 @@ int	check_if_all_are_sated(t_tab *tab)
 			number_of_fat_philosophers++;
 		if (number_of_fat_philosophers == tab->number_of_philosophers)
 		{
-			write(1, B_GREEN"They're all fat. Good job!\n"RESET, 49);
+			printf(B_GREEN"They're all fat. Good job!\n"RESET);
 			return (1);
 		}
 	}
@@ -87,7 +87,7 @@ int	monitor_philosophers(t_tab *tab)
 			return (0);
 		if (tab->phi_died)
 		{
-			write(1, B_RED"A philosopher has starved! Game over.\n"RESET, 50);
+			printf(B_RED"A philosopher has starved! Game over.\n"RESET);
 			return (1);
 		}
 		if (check_if_all_are_sated(tab))
@@ -128,9 +128,6 @@ int	main(int ac, char **av)
 {
 	t_tab	tab;
 
-	initialize_malloc_and_mutex_indicators(&tab);
-	if (ac < 5 || ac > 6)
-		return ((int)return_error(&tab, ERROR_AC));
 	if (!initialize_variables_and_locks(&tab, ac, av))
 		return (1);
 	if (!create_philosophers(&tab))
@@ -140,6 +137,6 @@ int	main(int ac, char **av)
 	if (!destroy_locks(&tab))
 		return (1);
 	free_malloced_variables(&tab);
-	system("leaks philo_one > leaks-report.git-ign.txt");
+	// system("leaks philo_one > leaks-report.git-ign.txt");
 	return (0);
 }

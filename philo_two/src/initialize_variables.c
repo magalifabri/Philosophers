@@ -6,7 +6,7 @@
 /*   By: mfabri <mfabri@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/04/15 20:59:33 by mfabri            #+#    #+#             */
-/*   Updated: 2021/04/16 14:06:58 by mfabri           ###   ########.fr       */
+/*   Updated: 2021/04/16 14:18:32 by mfabri           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,10 @@ static int	initialize_more(t_tab *tab)
 
 int	initialize_variables(t_tab *tab, int ac, char **av)
 {
+	tab->n_times_eaten = NULL;
+	tab->phi_t = NULL;
+	if (ac < 5 || ac > 6)
+		return ((int)return_error(tab, ERROR_AC));
 	tab->number_of_philosophers = ft_atoi(av[1]);
 	tab->time_to_die = ft_atoi(av[2]);
 	tab->time_to_eat = ft_atoi(av[3]);
@@ -60,9 +64,12 @@ int	initialize_variables(t_tab *tab, int ac, char **av)
 		return ((int)return_error(tab, ERROR_BAD_ARGS));
 	if (ac == 5)
 		tab->number_of_times_each_philosopher_must_eat = -1;
-	else if ((tab->number_of_times_each_philosopher_must_eat
-			= ft_atoi(av[5])) == 0)
-		return ((int)return_error(tab, ERROR_BAD_ARGS));
+	else
+	{
+		tab->number_of_times_each_philosopher_must_eat = ft_atoi(av[5]);
+		if (tab->number_of_times_each_philosopher_must_eat == 0)
+			return ((int)return_error(tab, ERROR_BAD_ARGS));
+	}
 	tab->phi_died = 0;
 	tab->error_encountered = 0;
 	tab->start_time = get_current_time(tab);

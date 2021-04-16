@@ -6,7 +6,7 @@
 /*   By: mfabri <mfabri@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/04/15 07:30:39 by mfabri            #+#    #+#             */
-/*   Updated: 2021/04/16 14:06:42 by mfabri           ###   ########.fr       */
+/*   Updated: 2021/04/16 14:21:00 by mfabri           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,9 @@ static int	initialize_more(t_tab *tab)
 
 int	initialize_variables_and_locks(t_tab *tab, int ac, char **av)
 {
+	initialize_malloc_and_mutex_indicators(tab);
+	if (ac < 5 || ac > 6)
+		return ((int)return_error(tab, ERROR_AC));
 	tab->number_of_philosophers = ft_atoi(av[1]);
 	tab->time_to_die = ft_atoi(av[2]);
 	tab->time_to_eat = ft_atoi(av[3]);
