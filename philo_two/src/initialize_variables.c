@@ -6,7 +6,7 @@
 /*   By: mfabri <mfabri@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/04/15 20:59:33 by mfabri            #+#    #+#             */
-/*   Updated: 2021/04/16 09:10:37 by mfabri           ###   ########.fr       */
+/*   Updated: 2021/04/16 12:24:58 by mfabri           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ static int	initialize_more(t_tab *tab)
 	i = -1;
 	sem_unlink("fork_availability");
 	tab->fork_availability = sem_open("fork_availability", O_CREAT, 0644,
-		tab->number_of_philosophers / 2);
+			tab->number_of_philosophers / 2);
 	if (tab->fork_availability == SEM_FAILED)
 		return ((int)return_error(tab, ERROR_SEM_OPEN));
 	return (1);

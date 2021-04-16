@@ -6,7 +6,7 @@
 /*   By: mfabri <mfabri@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/04/15 20:59:41 by mfabri            #+#    #+#             */
-/*   Updated: 2021/04/16 07:26:57 by mfabri           ###   ########.fr       */
+/*   Updated: 2021/04/16 12:24:21 by mfabri           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,12 +62,10 @@ long long	get_current_time(t_tab *tab)
 
 void	free_malloced_variables(t_tab *tab)
 {
-	printf("\033[0;36mfreeing allocated memory... \033[0m");
-	// write(1, CYAN"freeing allocated memory... "RESET, 40);
+	printf(CYAN"freeing allocated memory... "RESET);
 	if (tab->n_times_eaten)
 		free(tab->n_times_eaten);
 	if (tab->phi_t)
 		free(tab->phi_t);
-	printf("\033[0;36mdone.\033[0m\n");
-	// write(1, CYAN"done.\n"RESET, 17);
+	printf(CYAN"done.\n"RESET);
 }
