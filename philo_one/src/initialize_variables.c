@@ -6,7 +6,7 @@
 /*   By: mfabri <mfabri@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/04/15 07:30:39 by mfabri            #+#    #+#             */
-/*   Updated: 2021/04/15 10:04:20 by mfabri           ###   ########.fr       */
+/*   Updated: 2021/04/16 14:06:42 by mfabri           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,9 +76,7 @@ int	initialize_variables_and_locks(t_tab *tab, int ac, char **av)
 	tab->start_time = get_current_time(tab);
 	if (!tab->start_time)
 		return (0);
-	if (!initialize_more(tab))
-		return (0);
-	return (1);
+	return (initialize_more(tab));
 }
 
 void	initialize_variables_phi_f(t_tab *tab, t_thread_var_struct *s)

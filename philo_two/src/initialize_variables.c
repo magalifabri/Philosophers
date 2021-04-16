@@ -6,16 +6,11 @@
 /*   By: mfabri <mfabri@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/04/15 20:59:33 by mfabri            #+#    #+#             */
-/*   Updated: 2021/04/16 12:24:58 by mfabri           ###   ########.fr       */
+/*   Updated: 2021/04/16 14:06:58 by mfabri           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../philo_two.h"
-
-// void	initialize_malloc_indicators(t_tab *tab)
-// {
-// 	// tab->forks = NULL;
-// }
 
 /*
 ** Note(s) on initialize_variables_part_2():
@@ -56,8 +51,6 @@ static int	initialize_more(t_tab *tab)
 
 int	initialize_variables(t_tab *tab, int ac, char **av)
 {
-	tab->n_times_eaten = NULL;
-	tab->phi_t = NULL;
 	tab->number_of_philosophers = ft_atoi(av[1]);
 	tab->time_to_die = ft_atoi(av[2]);
 	tab->time_to_eat = ft_atoi(av[3]);
@@ -75,7 +68,5 @@ int	initialize_variables(t_tab *tab, int ac, char **av)
 	tab->start_time = get_current_time(tab);
 	if (!tab->start_time)
 		return (0);
-	if (!initialize_more(tab))
-		return (0);
-	return (1);
+	return (initialize_more(tab));
 }

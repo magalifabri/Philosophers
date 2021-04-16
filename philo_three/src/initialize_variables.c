@@ -6,11 +6,30 @@
 /*   By: mfabri <mfabri@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/04/16 12:26:43 by mfabri            #+#    #+#             */
-/*   Updated: 2021/04/16 12:50:51 by mfabri           ###   ########.fr       */
+/*   Updated: 2021/04/16 14:09:06 by mfabri           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../philo_three.h"
+
+int initialize_philosophers(t_tab *tab)
+{
+	int	i;
+
+	i = -1;
+	while (++i < tab->number_of_philosophers)
+	{
+		tab->phi_n = i;
+		pid_t fork_ret = fork();
+		if (fork_ret == 0)
+			phi_f(tab);
+		else if (fork_ret > 0)
+			tab->phi_pid[i] = fork_ret;
+		else
+			return ((int)return_error(tab, ERROR_FORK));
+	}
+	return (1);
+}
 
 /*
 ** Note(s) on initialize_variables_part_2():
@@ -49,6 +68,9 @@ int	initialize_variables_part_2(t_tab *tab)
 
 int	initialize_variables(t_tab *tab, int ac, char **av)
 {
+	tab->phi_pid = NULL;
+	if (ac < 5 || ac > 6)
+		return ((int)return_error(tab, ERROR_AC));
 	tab->number_of_philosophers = ft_atoi(av[1]);
 	tab->time_to_die = ft_atoi(av[2]);
 	tab->time_to_eat = ft_atoi(av[3]);
@@ -66,6 +88,5 @@ int	initialize_variables(t_tab *tab, int ac, char **av)
 		|| tab->time_to_eat < 1
 		|| tab->time_to_sleep < 1)
 		return ((int)return_error(tab, ERROR_BAD_ARGS));
-	initialize_variables_part_2(tab);
-	return (1);
+	return (initialize_variables_part_2(tab));
 }

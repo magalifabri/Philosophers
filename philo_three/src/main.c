@@ -6,7 +6,7 @@
 /*   By: mfabri <mfabri@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/04/16 12:27:48 by mfabri            #+#    #+#             */
-/*   Updated: 2021/04/16 12:55:53 by mfabri           ###   ########.fr       */
+/*   Updated: 2021/04/16 14:04:39 by mfabri           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,28 +132,17 @@ int	monitor_child_processes(t_tab *tab)
 int	main(int ac, char **av)
 {
 	t_tab	tab;
-	int		i;
 
-	tab.phi_pid = NULL;
-	if (ac < 5 || ac > 6)
-		return ((int)return_error(&tab, ERROR_AC));
 	if (!initialize_variables(&tab, ac, av))
-		return (0);
-	i = -1;
-	while (++i < tab.number_of_philosophers)
-	{
-		tab.phi_n = i;
-		pid_t fork_ret = fork();
-		if (fork_ret == 0)
-			phi_f(&tab);
-		else if (fork_ret > 0)
-			tab.phi_pid[i] = fork_ret;
-		else
-			return ((int)return_error(&tab, ERROR_FORK));
-	}
+		return (1);
+	if (!initialize_philosophers(&tab))
+		return (1);
 	monitor_child_processes(&tab);
 	if (sem_unlink("fork_availability") == -1)
-		return ((int)return_error(&tab, ERROR_SEM_UNLINK));
+	{
+		return_error(&tab, ERROR_SEM_UNLINK);
+		return (1);
+	}
 	free_malloced_variables(&tab);
 	return (0);
 }

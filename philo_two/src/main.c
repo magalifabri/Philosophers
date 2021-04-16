@@ -6,7 +6,7 @@
 /*   By: mfabri <mfabri@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/04/15 20:59:30 by mfabri            #+#    #+#             */
-/*   Updated: 2021/04/16 10:55:23 by mfabri           ###   ########.fr       */
+/*   Updated: 2021/04/16 13:58:55 by mfabri           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -129,14 +129,16 @@ int	main(int ac, char **av)
 {
 	t_tab	tab;
 
+	tab.n_times_eaten = NULL;
+	tab.phi_t = NULL;
 	if (ac < 5 || ac > 6)
 		return ((int)return_error(&tab, ERROR_AC));
 	if (!initialize_variables(&tab, ac, av))
-		return (0);
+		return (1);
 	if (!create_philosophers(&tab))
-		return (0);
+		return (1);
 	if (!monitor_philosophers(&tab))
-		return (0);
+		return (1);
 	if (sem_unlink("fork_availability") == -1)
 		return ((int)return_error(&tab, ERROR_SEM_UNLINK));
 	free_malloced_variables(&tab);
