@@ -49,6 +49,7 @@ typedef struct s_tab
 int				initialize_philosophers(t_tab *tab);
 int				initialize_variables(t_tab *tab, int ac, char **av);
 
+// main.c
 void			phi_f(void *arg);
 
 // utils.c

@@ -6,7 +6,7 @@
 /*   By: mfabri <mfabri@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/04/15 20:59:30 by mfabri            #+#    #+#             */
-/*   Updated: 2021/04/16 14:19:04 by mfabri           ###   ########.fr       */
+/*   Updated: 2021/04/16 20:02:14 by mfabri           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -139,6 +139,7 @@ int	main(int ac, char **av)
 	{
 		return_error(&tab, ERROR_SEM_UNLINK);
 		return (1);
+	}
 	free_malloced_variables(&tab);
 	return (0);
 }
