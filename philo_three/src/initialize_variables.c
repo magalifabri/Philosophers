@@ -6,21 +6,22 @@
 /*   By: mfabri <mfabri@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/04/16 12:26:43 by mfabri            #+#    #+#             */
-/*   Updated: 2021/04/16 14:09:06 by mfabri           ###   ########.fr       */
+/*   Updated: 2021/04/16 14:13:31 by mfabri           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../philo_three.h"
 
-int initialize_philosophers(t_tab *tab)
+int	initialize_philosophers(t_tab *tab)
 {
-	int	i;
+	int		i;
+	pid_t	fork_ret;
 
 	i = -1;
 	while (++i < tab->number_of_philosophers)
 	{
 		tab->phi_n = i;
-		pid_t fork_ret = fork();
+		fork_ret = fork();
 		if (fork_ret == 0)
 			phi_f(tab);
 		else if (fork_ret > 0)

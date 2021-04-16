@@ -6,7 +6,7 @@
 /*   By: mfabri <mfabri@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/04/16 12:28:43 by mfabri            #+#    #+#             */
-/*   Updated: 2021/04/16 12:49:48 by mfabri           ###   ########.fr       */
+/*   Updated: 2021/04/16 14:12:51 by mfabri           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 static int	ft_isspace(char c)
 {
 	return (c == ' ' || c == '\n' || c == '\t' || c == '\v' || c == '\f'
-	|| c == '\r');
+		|| c == '\r');
 }
 
 int	ft_atoi(const char *str)

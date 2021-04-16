@@ -6,7 +6,7 @@
 /*   By: mfabri <mfabri@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/04/16 12:27:48 by mfabri            #+#    #+#             */
-/*   Updated: 2021/04/16 14:04:39 by mfabri           ###   ########.fr       */
+/*   Updated: 2021/04/16 14:12:32 by mfabri           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,8 +59,8 @@ void	waiting_and_eating(t_tab *tab)
 	if (tab->number_of_times_each_philosopher_must_eat != -1
 		&& tab->times_eaten >= tab->number_of_times_each_philosopher_must_eat)
 	{
-		printf("%lld %d is %sfat enough%s\n", (tab->current_time -
-			tab->start_time), tab->phi_n + 1, B_GREEN, RESET);
+		printf("%lld %d is %sfat enough%s\n", (tab->current_time
+			- tab->start_time), tab->phi_n + 1, B_GREEN, RESET);
 		if (sem_post(tab->fork_availability) == -1)
 			exit(EXIT_ERROR);
 		exit(EXIT_EATEN_ENOUGH);
@@ -71,7 +71,7 @@ void	phi_f(void *arg)
 {
 	t_tab		*tab;
 	pthread_t	grimreaper_thread;
-	
+
 	tab = (t_tab *)arg;
 	tab->current_time = get_current_time(tab);
 	if (tab->current_time == -1)
@@ -121,7 +121,7 @@ int	monitor_child_processes(t_tab *tab)
 				return ((int)return_error(tab, ERROR_CHILD));
 			while (tab->number_of_philosophers--)
 				kill(tab->phi_pid[tab->number_of_philosophers], SIGKILL);
-			break;
+			break ;
 		}
 	}
 	if (philosophers_left == -1)
