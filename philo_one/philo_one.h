@@ -6,7 +6,7 @@
 /*   By: mfabri <mfabri@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/04/16 09:04:48 by mfabri            #+#    #+#             */
-/*   Updated: 2021/04/16 09:05:12 by mfabri           ###   ########.fr       */
+/*   Updated: 2021/04/20 08:47:49 by mfabri           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,6 +79,7 @@ typedef struct s_tab
 	int				error_encountered;
 	pthread_t		*phi_t;
 	int				mutexes_initialized;
+	pthread_mutex_t	*put_status_lock;
 }					t_tab;
 
 // main.c
@@ -92,6 +93,7 @@ void				initialize_variables_phi_f(t_tab *tab,
 						t_thread_var_struct *s);
 
 // phi_f.c
+int					put_status(t_tab *tab, int philo_n, char *msg);
 void				*phi_f(void *arg);
 int					eating_to_thinking(t_tab *tab, t_thread_var_struct *s);
 

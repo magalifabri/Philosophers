@@ -6,7 +6,7 @@
 /*   By: mfabri <mfabri@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/04/15 07:30:39 by mfabri            #+#    #+#             */
-/*   Updated: 2021/04/16 14:21:00 by mfabri           ###   ########.fr       */
+/*   Updated: 2021/04/20 08:55:48 by mfabri           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@ void	initialize_malloc_and_mutex_indicators(t_tab *tab)
 	tab->forks = NULL;
 	tab->n_times_eaten = NULL;
 	tab->phi_t = NULL;
+	tab->put_status_lock = NULL;
 	tab->mutexes_initialized = 0;
 }
 
@@ -43,6 +44,13 @@ static int	initialize_more(t_tab *tab)
 			return ((int)return_error(tab, ERROR_MUTEX_INIT));
 		tab->forks[i].available = 1;
 	}
+
+	tab->put_status_lock = malloc(sizeof(pthread_mutex_t) * 1);
+	if (!tab->put_status_lock)
+		return ((int)return_error(tab, ERROR_MALLOC));
+	if (pthread_mutex_init(tab->put_status_lock, NULL) != 0)
+		return ((int)return_error(tab, ERROR_MUTEX_INIT));
+
 	tab->mutexes_initialized = 1;
 	return (1);
 }

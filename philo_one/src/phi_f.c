@@ -6,80 +6,71 @@
 /*   By: mfabri <mfabri@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/04/15 07:30:45 by mfabri            #+#    #+#             */
-/*   Updated: 2021/04/15 19:13:16 by mfabri           ###   ########.fr       */
+/*   Updated: 2021/04/20 09:07:17 by mfabri           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../philo_one.h"
 
-static int	grab_right_fork_if_available(t_tab *tab, t_thread_var_struct *s)
+/*
+put_status() prints the philosphers' activities to stdout.
+It uses the mutex lock put_status_lock to make sure only one philosopher
+(thread) does this at a time.
+It also ensures that no more status messages are printed when a philosopher
+has dies or an error has occurred.
+*/
+
+int	put_status(t_tab *tab, int philo_n, char *msg)
 {
-	if (pthread_mutex_lock(&tab->forks[s->phi_n].lock) == -1)
+	if (pthread_mutex_lock(tab->put_status_lock) == -1)
 		return ((int)return_error(tab, ERROR_MUTEX_LOCK));
-	if (tab->forks[s->phi_n].available == 1)
+	if (!tab->phi_died && !tab->error_encountered)
+		printf("%lld %d %s\n",
+			(tab->current_time - tab->start_time), philo_n, msg);
+	if (pthread_mutex_unlock(tab->put_status_lock) == -1)
+		return ((int)return_error(tab, ERROR_MUTEX_UNLOCK));
+	return (1);
+}
+
+
+static int	grab_forks_if_available(t_tab *tab, t_thread_var_struct *s)
+{
+	int left_fork_i;
+
+	if (s->phi_n == 0)
+		left_fork_i = tab->number_of_philosophers - 1;
+	else
+		left_fork_i = s->phi_n - 1;
+
+	if (pthread_mutex_lock(&tab->forks[s->phi_n].lock) == -1
+		|| pthread_mutex_lock(&tab->forks[left_fork_i].lock) == -1)
+		return ((int)return_error(tab, ERROR_MUTEX_LOCK));
+	if (tab->forks[s->phi_n].available == 1
+		&& tab->forks[left_fork_i].available == 1)
 	{
 		tab->forks[s->phi_n].available = 0;
 		s->right_fork_held = 1;
-		if (!tab->phi_died && !tab->error_encountered)
-			printf("%lld %d has taken a fork (right)\n",
-				(tab->current_time - tab->start_time), s->phi_n + 1);
-	}
-	if (pthread_mutex_unlock(&tab->forks[s->phi_n].lock) == -1)
-		return ((int)return_error(tab, ERROR_MUTEX_UNLOCK));
-	return (1);
-}
-
-static int	grab_left_fork_if_available_1(t_tab *tab, t_thread_var_struct *s)
-{
-	if (pthread_mutex_lock(&tab->forks[tab->number_of_philosophers - 1].lock)
-		== -1)
-		return ((int)return_error(tab, ERROR_MUTEX_LOCK));
-	if (tab->forks[tab->number_of_philosophers - 1].available == 1)
-	{
-		tab->forks[tab->number_of_philosophers - 1].available = 0;
+		tab->forks[left_fork_i].available = 0;
 		s->left_fork_held = 1;
-		if (!tab->phi_died && !tab->error_encountered)
-			printf("%lld %d has taken a fork (left)\n",
-				(tab->current_time - tab->start_time), s->phi_n + 1);
+		if (!put_status(tab, s->phi_n + 1, "has taken forks"))
+			return (0);
 	}
-	if (pthread_mutex_unlock(&tab->forks[tab->number_of_philosophers - 1].lock)
-		== -1)
-		return ((int)return_error(tab, ERROR_MUTEX_UNLOCK));
-	return (1);
-}
-
-static int	grab_left_fork_if_available_2(t_tab *tab, t_thread_var_struct *s)
-{
-	if (pthread_mutex_lock(&tab->forks[s->phi_n - 1].lock) == -1)
-		return ((int)return_error(tab, ERROR_MUTEX_LOCK));
-	if (tab->forks[s->phi_n - 1].available == 1)
-	{
-		tab->forks[s->phi_n - 1].available = 0;
-		s->left_fork_held = 1;
-		if (!tab->phi_died && !tab->error_encountered)
-			printf("%lld %d has taken a fork (left)\n",
-				(tab->current_time - tab->start_time), s->phi_n + 1);
-	}
-	if (pthread_mutex_unlock(&tab->forks[s->phi_n - 1].lock) == -1)
+	if (pthread_mutex_unlock(&tab->forks[s->phi_n].lock) == -1
+		|| pthread_mutex_unlock(&tab->forks[left_fork_i].lock) == -1)
 		return ((int)return_error(tab, ERROR_MUTEX_UNLOCK));
 	return (1);
 }
 
 static int	thinking_to_eating(t_tab *tab, t_thread_var_struct *s)
 {
-	if (!grab_right_fork_if_available(tab, s))
-		return (0);
-	if (s->phi_n == 0 && !grab_left_fork_if_available_1(tab, s))
-		return (0);
-	else if (!grab_left_fork_if_available_2(tab, s))
+	if (!grab_forks_if_available(tab, s))
 		return (0);
 	if (s->left_fork_held && s->right_fork_held)
 	{
 		s->phi_state = 'e';
 		s->time_last_meal = tab->current_time;
-		if (!tab->phi_died && !tab->error_encountered)
-			printf("%lld %d is eating\n",
-				(tab->current_time - tab->start_time), s->phi_n + 1);
+		if (!put_status(tab, s->phi_n + 1, "is eating"))
+			return (0);
 		if (usleep(tab->time_to_eat * 1000) == -1)
 			return ((int)return_error(tab, ERROR_USLEEP));
 	}
@@ -116,9 +107,8 @@ void	*phi_f(void *arg)
 	{
 		if (s.time_last_meal + tab->time_to_die <= tab->current_time)
 		{
-			if (!tab->phi_died && !tab->error_encountered)
-				printf("%lld %d \033[1;31mdied\033[0m\n",
-					(tab->current_time - tab->start_time), s.phi_n + 1);
+			if (!put_status(tab, s.phi_n + 1, B_RED"died"RESET))
+				return (0);
 			tab->phi_died = 1;
 			return (NULL);
 		}

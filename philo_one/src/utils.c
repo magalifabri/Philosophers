@@ -6,7 +6,7 @@
 /*   By: mfabri <mfabri@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/04/15 07:30:53 by mfabri            #+#    #+#             */
-/*   Updated: 2021/04/15 10:02:45 by mfabri           ###   ########.fr       */
+/*   Updated: 2021/04/20 08:53:54 by mfabri           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,6 +69,8 @@ void	free_malloced_variables(t_tab *tab)
 		free(tab->n_times_eaten);
 	if (tab->phi_t)
 		free(tab->phi_t);
+	if (tab->put_status_lock)
+		free(tab->put_status_lock);
 	write(1, CYAN"done.\n"RESET, 17);
 }
 
@@ -89,6 +91,8 @@ int	destroy_locks(t_tab *tab)
 	while (++i < tab->number_of_philosophers)
 		if (pthread_mutex_destroy(&tab->forks[i].lock) != 0)
 			return ((int)return_error(tab, ERROR_MUTEX_DESTROY));
+	if (pthread_mutex_destroy(tab->put_status_lock) != 0)
+		return ((int)return_error(tab, ERROR_MUTEX_DESTROY));
 	write(1, CYAN"done.\n"RESET, 18);
 	return (1);
 }

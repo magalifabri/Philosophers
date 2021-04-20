@@ -6,7 +6,7 @@
 /*   By: mfabri <mfabri@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/04/15 07:30:42 by mfabri            #+#    #+#             */
-/*   Updated: 2021/04/15 19:16:28 by mfabri           ###   ########.fr       */
+/*   Updated: 2021/04/20 09:06:19 by mfabri           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,18 +46,16 @@ static int	finish_eating_and_obesity_check(t_tab *tab, t_thread_var_struct *s)
 		return (0);
 	s->right_fork_held = 0;
 	s->left_fork_held = 0;
-	if (!tab->phi_died && !tab->error_encountered)
-		printf("%lld %d put his forks down\n",
-			(tab->current_time - tab->start_time), s->phi_n + 1);
+	if (!put_status(tab, s->phi_n + 1, "put his forks down"))
+		return (0);
 	tab->n_times_eaten[s->phi_n]++;
 	if (tab->number_of_times_each_philosopher_must_eat != -1
 		&& tab->n_times_eaten[s->phi_n]
 		>= tab->number_of_times_each_philosopher_must_eat)
 	{
-		if (!tab->phi_died && !tab->error_encountered)
-			printf("%lld %d \033[1;32mis fat\033[0m\n",
-				(tab->current_time - tab->start_time), s->phi_n + 1);
-		return (0);
+		
+		if (!put_status(tab, s->phi_n + 1, B_GREEN"is fat"RESET))
+			return (0);
 	}
 	return (1);
 }
@@ -66,14 +64,11 @@ int	eating_to_thinking(t_tab *tab, t_thread_var_struct *s)
 {
 	if (!finish_eating_and_obesity_check(tab, s))
 		return (0);
-	if (!tab->phi_died && !tab->error_encountered)
-		printf("%lld %d is sleeping\n",
-			(tab->current_time - tab->start_time), s->phi_n + 1);
+	if (!put_status(tab, s->phi_n + 1, "is sleeping"))
+		return (0);
 	if (usleep(tab->time_to_sleep * 1000) == -1)
 		return ((int)return_error(tab, ERROR_USLEEP));
-	s->phi_state = 't';
-	if (!tab->phi_died && !tab->error_encountered)
-		printf("%lld %d is thinking\n",
-			(tab->current_time - tab->start_time), s->phi_n + 1);
+	if (!put_status(tab, s->phi_n + 1, "is thinking"))
+		return (0);
 	return (1);
 }
