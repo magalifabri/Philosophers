@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   philo_one.h                                        :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: mfabri <mfabri@student.s19.be>             +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/04/16 09:04:48 by mfabri            #+#    #+#             */
-/*   Updated: 2021/04/20 08:47:49 by mfabri           ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #ifndef PHILO_ONE_H
 # define PHILO_ONE_H
 
@@ -48,8 +36,7 @@
 typedef struct s_thread_variable_struct
 {
 	int				phi_n;
-	int				left_fork_held;
-	int				right_fork_held;
+	int				got_forks;
 	int				phi_state;
 	long long		time_last_meal;
 	long long		time_sleep_start;
@@ -94,6 +81,7 @@ void				initialize_variables_phi_f(t_tab *tab,
 
 // phi_f.c
 int					put_status(t_tab *tab, int philo_n, char *msg);
+int					check_vitality(t_tab *tab, t_thread_var_struct *s);
 void				*phi_f(void *arg);
 int					eating_to_thinking(t_tab *tab, t_thread_var_struct *s);
 

@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   phi_f.c                                            :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: mfabri <mfabri@student.s19.be>             +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/04/15 07:30:45 by mfabri            #+#    #+#             */
-/*   Updated: 2021/04/20 09:07:17 by mfabri           ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "../philo_one.h"
 
 /*
@@ -32,6 +20,17 @@ int	put_status(t_tab *tab, int philo_n, char *msg)
 	return (1);
 }
 
+int	check_vitality(t_tab *tab, t_thread_var_struct *s)
+{
+	if (s->time_last_meal + tab->time_to_die <= tab->current_time)
+	{
+		if (!put_status(tab, s->phi_n + 1, B_RED"died"RESET))
+			return (0);
+		tab->phi_died = 1;
+		return (0);
+	}
+	return (1);
+}
 
 static int	grab_forks_if_available(t_tab *tab, t_thread_var_struct *s)
 {
@@ -49,9 +48,8 @@ static int	grab_forks_if_available(t_tab *tab, t_thread_var_struct *s)
 		&& tab->forks[left_fork_i].available == 1)
 	{
 		tab->forks[s->phi_n].available = 0;
-		s->right_fork_held = 1;
 		tab->forks[left_fork_i].available = 0;
-		s->left_fork_held = 1;
+		s->got_forks = 1;
 		if (!put_status(tab, s->phi_n + 1, "has taken forks"))
 			return (0);
 	}
@@ -65,7 +63,7 @@ static int	thinking_to_eating(t_tab *tab, t_thread_var_struct *s)
 {
 	if (!grab_forks_if_available(tab, s))
 		return (0);
-	if (s->left_fork_held && s->right_fork_held)
+	if (s->got_forks)
 	{
 		s->phi_state = 'e';
 		s->time_last_meal = tab->current_time;
@@ -105,18 +103,14 @@ void	*phi_f(void *arg)
 	initialize_variables_phi_f(tab, &s);
 	while (1)
 	{
-		if (s.time_last_meal + tab->time_to_die <= tab->current_time)
-		{
-			if (!put_status(tab, s.phi_n + 1, B_RED"died"RESET))
-				return (0);
-			tab->phi_died = 1;
+		if (!check_vitality(tab, &s))
 			return (NULL);
-		}
-		if (s.phi_state == 't' && !thinking_to_eating(tab, &s))
-			return (NULL);
+		if (s.phi_state == 't')
+			if (!thinking_to_eating(tab, &s))
+				return (NULL);
 		if (s.phi_state == 'e'
-			&& s.time_last_meal + tab->time_to_eat <= tab->current_time
-			&& !eating_to_thinking(tab, &s))
-			return (NULL);
+			&& s.time_last_meal + tab->time_to_eat <= tab->current_time)
+			if (!eating_to_thinking(tab, &s))
+				return (NULL);
 	}
 }

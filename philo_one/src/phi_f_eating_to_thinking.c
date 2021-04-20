@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   phi_f_eating_to_thinking.c                         :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: mfabri <mfabri@student.s19.be>             +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/04/15 07:30:42 by mfabri            #+#    #+#             */
-/*   Updated: 2021/04/20 09:06:19 by mfabri           ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "../philo_one.h"
 
 static int	lay_down_forks(t_tab *tab, t_thread_var_struct *s)
@@ -44,8 +32,7 @@ static int	finish_eating_and_obesity_check(t_tab *tab, t_thread_var_struct *s)
 {
 	if (!lay_down_forks(tab, s))
 		return (0);
-	s->right_fork_held = 0;
-	s->left_fork_held = 0;
+	s->got_forks = 0;
 	if (!put_status(tab, s->phi_n + 1, "put his forks down"))
 		return (0);
 	tab->n_times_eaten[s->phi_n]++;
@@ -60,14 +47,29 @@ static int	finish_eating_and_obesity_check(t_tab *tab, t_thread_var_struct *s)
 	return (1);
 }
 
+/*
+One big usleep() isn't used when the philosopher is sleeping, because the philosopher might die in it's sleep, and we need to be able to check that.
+*/
+
 int	eating_to_thinking(t_tab *tab, t_thread_var_struct *s)
 {
+	// int waking_time;
+
 	if (!finish_eating_and_obesity_check(tab, s))
 		return (0);
 	if (!put_status(tab, s->phi_n + 1, "is sleeping"))
 		return (0);
+	// waking_time = s->time_last_meal + tab->time_to_eat + tab->time_to_sleep;
+	// while (waking_time > tab->current_time)
+	// {
+	// 	if (!check_vitality(tab, s))
+	// 		return (0);
+	// 	if (usleep(1000) == -1)
+	// 		return ((int)return_error(tab, ERROR_USLEEP));
+	// }
 	if (usleep(tab->time_to_sleep * 1000) == -1)
 		return ((int)return_error(tab, ERROR_USLEEP));
+	s->phi_state = 't';
 	if (!put_status(tab, s->phi_n + 1, "is thinking"))
 		return (0);
 	return (1);

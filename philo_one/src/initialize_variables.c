@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   initialize_variables.c                             :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: mfabri <mfabri@student.s19.be>             +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/04/15 07:30:39 by mfabri            #+#    #+#             */
-/*   Updated: 2021/04/20 08:55:48 by mfabri           ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "../philo_one.h"
 
 void	initialize_malloc_and_mutex_indicators(t_tab *tab)
@@ -26,13 +14,13 @@ static int	initialize_more(t_tab *tab)
 	int	i;
 
 	tab->forks = malloc(sizeof(t_frk) * tab->number_of_philosophers);
-	if (!tab->forks)
-		return ((int)return_error(tab, ERROR_MALLOC));
 	tab->n_times_eaten = malloc(sizeof(int) * tab->number_of_philosophers);
-	if (!tab->n_times_eaten)
-		return ((int)return_error(tab, ERROR_MALLOC));
 	tab->phi_t = malloc(sizeof(pthread_t) * tab->number_of_philosophers);
-	if (!tab->phi_t)
+	tab->put_status_lock = malloc(sizeof(pthread_mutex_t) * 1);
+	if (!tab->forks
+		|| !tab->n_times_eaten
+		|| !tab->phi_t
+		|| !tab->put_status_lock)
 		return ((int)return_error(tab, ERROR_MALLOC));
 	i = -1;
 	while (++i < tab->number_of_philosophers)
@@ -44,13 +32,8 @@ static int	initialize_more(t_tab *tab)
 			return ((int)return_error(tab, ERROR_MUTEX_INIT));
 		tab->forks[i].available = 1;
 	}
-
-	tab->put_status_lock = malloc(sizeof(pthread_mutex_t) * 1);
-	if (!tab->put_status_lock)
-		return ((int)return_error(tab, ERROR_MALLOC));
 	if (pthread_mutex_init(tab->put_status_lock, NULL) != 0)
 		return ((int)return_error(tab, ERROR_MUTEX_INIT));
-
 	tab->mutexes_initialized = 1;
 	return (1);
 }
@@ -93,8 +76,7 @@ int	initialize_variables_and_locks(t_tab *tab, int ac, char **av)
 void	initialize_variables_phi_f(t_tab *tab, t_thread_var_struct *s)
 {
 	s->phi_n = tab->phi_n;
-	s->left_fork_held = 0;
-	s->right_fork_held = 0;
+	s->got_forks = 0;
 	s->phi_state = 't';
 	s->time_sleep_start = tab->current_time;
 	s->time_last_meal = tab->current_time;
