@@ -1,46 +1,19 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   phi_f.c                                            :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: mfabri <mfabri@student.s19.be>             +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/04/15 20:59:37 by mfabri            #+#    #+#             */
-/*   Updated: 2021/04/16 10:49:06 by mfabri           ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "../philo_two.h"
 
-void	*starving(t_tab *tab, t_thread_var_struct *s)
+static void	*starving(t_tab *tab, t_thread_var_struct *s)
 {
-	if (!tab->phi_died && !tab->error_encountered)
-		printf("%lld %d \033[1;31mdied\033[0m\n",
-			(tab->current_time - tab->start_time), s->phi_n + 1);
+	put_status_msg(tab, s, B_RED"died"RESET);
 	tab->phi_died = 1;
 	return (NULL);
 }
 
-int	eating(t_tab *tab, t_thread_var_struct *s)
+static int	sated(t_tab *tab, t_thread_var_struct *s)
 {
-	if (sem_wait(tab->fork_availability) == -1)
-		return ((int)return_error(tab, ERROR_SEM_WAIT));
-	if (s->time_last_meal + tab->time_to_die <= tab->current_time)
-		return ((int)starving(tab, s));
-	if (!tab->phi_died && !tab->error_encountered)
-		printf("%lld %d is eating\n",
-			(tab->current_time - tab->start_time), s->phi_n + 1);
-	s->time_last_meal = tab->current_time;
-	if (usleep(tab->time_to_eat * 1000) == -1)
-		return ((int)return_error(tab, ERROR_USLEEP));
-	tab->n_times_eaten[s->phi_n]++;
 	if (tab->number_of_times_each_philosopher_must_eat != -1
 		&& tab->n_times_eaten[s->phi_n]
 		>= tab->number_of_times_each_philosopher_must_eat)
 	{
-		if (!tab->phi_died && !tab->error_encountered)
-			printf("%lld %d \033[1;32mis fat enough\033[0m\n",
-				(tab->current_time - tab->start_time), s->phi_n + 1);
+		put_status_msg(tab, s, B_GREEN"is fat enough"RESET);
 		if (sem_post(tab->fork_availability) == -1)
 			return ((int)return_error(tab, ERROR_SEM_POST));
 		return (0);
@@ -48,15 +21,39 @@ int	eating(t_tab *tab, t_thread_var_struct *s)
 	return (1);
 }
 
-int	sleeping(t_tab *tab, t_thread_var_struct *s)
+static int	eating(t_tab *tab, t_thread_var_struct *s)
 {
-	if (!tab->phi_died && !tab->error_encountered)
-		printf("%lld %d is sleeping\n",
-			(tab->current_time - tab->start_time), s->phi_n + 1);
+	long long	time_done_eating;
+
+	if (sem_wait(tab->fork_availability) == -1)
+		return ((int)return_error(tab, ERROR_SEM_WAIT));
+	if (s->time_last_meal + tab->time_to_die <= tab->current_time)
+		return ((int)starving(tab, s));
+	put_status_msg(tab, s, "is eating");
+	s->time_last_meal = tab->current_time;
+	time_done_eating = tab->current_time + tab->time_to_eat;
+	while (time_done_eating > tab->current_time)
+		if (usleep(1000) == -1)
+			return ((int)return_error(tab, ERROR_USLEEP));
+	tab->n_times_eaten[s->phi_n]++;
+	return (sated(tab, s));
+}
+
+static int	sleeping(t_tab *tab, t_thread_var_struct *s)
+{
+	long long	waking_time;
+
+	put_status_msg(tab, s, "is sleeping");
 	if (sem_post(tab->fork_availability) == -1)
 		return ((int)return_error(tab, ERROR_SEM_POST));
-	if (usleep(tab->time_to_sleep * 1000) == -1)
-		return ((int)return_error(tab, ERROR_USLEEP));
+	waking_time = tab->current_time + tab->time_to_sleep;
+	while (waking_time > tab->current_time)
+	{
+		if (s->time_last_meal + tab->time_to_die <= tab->current_time)
+			return ((int)starving(tab, s));
+		if (usleep(1000) == -1)
+			return ((int)return_error(tab, ERROR_USLEEP));
+	}
 	return (1);
 }
 
@@ -79,8 +76,6 @@ void	*phi_f(void *arg)
 			return (NULL);
 		if (!sleeping(tab, &s))
 			return (NULL);
-		if (!tab->phi_died && !tab->error_encountered)
-			printf("%lld %d is thinking\n",
-				(tab->current_time - tab->start_time), s.phi_n + 1);
+		put_status_msg(tab, &s, "is thinking");
 	}
 }
