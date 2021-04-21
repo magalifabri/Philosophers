@@ -6,45 +6,42 @@
 /*   By: mfabri <mfabri@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/04/15 07:30:53 by mfabri            #+#    #+#             */
-/*   Updated: 2021/04/20 08:53:54 by mfabri           ###   ########.fr       */
+/*   Updated: 2021/04/21 10:38:59 by mfabri           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../philo_one.h"
 
-static int	ft_isspace(char c)
+/*
+put_status() prints the philosphers' activities to stdout.
+It uses the mutex lock put_status_lock to make sure only one philosopher
+(thread) does this at a time.
+It also ensures that no more status messages are printed when a philosopher
+has dies or an error has occurred.
+*/
+
+int	put_status(t_tab *tab, int philo_n, char *msg)
 {
-	return (c == ' ' || c == '\n' || c == '\t' || c == '\v' || c == '\f'
-		|| c == '\r');
+	if (pthread_mutex_lock(tab->put_status_lock) == -1)
+		return ((int)return_error(tab, ERROR_MUTEX_LOCK));
+	if (!tab->phi_died && !tab->error_encountered)
+		printf("%lld %d %s\n",
+			(tab->current_time - tab->start_time), philo_n, msg);
+	if (pthread_mutex_unlock(tab->put_status_lock) == -1)
+		return ((int)return_error(tab, ERROR_MUTEX_UNLOCK));
+	return (1);
 }
 
-int	ft_atoi(const char *str)
+int	check_vitality(t_tab *tab, t_thread_var_struct *s)
 {
-	int					i;
-	int					neg;
-	unsigned long int	res;
-
-	i = 0;
-	while (str[i] && ft_isspace(str[i]))
-		i++;
-	neg = 1;
-	if (str[i] == '-' || str[i] == '+')
+	if (s->time_last_meal + tab->time_to_die <= tab->current_time)
 	{
-		(str[i] == '-') && (neg = -neg);
-		i++;
-	}
-	res = 0;
-	while (str[i] == '0')
-		i++;
-	while (str[i] >= '0' && str[i] <= '9')
-	{
-		res = res * 10 + (str[i++] - '0');
-		if (res > 9223372036854775807 && neg == 1)
-			return (-1);
-		if (res - 1 > 9223372036854775807 && neg == -1)
+		if (!put_status(tab, s->phi_n + 1, B_RED"died"RESET))
 			return (0);
+		tab->phi_died = 1;
+		return (0);
 	}
-	return (res * neg);
+	return (1);
 }
 
 long long	get_current_time(t_tab *tab)

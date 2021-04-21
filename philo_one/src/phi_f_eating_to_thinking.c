@@ -2,7 +2,7 @@
 
 static int	lay_down_forks(t_tab *tab, t_thread_var_struct *s)
 {
-	int left_fork_i;
+	int	left_fork_i;
 
 	if (s->phi_n == 0)
 		left_fork_i = tab->number_of_philosophers - 1;
@@ -30,11 +30,8 @@ static int	finish_eating_and_obesity_check(t_tab *tab, t_thread_var_struct *s)
 	if (tab->number_of_times_each_philosopher_must_eat != -1
 		&& tab->n_times_eaten[s->phi_n]
 		>= tab->number_of_times_each_philosopher_must_eat)
-	{
-		
 		if (!put_status(tab, s->phi_n + 1, B_GREEN"is fat"RESET))
 			return (0);
-	}
 	return (1);
 }
 

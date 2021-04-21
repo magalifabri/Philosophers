@@ -69,8 +69,8 @@ typedef struct s_tab
 	pthread_mutex_t	*put_status_lock;
 }					t_tab;
 
-// main.c
-void				*return_error(t_tab *tab, int error_num);
+// ft_atoi.c
+int					ft_atoi(const char *str);
 
 // initialize_variables.c
 void				initialize_malloc_and_mutex_indicators(t_tab *tab);
@@ -79,15 +79,19 @@ int					initialize_variables_and_locks(t_tab *tab, int ac,
 void				initialize_variables_phi_f(t_tab *tab,
 						t_thread_var_struct *s);
 
-// phi_f.c
-int					put_status(t_tab *tab, int philo_n, char *msg);
-int					check_vitality(t_tab *tab, t_thread_var_struct *s);
-void				*phi_f(void *arg);
+// main.c
+void				*return_error(t_tab *tab, int error_num);
+
+// phi_f_eating_to_thinking.c
 int					eating_to_thinking(t_tab *tab, t_thread_var_struct *s);
 
+// phi_f.c
+void				*phi_f(void *arg);
+
 // utils.c
+int					put_status(t_tab *tab, int philo_n, char *msg);
+int					check_vitality(t_tab *tab, t_thread_var_struct *s);
 long long			get_current_time(t_tab *tab);
-int					ft_atoi(const char *str);
 int					destroy_locks(t_tab *tab);
 void				free_malloced_variables(t_tab *tab);
 

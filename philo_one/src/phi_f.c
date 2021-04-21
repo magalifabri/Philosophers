@@ -1,40 +1,8 @@
 #include "../philo_one.h"
 
-/*
-put_status() prints the philosphers' activities to stdout.
-It uses the mutex lock put_status_lock to make sure only one philosopher
-(thread) does this at a time.
-It also ensures that no more status messages are printed when a philosopher
-has dies or an error has occurred.
-*/
-
-int	put_status(t_tab *tab, int philo_n, char *msg)
-{
-	if (pthread_mutex_lock(tab->put_status_lock) == -1)
-		return ((int)return_error(tab, ERROR_MUTEX_LOCK));
-	if (!tab->phi_died && !tab->error_encountered)
-		printf("%lld %d %s\n",
-			(tab->current_time - tab->start_time), philo_n, msg);
-	if (pthread_mutex_unlock(tab->put_status_lock) == -1)
-		return ((int)return_error(tab, ERROR_MUTEX_UNLOCK));
-	return (1);
-}
-
-int	check_vitality(t_tab *tab, t_thread_var_struct *s)
-{
-	if (s->time_last_meal + tab->time_to_die <= tab->current_time)
-	{
-		if (!put_status(tab, s->phi_n + 1, B_RED"died"RESET))
-			return (0);
-		tab->phi_died = 1;
-		return (0);
-	}
-	return (1);
-}
-
 static int	grab_forks_if_available(t_tab *tab, t_thread_var_struct *s)
 {
-	int left_fork_i;
+	int	left_fork_i;
 
 	if (s->phi_n == 0)
 		left_fork_i = tab->number_of_philosophers - 1;
@@ -69,7 +37,7 @@ some point the one philosopher that eats in the third shift, will miss its
 chance and drop dead.
 */
 
-int queue(t_tab *tab, t_thread_var_struct *s)
+static int	queue(t_tab *tab, t_thread_var_struct *s)
 {
 	while (s->time_last_meal + (tab->time_to_eat * 2) + 5 > tab->current_time)
 		if (usleep(1000) == -1)
