@@ -1,16 +1,11 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   utils.c                                            :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: mfabri <mfabri@student.s19.be>             +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/04/15 20:59:41 by mfabri            #+#    #+#             */
-/*   Updated: 2021/04/16 12:24:21 by mfabri           ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "../philo_two.h"
+
+void	put_status_msg(t_tab *tab, t_thread_var_struct *s, char *msg)
+{
+	if (!tab->phi_died && !tab->error_encountered)
+		printf("%lld %d %s\n",
+			(tab->current_time - tab->start_time), s->phi_n + 1, msg);
+}
 
 static int	ft_isspace(char c)
 {

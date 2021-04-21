@@ -61,16 +61,17 @@ typedef struct s_tab
 	int			malloc_phi_t;
 }				t_tab;
 
-// main.c
-void			*return_error(t_tab *tab, int error_num);
-
 // initialize_variables.c
 int				initialize_variables(t_tab *tab, int ac, char **av);
+
+// main.c
+void			*return_error(t_tab *tab, int error_num);
 
 // phi_f.c
 void			*phi_f(void *arg);
 
 // utils.c
+void			put_status_msg(t_tab *tab, t_thread_var_struct *s, char *msg);
 long long		get_current_time(t_tab *tab);
 int				ft_atoi(const char *str);
 void			free_malloced_variables(t_tab *tab);
