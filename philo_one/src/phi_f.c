@@ -59,8 +59,14 @@ static int	grab_forks_if_available(t_tab *tab, t_thread_var_struct *s)
 }
 
 /*
-When the number of philosophers is uneven, the eating done in three shifts. 
-Depending on the program's parameters, it can be possible that one philosopher eats while another is in greater need. To try and remedy this and keep the eating to a steady rhythm, we make sure that each philosopher waits in between meals for an amount of time that allows all other philosophers to have a meal as well. Otherwise it is almost certain that at some point the one philosopher that eats in the third shift, will miss its chance and drop dead.
+When the number of philosophers is uneven, the eating done in three shifts.
+Depending on the program's parameters, it can be possible that one
+philosopher eats while another is in greater need. To try and remedy this
+and keep the eating to a steady rhythm, we make sure that each philosopher
+waits in between meals for an amount of time that allows all other
+philosophers to have a meal as well. Otherwise it is almost certain that at
+some point the one philosopher that eats in the third shift, will miss its
+chance and drop dead.
 */
 
 int queue(t_tab *tab, t_thread_var_struct *s)
@@ -74,7 +80,9 @@ int queue(t_tab *tab, t_thread_var_struct *s)
 }
 
 /*
-Simply usleep()ing for time_to_eat * 1000 didn't work, because usleep() would take a couple extra microseconds to return, causing small but potentially fatal delays.
+Simply usleep()ing for time_to_eat * 1000 didn't work, because usleep()
+would take a couple extra microseconds to return, causing small but
+potentially fatal delays.
 */
 
 static int	thinking_to_eating(t_tab *tab, t_thread_var_struct *s)

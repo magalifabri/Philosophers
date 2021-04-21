@@ -39,7 +39,8 @@ static int	finish_eating_and_obesity_check(t_tab *tab, t_thread_var_struct *s)
 }
 
 /*
-One big usleep() isn't used when the philosopher is sleeping, because the philosopher might die in it's sleep, and we need to be able to check that.
+One big usleep() isn't used when the philosopher is sleeping, because the
+philosopher might die in its sleep, and we need to be able to check that.
 */
 
 int	eating_to_thinking(t_tab *tab, t_thread_var_struct *s)
