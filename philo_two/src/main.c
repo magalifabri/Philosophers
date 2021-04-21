@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   main.c                                             :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: mfabri <mfabri@student.s19.be>             +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/04/15 20:59:30 by mfabri            #+#    #+#             */
-/*   Updated: 2021/04/16 20:02:14 by mfabri           ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "../philo_two.h"
 
 void	*return_error(t_tab *tab, int error_num)
@@ -41,7 +29,7 @@ void	*return_error(t_tab *tab, int error_num)
 	return (NULL);
 }
 
-int	check_if_all_are_sated(t_tab *tab)
+static int	check_if_all_are_sated(t_tab *tab)
 {
 	int	i;
 	int	number_of_fat_philosophers;
@@ -75,7 +63,7 @@ int	check_if_all_are_sated(t_tab *tab)
 ** individually.
 */
 
-int	monitor_philosophers(t_tab *tab)
+static int	monitor_philosophers(t_tab *tab)
 {
 	while (1)
 	{
@@ -105,7 +93,7 @@ int	monitor_philosophers(t_tab *tab)
 ** to give each thread a bit of time to copy this value.
 */
 
-int	create_philosophers(t_tab *tab)
+static int	create_philosophers(t_tab *tab)
 {
 	int	i;
 
