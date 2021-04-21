@@ -1,11 +1,13 @@
 # Philosophers
 ## ***WORK IN PROGRESS***
-- check if philo has died before thinking
+
+TO-DO:
+
 ## Project Description
 
 ***"Summary:  In this project, you will learn the basics of threading a process and how to work on the same memory space. You will learn how to make threads. You will discover the mutex, semaphore and shared memory."***
 
-What it comes down to (in my implementation anyway) is a program with the main objective of running a loop that constitutes the philosophers' routines: thinking, eating, sleeping, repeat. The loop ends when all the philosophers have eaten a certain number of times or if one starves and dies.
+What it comes down to (in my implementation anyway) is a program with the main objective of running a loop that constitutes the philosophers' routines: think, eat, sleep, repeat. The loop ends when all the philosophers have eaten a certain number of times or if one starves and dies.
 
 Each philosopher has their own separate routine, either in a thread or a child process, but they are related to each other by the limitation on how many philosophers can eat at the same time. Supposedly they're all sitting around a round table with food on it, but only a certain number of forks and the need to possess two forks to be able to eat.
 
