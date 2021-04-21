@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   initialize_variables.c                             :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: mfabri <mfabri@student.s19.be>             +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/04/15 20:59:33 by mfabri            #+#    #+#             */
-/*   Updated: 2021/04/16 14:18:32 by mfabri           ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "../philo_two.h"
 
 /*
@@ -25,10 +13,8 @@ static int	initialize_more(t_tab *tab)
 	int	i;
 
 	tab->n_times_eaten = malloc(sizeof(int) * tab->number_of_philosophers);
-	if (!tab->n_times_eaten)
-		return ((int)return_error(tab, ERROR_MALLOC));
 	tab->phi_t = malloc(sizeof(pthread_t) * tab->number_of_philosophers);
-	if (!tab->phi_t)
+	if (!tab->n_times_eaten || !tab->phi_t)
 		return ((int)return_error(tab, ERROR_MALLOC));
 	i = -1;
 	while (++i < tab->number_of_philosophers)
