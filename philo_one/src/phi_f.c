@@ -40,7 +40,6 @@ static int	grab_forks_if_available(t_tab *tab, t_thread_var_struct *s)
 		left_fork_i = tab->number_of_philosophers - 1;
 	else
 		left_fork_i = s->phi_n - 1;
-
 	if (pthread_mutex_lock(&tab->forks[s->phi_n].lock) == -1
 		|| pthread_mutex_lock(&tab->forks[left_fork_i].lock) == -1)
 		return ((int)return_error(tab, ERROR_MUTEX_LOCK));
@@ -59,8 +58,43 @@ static int	grab_forks_if_available(t_tab *tab, t_thread_var_struct *s)
 	return (1);
 }
 
+/*
+Depending on program's parameters, it can be possible that one philosopher eats while another is in greater need. To try and remedy this and keep the eating to a steady rhythm, we make sure that each philosopher waits in between meals for an amount of time that allows all other philosophers to have a meal as well.
+When the number of philosophers is even, the eating is done in two "shifts". So in this case philosophers wait <time_to_eat + a little extra> after a meal (just in case time_to_sleep is 1 or something, which could allow them to start eating again before the other shift).
+More importantly, when the number of philosophers is uneven, the eating done in three shifts. So then philosophers waits <time_to_eat * 2 + a little extra>. Otherwise it is almost certain that at some point the one philosopher that eats in the third shift, will miss its chance and drop dead.
+*/
+
+int queue(t_tab *tab, t_thread_var_struct *s)
+{
+	if (tab->number_of_philosophers % 2 == 0)
+	{
+		while (s->time_last_meal + tab->time_to_eat + 3 > tab->current_time)
+			if (usleep(1000) == -1)
+				return ((int)return_error(tab, ERROR_USLEEP));
+		if (!check_vitality(tab, s))
+			return (0);
+	}
+	else
+	{
+		while (s->time_last_meal + (tab->time_to_eat * 2) + 3 > tab->current_time)
+			if (usleep(1000) == -1)
+				return ((int)return_error(tab, ERROR_USLEEP));
+		if (!check_vitality(tab, s))
+			return (0);
+	}
+	return (1);
+}
+
+/*
+Simply usleep()ing for time_to_eat * 1000 didn't work, because usleep() would take a couple extra microseconds to return, causing small but potentially fatal delays.
+*/
+
 static int	thinking_to_eating(t_tab *tab, t_thread_var_struct *s)
 {
+	long long	time_done_eating;
+
+	if (tab->n_times_eaten[s->phi_n] != 0)
+		queue(tab, s);
 	if (!grab_forks_if_available(tab, s))
 		return (0);
 	if (s->got_forks)
@@ -69,8 +103,10 @@ static int	thinking_to_eating(t_tab *tab, t_thread_var_struct *s)
 		s->time_last_meal = tab->current_time;
 		if (!put_status(tab, s->phi_n + 1, "is eating"))
 			return (0);
-		if (usleep(tab->time_to_eat * 1000) == -1)
-			return ((int)return_error(tab, ERROR_USLEEP));
+		time_done_eating = tab->current_time + tab->time_to_eat;
+		while (time_done_eating > tab->current_time)
+			if (usleep(1000) == -1)
+				return ((int)return_error(tab, ERROR_USLEEP));
 	}
 	if (tab->phi_died || tab->error_encountered)
 		return (0);
@@ -108,8 +144,7 @@ void	*phi_f(void *arg)
 		if (s.phi_state == 't')
 			if (!thinking_to_eating(tab, &s))
 				return (NULL);
-		if (s.phi_state == 'e'
-			&& s.time_last_meal + tab->time_to_eat <= tab->current_time)
+		if (s.phi_state == 'e')
 			if (!eating_to_thinking(tab, &s))
 				return (NULL);
 	}
