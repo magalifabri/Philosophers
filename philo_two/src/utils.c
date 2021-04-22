@@ -57,10 +57,8 @@ long long	get_current_time(t_tab *tab)
 
 void	free_malloced_variables(t_tab *tab)
 {
-	printf(CYAN"freeing allocated memory... "RESET);
 	if (tab->n_times_eaten)
 		free(tab->n_times_eaten);
 	if (tab->phi_t)
 		free(tab->phi_t);
-	printf(CYAN"done.\n"RESET);
 }

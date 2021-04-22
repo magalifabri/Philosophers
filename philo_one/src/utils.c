@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   utils.c                                            :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: mfabri <mfabri@student.s19.be>             +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/04/15 07:30:53 by mfabri            #+#    #+#             */
-/*   Updated: 2021/04/21 10:38:59 by mfabri           ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "../philo_one.h"
 
 /*
@@ -59,7 +47,6 @@ long long	get_current_time(t_tab *tab)
 
 void	free_malloced_variables(t_tab *tab)
 {
-	write(1, CYAN"freeing allocated memory... "RESET, 40);
 	if (tab->forks)
 		free(tab->forks);
 	if (tab->n_times_eaten)
@@ -68,7 +55,6 @@ void	free_malloced_variables(t_tab *tab)
 		free(tab->phi_t);
 	if (tab->put_status_lock)
 		free(tab->put_status_lock);
-	write(1, CYAN"done.\n"RESET, 17);
 }
 
 /*
@@ -83,13 +69,11 @@ int	destroy_locks(t_tab *tab)
 	int	i;
 
 	usleep(10000);
-	write(1, CYAN"destroying mutex locks... "RESET, 38);
 	i = -1;
 	while (++i < tab->number_of_philosophers)
 		if (pthread_mutex_destroy(&tab->forks[i].lock) != 0)
 			return ((int)return_error(tab, ERROR_MUTEX_DESTROY));
 	if (pthread_mutex_destroy(tab->put_status_lock) != 0)
 		return ((int)return_error(tab, ERROR_MUTEX_DESTROY));
-	write(1, CYAN"done.\n"RESET, 18);
 	return (1);
 }
