@@ -6,7 +6,7 @@
 /*   By: mfabri <mfabri@student.s19.be>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/04/16 12:27:48 by mfabri            #+#    #+#             */
-/*   Updated: 2021/04/16 20:02:04 by mfabri           ###   ########.fr       */
+/*   Updated: 2021/04/22 08:45:55 by mfabri           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,12 +106,11 @@ int	monitor_child_processes(t_tab *tab)
 {
 	int		philosophers_left;
 	int		exit_status;
-	pid_t	pid;
 
 	philosophers_left = tab->number_of_philosophers;
 	while (philosophers_left--)
 	{
-		pid = wait(&exit_status);
+		wait(&exit_status);
 		if (WEXITSTATUS(exit_status) == EXIT_DEATH
 			|| WEXITSTATUS(exit_status) == EXIT_ERROR)
 		{
@@ -137,7 +136,8 @@ int	main(int ac, char **av)
 		return (1);
 	if (!initialize_philosophers(&tab))
 		return (1);
-	monitor_child_processes(&tab);
+	if (!monitor_child_processes(&tab))
+		return (1);
 	if (sem_unlink("fork_availability") == -1)
 	{
 		return_error(&tab, ERROR_SEM_UNLINK);
