@@ -62,7 +62,7 @@ int	initialize_variables_and_locks(t_tab *tab, int ac, char **av)
 	else
 	{
 		tab->number_of_times_each_philosopher_must_eat = ft_atoi(av[5]);
-		if (!tab->number_of_times_each_philosopher_must_eat)
+		if (tab->number_of_times_each_philosopher_must_eat < 1)
 			return ((int)return_error(tab, ERROR_BAD_ARGS));
 	}
 	tab->phi_died = 0;

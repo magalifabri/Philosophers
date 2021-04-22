@@ -29,6 +29,8 @@ static int	eating(t_tab *tab, t_thread_var_struct *s)
 		return ((int)return_error(tab, ERROR_SEM_WAIT));
 	if (s->time_last_meal + tab->time_to_die <= tab->current_time)
 		return ((int)starving(tab, s));
+	put_status_msg(tab, s, "has taken a fork");
+	put_status_msg(tab, s, "has taken a fork");
 	put_status_msg(tab, s, "is eating");
 	s->time_last_meal = tab->current_time;
 	time_done_eating = tab->current_time + tab->time_to_eat;

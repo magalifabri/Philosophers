@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   main.c                                             :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: mfabri <mfabri@student.s19.be>             +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/04/16 12:27:48 by mfabri            #+#    #+#             */
-/*   Updated: 2021/04/22 08:45:55 by mfabri           ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "../philo_three.h"
 
 /*
@@ -50,6 +38,10 @@ void	waiting_and_eating(t_tab *tab)
 {
 	if (sem_wait(tab->fork_availability) == -1)
 		exit(EXIT_ERROR);
+	printf("%lld %d has taken a fork\n", (tab->current_time - tab->start_time),
+		tab->phi_n + 1);
+	printf("%lld %d has taken a fork\n", (tab->current_time - tab->start_time),
+		tab->phi_n + 1);
 	printf("%lld %d is eating\n", (tab->current_time - tab->start_time),
 		tab->phi_n + 1);
 	tab->time_last_meal = tab->current_time;

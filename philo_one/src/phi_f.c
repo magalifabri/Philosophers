@@ -15,10 +15,12 @@ static int	grab_forks_if_available(t_tab *tab, t_thread_var_struct *s)
 		&& tab->forks[left_fork_i].available == 1)
 	{
 		tab->forks[s->phi_n].available = 0;
-		tab->forks[left_fork_i].available = 0;
-		s->got_forks = 1;
-		if (!put_status(tab, s->phi_n + 1, "has taken forks"))
+		if (!put_status(tab, s->phi_n + 1, "has taken a fork"))
 			return (0);
+		tab->forks[left_fork_i].available = 0;
+		if (!put_status(tab, s->phi_n + 1, "has taken a fork"))
+			return (0);
+		s->got_forks = 1;
 	}
 	if (pthread_mutex_unlock(&tab->forks[s->phi_n].lock) == -1
 		|| pthread_mutex_unlock(&tab->forks[left_fork_i].lock) == -1)
