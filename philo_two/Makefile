@@ -13,7 +13,7 @@ OBJ_FILES = $(addprefix $(OBJ_DIR), $(SRC_FILES:.c=.o))
 INCLUDE_FILES = philo_two.h
 
 CC = gcc
-FLAGS = -Wall -Wextra -Werror
+FLAGS = -g -Wall -Wextra -Werror
 
 RM = /bin/rm -f
 RMDIR = /bin/rm -rf

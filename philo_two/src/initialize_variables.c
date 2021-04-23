@@ -25,6 +25,11 @@ static int	initialize_more(t_tab *tab)
 			tab->number_of_philosophers / 2);
 	if (tab->fork_availability == SEM_FAILED)
 		return ((int)return_error(tab, ERROR_SEM_OPEN));
+	// sem_unlink("put_status_msg_sem");
+	// tab->put_status_msg_sem = sem_open("put_status_msg_sem", O_CREAT, 0644,
+	// 		tab->number_of_philosophers / 2);
+	// if (tab->put_status_msg_sem == SEM_FAILED)
+	// 	return ((int)return_error(tab, ERROR_SEM_OPEN));
 	return (1);
 }
 

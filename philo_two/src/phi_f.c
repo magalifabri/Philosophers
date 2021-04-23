@@ -2,8 +2,12 @@
 
 static void	*starving(t_tab *tab, t_thread_var_struct *s)
 {
-	put_status_msg(tab, s, B_RED"died"RESET);
-	tab->phi_died = 1;
+	if (!tab->phi_died)
+	{
+		tab->phi_died = 1;
+		printf("%lld %d "B_RED"died"RESET"\n",
+			(tab->current_time - tab->start_time), s->phi_n + 1);
+	}
 	return (NULL);
 }
 

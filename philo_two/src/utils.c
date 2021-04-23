@@ -1,10 +1,15 @@
 #include "../philo_two.h"
 
-void	put_status_msg(t_tab *tab, t_thread_var_struct *s, char *msg)
+int	put_status_msg(t_tab *tab, t_thread_var_struct *s, char *msg)
 {
+	// if (sem_wait(tab->put_status_msg_sem) == -1)
+	// 	return ((int)return_error(tab, ERROR_SEM_WAIT));
 	if (!tab->phi_died && !tab->error_encountered)
 		printf("%lld %d %s\n",
 			(tab->current_time - tab->start_time), s->phi_n + 1, msg);
+	// if (sem_post(tab->put_status_msg_sem) == -1)
+	// 	return ((int)return_error(tab, ERROR_SEM_POST));
+	return (1);
 }
 
 static int	ft_isspace(char c)
@@ -58,7 +63,13 @@ long long	get_current_time(t_tab *tab)
 void	free_malloced_variables(t_tab *tab)
 {
 	if (tab->n_times_eaten)
+	{
 		free(tab->n_times_eaten);
+		tab->n_times_eaten = NULL;
+	}
 	if (tab->phi_t)
+	{
 		free(tab->phi_t);
+		tab->phi_t = NULL;
+	}
 }
