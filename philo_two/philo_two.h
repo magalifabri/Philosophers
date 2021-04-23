@@ -43,26 +43,30 @@ typedef struct s_tab
 	int			time_to_sleep;
 	int			number_of_times_each_philosopher_must_eat;
 	sem_t		*fork_availability;
-	// sem_t		*put_status_msg_sem;
+	sem_t		*starving_sem;
 	int			phi_died;
 	int			*n_times_eaten;
-	int			error_encountered;
+	int			error_code;
 	pthread_t	*phi_t;
 }				t_tab;
+
+// ft_atoi.c
+int				ft_atoi(const char *str);
 
 // initialize_variables.c
 int				initialize_variables(t_tab *tab, int ac, char **av);
 
 // main.c
-void			*return_error(t_tab *tab, int error_num);
+long long		get_current_time(t_tab *tab);
 
 // phi_f.c
 void			*phi_f(void *arg);
 
 // utils.c
-int				put_status_msg(t_tab *tab, t_thread_var_struct *s, char *msg);
-long long		get_current_time(t_tab *tab);
-int				ft_atoi(const char *str);
+void			put_status_msg(t_tab *tab, t_thread_var_struct *s, char *msg);
+int				exit_error(t_tab *tab);
+void			*set_error_code(t_tab *tab, int error_code);
 void			free_malloced_variables(t_tab *tab);
+void			wrap_up(t_tab *tab);
 
 #endif

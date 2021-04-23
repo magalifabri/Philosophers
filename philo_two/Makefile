@@ -2,10 +2,11 @@ NAME = philo_two
 
 SRC_DIR = ./src/
 SRC_FILES = \
-			main.c \
-			utils.c \
+			ft_atoi.c \
 			initialize_variables.c \
-			phi_f.c
+			main.c \
+			phi_f.c \
+			utils.c
 
 OBJ_DIR = ./obj/
 OBJ_FILES = $(addprefix $(OBJ_DIR), $(SRC_FILES:.c=.o))

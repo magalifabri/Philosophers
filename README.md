@@ -3,9 +3,26 @@
 
 TO-DO:
 - check return of put_status_msg()
-- sem_close?
 - sem protect free or only have main process call free
 
+- problem (2): Segfault: Because there is a slight pause between the creation of philosophers/threads, when there are sufficient philosophers, a philosophers might have died while new ones are still being created.
+	- solution: While creating philosophers, keep tabs on if one has dies (or an error has occurred)
+
+- problem (2): Invalid free: Because threads can call free on a variable that is shared between the threads, this makes it possible for multiple threads to do so at the same time.
+	- solution: Only call free from the main process. return_error() becomes set_error_code() + exit_error()
+
+- problem (2): Status messages are still being printed, even after a philosopher has died.
+	- solution: Change starving(), so that the death of a philosopher is processed quicker.
+
+- problem (2): Multiple "died" status messages.
+	- solution: Protect the printing of that message with a semaphore (on which sem_post() isn't called).
+
+- problem (2): tab->n_times_eaten is being read/written to after it has been freed.
+	- solution: set it to NULL after freeing, and before reading/writing, check if it's NULL.
+
+- problem (2): A philosopher can surpass time_to_die but not drop dead because of sem_wait.
+	- solution: 
+	
 ## Project Description
 
 ***"Summary:  In this project, you will learn the basics of threading a process and how to work on the same memory space. You will learn how to make threads. You will discover the mutex, semaphore and shared memory."***
