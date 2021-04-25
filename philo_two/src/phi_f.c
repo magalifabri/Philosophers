@@ -16,12 +16,12 @@ static int	eating(t_tab *tab, t_thread_var_struct *s)
 
 	if (sem_wait(tab->fork_availability) == -1)
 		return ((int)set_error_code(tab, ERROR_SEM_WAIT));
+	put_status_msg(tab, s, "has taken a fork");
+	put_status_msg(tab, s, "has taken a fork");
 	if (s->time_last_meal + tab->time_to_die <= tab->current_time)
 		return ((int)starving(tab, s));
-	put_status_msg(tab, s, "has taken a fork");
-	put_status_msg(tab, s, "has taken a fork");
-	put_status_msg(tab, s, "is eating");
 	s->time_last_meal = tab->current_time;
+	put_status_msg(tab, s, "is eating");
 	time_done_eating = tab->current_time + tab->time_to_eat;
 	while (time_done_eating > tab->current_time)
 		if (usleep(1000) == -1)
