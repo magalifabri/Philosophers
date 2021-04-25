@@ -2,11 +2,6 @@
 ## ***WORK IN PROGRESS***
 
 TO-DO:
-- check return of put_status_msg()
-- sem protect free or only have main process call free
-
-- problem (2): Segfault: Because there is a slight pause between the creation of philosophers/threads, when there are sufficient philosophers, a philosophers might have died while new ones are still being created.
-	- solution: While creating philosophers, keep tabs on if one has dies (or an error has occurred)
 
 - problem (2): Invalid free: Because threads can call free on a variable that is shared between the threads, this makes it possible for multiple threads to do so at the same time.
 	- solution: Only call free from the main process. return_error() becomes set_error_code() + exit_error()
@@ -21,8 +16,23 @@ TO-DO:
 	- solution: set it to NULL after freeing, and before reading/writing, check if it's NULL.
 
 - problem (2): A philosopher can surpass time_to_die but not drop dead because of sem_wait.
-	- solution: 
-	
+	- solution: Create a thread (grim_reaper) within the threads (philosophers) that checks if a philosopher should die and causing that to happen if so.
+
+TESTING
+5 800 200 200 : infinite
+5 800 200 200 3 : all fat
+4 410 200 200 : infinite
+4 410 200 200 3 : all fat
+4 310 200 100 : death at ± 310
+4 310 200 200 : death at ± 310 (interrupts sleeping)
+200 200 200 200 : death at ± 200
+200 240 100 100 : death at ± 200
+4 200 210 100 :  death at ± 200
+5 610 200 60 : infinite
+4 60 60 60 : death at ± 60
+4 120 60 60 : death at ± 120
+4 125 60 60 : infinite
+
 ## Project Description
 
 ***"Summary:  In this project, you will learn the basics of threading a process and how to work on the same memory space. You will learn how to make threads. You will discover the mutex, semaphore and shared memory."***
