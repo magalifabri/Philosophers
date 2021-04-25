@@ -13,21 +13,21 @@ static int	initialize_more(t_tab *tab)
 	int	i;
 
 	tab->n_times_eaten = malloc(sizeof(int) * tab->number_of_philosophers);
-	tab->phi_t = malloc(sizeof(pthread_t) * tab->number_of_philosophers);
-	if (!tab->n_times_eaten || !tab->phi_t)
+	if (!tab->n_times_eaten)
 		return ((int)set_error_code(tab, ERROR_MALLOC));
 	i = -1;
 	while (++i < tab->number_of_philosophers)
 		tab->n_times_eaten[i] = 0;
 	i = -1;
 	sem_unlink("fork_availability");
+	sem_unlink("starving_sem");
+	sem_unlink("id_sem");
 	tab->fork_availability = sem_open("fork_availability", O_CREAT, 0644,
 			tab->number_of_philosophers / 2);
-	if (tab->fork_availability == SEM_FAILED)
-		return ((int)set_error_code(tab, ERROR_SEM_OPEN));
-	sem_unlink("starving_sem");
 	tab->starving_sem = sem_open("starving_sem", O_CREAT, 0644, 1);
-	if (tab->starving_sem == SEM_FAILED)
+	tab->id_sem = sem_open("id_sem", O_CREAT, 0644, 1);
+	if (tab->fork_availability == SEM_FAILED
+		|| tab->starving_sem == SEM_FAILED || tab->id_sem == SEM_FAILED)
 		return ((int)set_error_code(tab, ERROR_SEM_OPEN));
 	return (1);
 }
@@ -42,7 +42,6 @@ static int	initialize_more(t_tab *tab)
 int	initialize_variables(t_tab *tab, int ac, char **av)
 {
 	tab->n_times_eaten = NULL;
-	tab->phi_t = NULL;
 	if (ac < 5 || ac > 6)
 		return ((int)set_error_code(tab, ERROR_AC));
 	tab->number_of_philosophers = ft_atoi(av[1]);
@@ -62,8 +61,8 @@ int	initialize_variables(t_tab *tab, int ac, char **av)
 	}
 	tab->phi_died = 0;
 	tab->error_code = 0;
-	tab->start_time = get_current_time(tab);
-	if (!tab->start_time)
-		return (0);
+	tab->start_time = get_current_time();
+	if (tab->start_time == -1)
+		return ((int)set_error_code(tab, ERROR_GETTIMEOFDAY));
 	return (initialize_more(tab));
 }
