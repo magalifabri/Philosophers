@@ -47,16 +47,13 @@ void	free_malloced_variables(t_tab *tab)
 		free(tab->n_times_eaten);
 		tab->n_times_eaten = NULL;
 	}
-	if (tab->phi_t)
-	{
-		free(tab->phi_t);
-		tab->phi_t = NULL;
-	}
 }
 
 void	wrap_up(t_tab *tab)
 {
+	usleep(1000);
 	free_malloced_variables(tab);
 	sem_unlink("fork_availability");
 	sem_unlink("starving_sem");
+	sem_unlink("id_sem");
 }
