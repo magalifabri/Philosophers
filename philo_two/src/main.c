@@ -1,19 +1,19 @@
 #include "../philo_two.h"
 
-long long	get_current_time(t_tab *tab)
+long long	get_current_time(void)
 {
 	struct timeval	tp;
 	long long		passed_time;
 
 	if (gettimeofday(&tp, 0) == -1)
-		return ((long long)set_error_code(tab, ERROR_GETTIMEOFDAY));
+		return (-1);
 	passed_time = tp.tv_sec;
 	passed_time *= 1000;
 	passed_time += (tp.tv_usec / 1000);
 	return (passed_time);
 }
 
-static int	check_if_all_are_sated(t_tab *tab)
+static int	check_if_all_are_fat(t_tab *tab)
 {
 	int	i;
 	int	number_of_fat_philosophers;
@@ -53,9 +53,9 @@ static int	monitor_philosophers(t_tab *tab)
 	{
 		if (usleep(1000) == -1)
 			return ((int)set_error_code(tab, ERROR_USLEEP));
-		tab->current_time = get_current_time(tab);
-		if (!tab->current_time)
-			return (0);
+		tab->current_time = get_current_time();
+		if (tab->current_time == -1)
+			return ((int)set_error_code(tab, ERROR_GETTIMEOFDAY));
 		if (tab->error_code)
 			return (0);
 		if (tab->phi_died == 1)
@@ -63,38 +63,27 @@ static int	monitor_philosophers(t_tab *tab)
 			printf(B_RED"A philosopher has starved! Game over."RESET"\n");
 			return (1);
 		}
-		if (check_if_all_are_sated(tab))
+		if (check_if_all_are_fat(tab))
 			return (1);
 	}
 	return (0);
 }
 
-/*
-** Note(s) on create_philosophers():
-** 
-** Reason for usleep(): tab.phi_n needs to be copied over in each phi_f thread
-** to tell the thread the number of the philosopher it represents. So we want
-** to give each thread a bit of time to copy this value.
-*/
-
 static int	create_philosophers(t_tab *tab)
 {
+	pthread_t philosopher_thread;
 	int	i;
 
+	tab->phi_n_c = 0;
 	i = -1;
+	tab->current_time = get_current_time();
+	if (tab->current_time == -1)
+		return ((int)set_error_code(tab, ERROR_GETTIMEOFDAY));
 	while (++i < tab->number_of_philosophers
 		&& !tab->error_code && !tab->phi_died)
-	{
-		tab->current_time = get_current_time(tab);
-		if (!tab->current_time)
-			return (0);
-		tab->phi_n = i;
-		if (pthread_create(&tab->phi_t[i], NULL, phi_f, tab) != 0)
+		if (pthread_create(&philosopher_thread, NULL, phi_f, tab) != 0)
 			return ((int)set_error_code(tab, ERROR_PTHREAD_CREATE));
-		pthread_detach(tab->phi_t[i]);
-		if (usleep(100) == -1)
-			return ((int)set_error_code(tab, ERROR_USLEEP));
-	}
+	pthread_detach(philosopher_thread);
 	return (1);
 }
 
