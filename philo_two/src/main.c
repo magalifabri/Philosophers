@@ -71,8 +71,8 @@ static int	monitor_philosophers(t_tab *tab)
 
 static int	create_philosophers(t_tab *tab)
 {
-	pthread_t philosopher_thread;
-	int	i;
+	pthread_t	philosopher_thread;
+	int			i;
 
 	tab->phi_n_c = 0;
 	i = -1;

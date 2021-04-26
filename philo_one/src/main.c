@@ -97,7 +97,7 @@ static int	create_philosophers(t_tab *tab)
 int	main(int ac, char **av)
 {
 	t_tab	tab;
-	
+
 	pre_initialisation(&tab);
 	if (ac < 5 || ac > 6)
 	{

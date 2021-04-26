@@ -1,6 +1,6 @@
 #include "../philo_two.h"
 
-void		*starving(t_tab *tab, t_thread_var_struct *s)
+void	*starving(t_tab *tab, t_thread_var_struct *s)
 {
 	if (sem_wait(tab->starving_sem) == -1)
 		return (set_error_code(tab, ERROR_SEM_WAIT));
