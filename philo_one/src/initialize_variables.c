@@ -63,6 +63,8 @@ int	initialize_variables_and_locks(t_tab *tab, int ac, char **av)
 			return ((int)set_error_code(tab, ERROR_BAD_ARGS));
 	}
 	tab->phi_died = 0;
+	tab->number_of_fat_philosophers = 0;
+	tab->all_fat = 0;
 	tab->error_code = 0;
 	tab->start_time = get_current_time(tab);
 	if (!tab->start_time)

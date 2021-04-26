@@ -30,8 +30,20 @@ static int	finish_eating_and_obesity_check(t_tab *tab, t_thread_var_struct *s)
 	if (tab->number_of_times_each_philosopher_must_eat != -1
 		&& tab->n_times_eaten[s->phi_n]
 		>= tab->number_of_times_each_philosopher_must_eat)
+	{
+		if (pthread_mutex_lock(&tab->fat_lock) == -1)
+			return ((int)set_error_code(tab, ERROR_MUTEX_LOCK));
 		if (!put_status(tab, s->phi_n + 1, B_GREEN"is fat"RESET))
 			return (0);
+		tab->number_of_fat_philosophers++;
+		if (tab->number_of_fat_philosophers == tab->number_of_philosophers)
+		{
+			tab->all_fat = 1;
+			printf(B_GREEN"They're all fat. Good job!\n"RESET);
+		}
+		if (pthread_mutex_unlock(&tab->fat_lock) == -1)
+			return ((int)set_error_code(tab, ERROR_MUTEX_UNLOCK));
+	}
 	return (1);
 }
 

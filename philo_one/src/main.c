@@ -83,7 +83,7 @@ int	monitor_philosophers(t_tab *tab)
 			printf(B_RED"A philosopher has starved! Game over.\n"RESET);
 			return (1);
 		}
-		if (check_if_all_are_sated(tab))
+		if (tab->all_fat)
 			return (1);
 	}
 	return (0);

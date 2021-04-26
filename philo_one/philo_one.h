@@ -54,12 +54,15 @@ typedef struct s_tab
 	int				number_of_times_each_philosopher_must_eat;
 	t_frk			*forks;
 	int				phi_died;
+	int				number_of_fat_philosophers;
+	int				all_fat;
 	int				*n_times_eaten;
 	int				error_code;
 	int				mutexes_initialized;
 	pthread_mutex_t	put_status_lock;
 	pthread_mutex_t	id_lock;
 	pthread_mutex_t	death_lock;
+	pthread_mutex_t	fat_lock;
 }					t_tab;
 
 // ft_atoi.c
@@ -75,6 +78,7 @@ int					initialize_variables_phi_f(t_tab *tab,
 // main.c
 int					return_error(t_tab *tab, int error_num);
 void				*set_error_code(t_tab *tab, int error_code);
+
 // phi_f_eating_to_thinking.c
 int					eating_to_thinking(t_tab *tab, t_thread_var_struct *s);
 

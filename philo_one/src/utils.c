@@ -1,18 +1,15 @@
 #include "../philo_one.h"
 
 /*
-put_status() prints the philosphers' activities to stdout.
-It uses a mutex lock to make sure only one philosopher
-(thread) does this at a time.
-It also ensures that no more status messages are printed when a philosopher
-has dies or an error has occurred.
+put_status() prints the philosphers' activities to stdout. It uses a mutex lock to make sure only one philosopher (thread) does this at a time.
+It also tries to prevent more status messages from being printed when a philosopher has died, an error has occurred or all philosophers are fat.
 */
 
 int	put_status(t_tab *tab, int philo_n, char *msg)
 {
 	if (pthread_mutex_lock(&tab->put_status_lock) == -1)
 		return ((int)set_error_code(tab, ERROR_MUTEX_LOCK));
-	if (!tab->phi_died && !tab->error_code)
+	if (!tab->phi_died && !tab->error_code && !tab->all_fat)
 		printf("%lld %d %s\n",
 			(tab->current_time - tab->start_time), philo_n, msg);
 	if (pthread_mutex_unlock(&tab->put_status_lock) == -1)
