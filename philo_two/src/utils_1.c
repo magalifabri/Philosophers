@@ -1,15 +1,10 @@
 #include "../philo_two.h"
 
-int	put_status_msg(t_tab *tab, t_thread_var_struct *s, char *msg)
+void	put_status_msg(t_tab *tab, t_thread_var_struct *s, char *msg)
 {
-	if (sem_wait(tab->put_status_msg_sem) == -1)
-		return ((int)set_error_code(tab, ERROR_SEM_WAIT));
 	if (!tab->phi_died && !tab->error_code && !tab->all_fat)
 		printf("%lld %d %s\n",
 			(tab->current_time - tab->start_time), s->phi_n + 1, msg);
-	if (sem_post(tab->put_status_msg_sem) == -1)
-		return ((int)set_error_code(tab, ERROR_SEM_POST));
-	return (1);
 }
 
 int	exit_error(t_tab *tab)
@@ -62,5 +57,4 @@ void	wrap_up(t_tab *tab)
 	sem_unlink("starving_sem");
 	sem_unlink("id_sem");
 	sem_unlink("fat_sem");
-	sem_unlink("put_status_msg_sem");
 }
