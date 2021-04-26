@@ -33,27 +33,6 @@ void	*set_error_code(t_tab *tab, int error_code)
 	return (NULL);
 }
 
-int	check_if_all_are_sated(t_tab *tab)
-{
-	int	i;
-	int	number_of_fat_philosophers;
-
-	i = -1;
-	number_of_fat_philosophers = 0;
-	while (++i < tab->number_of_philosophers)
-	{
-		if (tab->n_times_eaten[i]
-			== tab->number_of_times_each_philosopher_must_eat)
-			number_of_fat_philosophers++;
-		if (number_of_fat_philosophers == tab->number_of_philosophers)
-		{
-			printf(B_GREEN"They're all fat. Good job!\n"RESET);
-			return (1);
-		}
-	}
-	return (0);
-}
-
 /*
 ** Note(s) on monitor_philosophers():
 ** 
@@ -99,8 +78,8 @@ int	monitor_philosophers(t_tab *tab)
 
 static int	create_philosophers(t_tab *tab)
 {
-	pthread_t philosopher_thread;
-	int	i;
+	pthread_t	philosopher_thread;
+	int			i;
 
 	tab->phi_n_c = 0;
 	i = -1;
@@ -118,7 +97,13 @@ static int	create_philosophers(t_tab *tab)
 int	main(int ac, char **av)
 {
 	t_tab	tab;
-
+	
+	pre_initialisation(&tab);
+	if (ac < 5 || ac > 6)
+	{
+		set_error_code(&tab, ERROR_AC);
+		return (exit_error(&tab));
+	}
 	if (!initialize_variables_and_locks(&tab, ac, av))
 		return (exit_error(&tab));
 	if (!create_philosophers(&tab))

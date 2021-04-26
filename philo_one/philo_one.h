@@ -69,6 +69,7 @@ typedef struct s_tab
 int					ft_atoi(const char *str);
 
 // initialize_variables.c
+void				pre_initialisation(t_tab *tab);
 void				initialize_malloc_and_mutex_indicators(t_tab *tab);
 int					initialize_variables_and_locks(t_tab *tab, int ac,
 						char **av);

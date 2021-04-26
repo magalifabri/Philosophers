@@ -1,6 +1,6 @@
 #include "../philo_one.h"
 
-void	initialize_malloc_and_mutex_indicators(t_tab *tab)
+void	pre_initialisation(t_tab *tab)
 {
 	tab->forks = NULL;
 	tab->n_times_eaten = NULL;
@@ -25,13 +25,10 @@ static int	initialize_more(t_tab *tab)
 			return ((int)set_error_code(tab, ERROR_MUTEX_INIT));
 		tab->forks[i].available = 1;
 	}
-	if (pthread_mutex_init(&tab->put_status_lock, NULL) != 0)
-		return ((int)set_error_code(tab, ERROR_MUTEX_INIT));
-	if (pthread_mutex_init(&tab->id_lock, NULL) != 0)
-		return ((int)set_error_code(tab, ERROR_MUTEX_INIT));
-	if (pthread_mutex_init(&tab->death_lock, NULL) != 0)
-		return ((int)set_error_code(tab, ERROR_MUTEX_INIT));
-	if (pthread_mutex_init(&tab->fat_lock, NULL) != 0)
+	if (pthread_mutex_init(&tab->put_status_lock, NULL) != 0
+		|| pthread_mutex_init(&tab->id_lock, NULL) != 0
+		|| pthread_mutex_init(&tab->death_lock, NULL) != 0
+		|| pthread_mutex_init(&tab->fat_lock, NULL) != 0)
 		return ((int)set_error_code(tab, ERROR_MUTEX_INIT));
 	tab->mutexes_initialized = 1;
 	return (1);
@@ -46,9 +43,6 @@ static int	initialize_more(t_tab *tab)
 
 int	initialize_variables_and_locks(t_tab *tab, int ac, char **av)
 {
-	initialize_malloc_and_mutex_indicators(tab);
-	if (ac < 5 || ac > 6)
-		return ((int)set_error_code(tab, ERROR_AC));
 	tab->number_of_philosophers = ft_atoi(av[1]);
 	tab->time_to_die = ft_atoi(av[2]);
 	tab->time_to_eat = ft_atoi(av[3]);

@@ -1,8 +1,10 @@
 #include "../philo_one.h"
 
 /*
-put_status() prints the philosphers' activities to stdout. It uses a mutex lock to make sure only one philosopher (thread) does this at a time.
-It also tries to prevent more status messages from being printed when a philosopher has died, an error has occurred or all philosophers are fat.
+put_status() prints the philosphers' activities to stdout. It uses a mutex
+lock to make sure only one philosopher (thread) does this at a time. It also
+tries to prevent more status messages from being printed when a philosopher
+has died, an error has occurred or all philosophers are fat.
 */
 
 int	put_status(t_tab *tab, int philo_n, char *msg)
@@ -68,7 +70,6 @@ int	destroy_locks(t_tab *tab)
 {
 	int	i;
 
-	// usleep(10000);
 	i = -1;
 	while (++i < tab->number_of_philosophers)
 		if (pthread_mutex_destroy(&tab->forks[i].lock) != 0)
