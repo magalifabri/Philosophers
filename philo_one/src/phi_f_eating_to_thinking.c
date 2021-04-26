@@ -36,7 +36,8 @@ static int	finish_eating_and_obesity_check(t_tab *tab, t_thread_var_struct *s)
 		if (!put_status(tab, s->phi_n + 1, B_GREEN"is fat"RESET))
 			return (0);
 		tab->number_of_fat_philosophers++;
-		if (tab->number_of_fat_philosophers == tab->number_of_philosophers)
+		if (!tab->phi_died && !tab->error_code &&
+			tab->number_of_fat_philosophers == tab->number_of_philosophers)
 		{
 			tab->all_fat = 1;
 			printf(B_GREEN"They're all fat. Good job!\n"RESET);
