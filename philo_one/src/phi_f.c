@@ -104,6 +104,13 @@ void	*phi_f(void *arg)
 	t_thread_var_struct	s;
 
 	tab = (t_tab *)arg;
+
+	if (pthread_mutex_lock(tab->id_lock) == -1)
+		return (set_error_code(tab, ERROR_MUTEX_LOCK));
+	s.phi_n = tab->phi_n_c++;
+	if (pthread_mutex_unlock(tab->id_lock) == -1)
+		return (set_error_code(tab, ERROR_MUTEX_UNLOCK));
+	
 	initialize_variables_phi_f(tab, &s);
 	while (1)
 	{

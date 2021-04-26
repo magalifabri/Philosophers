@@ -4,8 +4,9 @@ void	initialize_malloc_and_mutex_indicators(t_tab *tab)
 {
 	tab->forks = NULL;
 	tab->n_times_eaten = NULL;
-	tab->phi_t = NULL;
+	// tab->phi_t = NULL;
 	tab->put_status_lock = NULL;
+	tab->id_lock = NULL;
 	tab->mutexes_initialized = 0;
 }
 
@@ -15,12 +16,14 @@ static int	initialize_more(t_tab *tab)
 
 	tab->forks = malloc(sizeof(t_frk) * tab->number_of_philosophers);
 	tab->n_times_eaten = malloc(sizeof(int) * tab->number_of_philosophers);
-	tab->phi_t = malloc(sizeof(pthread_t) * tab->number_of_philosophers);
+	// tab->phi_t = malloc(sizeof(pthread_t) * tab->number_of_philosophers);
 	tab->put_status_lock = malloc(sizeof(pthread_mutex_t) * 1);
+	tab->id_lock = malloc(sizeof(pthread_mutex_t) * 1);
 	if (!tab->forks
 		|| !tab->n_times_eaten
-		|| !tab->phi_t
-		|| !tab->put_status_lock)
+		// || !tab->phi_t
+		|| !tab->put_status_lock
+		|| !tab->id_lock)
 		return ((int)set_error_code(tab, ERROR_MALLOC));
 	i = -1;
 	while (++i < tab->number_of_philosophers)
@@ -33,6 +36,8 @@ static int	initialize_more(t_tab *tab)
 		tab->forks[i].available = 1;
 	}
 	if (pthread_mutex_init(tab->put_status_lock, NULL) != 0)
+		return ((int)set_error_code(tab, ERROR_MUTEX_INIT));
+	if (pthread_mutex_init(tab->id_lock, NULL) != 0)
 		return ((int)set_error_code(tab, ERROR_MUTEX_INIT));
 	tab->mutexes_initialized = 1;
 	return (1);
@@ -75,7 +80,7 @@ int	initialize_variables_and_locks(t_tab *tab, int ac, char **av)
 
 void	initialize_variables_phi_f(t_tab *tab, t_thread_var_struct *s)
 {
-	s->phi_n = tab->phi_n;
+	// s->phi_n = tab->phi_n;
 	s->got_forks = 0;
 	s->phi_state = 't';
 	s->time_sleep_start = tab->current_time;

@@ -97,24 +97,21 @@ int	monitor_philosophers(t_tab *tab)
 ** to give each thread a bit of time to copy this value.
 */
 
-int	create_philosophers(t_tab *tab)
+static int	create_philosophers(t_tab *tab)
 {
+	pthread_t philosopher_thread;
 	int	i;
 
+	tab->phi_n_c = 0;
 	i = -1;
+	tab->current_time = get_current_time(tab);
+	if (!tab->current_time)
+		return (0);
 	while (++i < tab->number_of_philosophers
-	&& !tab->phi_died && !tab->error_code)
-	{
-		tab->current_time = get_current_time(tab);
-		if (!tab->current_time)
-			return (0);
-		tab->phi_n = i;
-		if (pthread_create(&tab->phi_t[i], NULL, phi_f, tab) != 0)
+		&& !tab->error_code && !tab->phi_died)
+		if (pthread_create(&philosopher_thread, NULL, phi_f, tab) != 0)
 			return ((int)set_error_code(tab, ERROR_PTHREAD_CREATE));
-		pthread_detach(tab->phi_t[i]);
-		if (usleep(100) == -1)
-			return ((int)set_error_code(tab, ERROR_USLEEP));
-	}
+	pthread_detach(philosopher_thread);
 	return (1);
 }
 

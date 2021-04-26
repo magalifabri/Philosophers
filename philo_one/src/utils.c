@@ -51,8 +51,8 @@ void	free_malloced_variables(t_tab *tab)
 		free(tab->forks);
 	if (tab->n_times_eaten)
 		free(tab->n_times_eaten);
-	if (tab->phi_t)
-		free(tab->phi_t);
+	// if (tab->phi_t)
+	// 	free(tab->phi_t);
 	if (tab->put_status_lock)
 		free(tab->put_status_lock);
 }

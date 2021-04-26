@@ -46,6 +46,7 @@ typedef struct s_tab
 	long long		start_time;
 	long long		current_time;
 	int				phi_n;
+	int				phi_n_c;
 	int				number_of_philosophers;
 	int				time_to_die;
 	int				time_to_eat;
@@ -55,9 +56,10 @@ typedef struct s_tab
 	int				phi_died;
 	int				*n_times_eaten;
 	int				error_code;
-	pthread_t		*phi_t;
+	// pthread_t		*phi_t;
 	int				mutexes_initialized;
 	pthread_mutex_t	*put_status_lock;
+	pthread_mutex_t	*id_lock;
 }					t_tab;
 
 // ft_atoi.c
