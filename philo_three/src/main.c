@@ -49,7 +49,7 @@ void	waiting_and_eating(t_tab *tab)
 		exit(EXIT_ERROR);
 	tab->times_eaten++;
 	if (tab->number_of_times_each_philosopher_must_eat != -1
-		&& tab->times_eaten >= tab->number_of_times_each_philosopher_must_eat)
+		&& tab->times_eaten == tab->number_of_times_each_philosopher_must_eat)
 	{
 		printf("%lld %d is %sfat%s\n", (tab->current_time - tab->start_time),
 			tab->phi_n + 1, B_GREEN, RESET);

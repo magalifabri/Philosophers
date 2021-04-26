@@ -29,7 +29,7 @@ static int	finish_eating_and_obesity_check(t_tab *tab, t_thread_var_struct *s)
 	tab->n_times_eaten[s->phi_n]++;
 	if (tab->number_of_times_each_philosopher_must_eat != -1
 		&& tab->n_times_eaten[s->phi_n]
-		>= tab->number_of_times_each_philosopher_must_eat)
+		== tab->number_of_times_each_philosopher_must_eat)
 	{
 		if (pthread_mutex_lock(&tab->fat_lock) == -1)
 			return ((int)set_error_code(tab, ERROR_MUTEX_LOCK));
