@@ -38,6 +38,7 @@ typedef struct s_tab
 	sem_t		*starving_sem;
 	sem_t		*id_sem;
 	sem_t		*fat_sem;
+	sem_t		*put_status_msg_sem;
 	int			phi_n_c;
 	int			phi_died;
 	int			number_of_fat_philosophers;
@@ -65,7 +66,7 @@ void			*starving(t_tab *tab, t_thread_var_struct *s);
 void			*phi_f(void *arg);
 
 // utils_1.c
-void			put_status_msg(t_tab *tab, t_thread_var_struct *s, char *msg);
+int				put_status_msg(t_tab *tab, t_thread_var_struct *s, char *msg);
 int				exit_error(t_tab *tab);
 void			*set_error_code(t_tab *tab, int error_code);
 void			free_malloced_variables(t_tab *tab);
