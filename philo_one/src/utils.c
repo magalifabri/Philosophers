@@ -11,12 +11,12 @@ has dies or an error has occurred.
 int	put_status(t_tab *tab, int philo_n, char *msg)
 {
 	if (pthread_mutex_lock(tab->put_status_lock) == -1)
-		return ((int)return_error(tab, ERROR_MUTEX_LOCK));
-	if (!tab->phi_died && !tab->error_encountered)
+		return ((int)set_error_code(tab, ERROR_MUTEX_LOCK));
+	if (!tab->phi_died && !tab->error_code)
 		printf("%lld %d %s\n",
 			(tab->current_time - tab->start_time), philo_n, msg);
 	if (pthread_mutex_unlock(tab->put_status_lock) == -1)
-		return ((int)return_error(tab, ERROR_MUTEX_UNLOCK));
+		return ((int)set_error_code(tab, ERROR_MUTEX_UNLOCK));
 	return (1);
 }
 
@@ -38,7 +38,7 @@ long long	get_current_time(t_tab *tab)
 	long long		passed_time;
 
 	if (gettimeofday(&tp, 0) == -1)
-		return ((long long)return_error(tab, ERROR_GETTIMEOFDAY));
+		return ((long long)set_error_code(tab, ERROR_GETTIMEOFDAY));
 	passed_time = tp.tv_sec;
 	passed_time *= 1000;
 	passed_time += (tp.tv_usec / 1000);
@@ -72,8 +72,8 @@ int	destroy_locks(t_tab *tab)
 	i = -1;
 	while (++i < tab->number_of_philosophers)
 		if (pthread_mutex_destroy(&tab->forks[i].lock) != 0)
-			return ((int)return_error(tab, ERROR_MUTEX_DESTROY));
+			return ((int)set_error_code(tab, ERROR_MUTEX_DESTROY));
 	if (pthread_mutex_destroy(tab->put_status_lock) != 0)
-		return ((int)return_error(tab, ERROR_MUTEX_DESTROY));
+		return ((int)set_error_code(tab, ERROR_MUTEX_DESTROY));
 	return (1);
 }

@@ -21,7 +21,7 @@ static int	initialize_more(t_tab *tab)
 		|| !tab->n_times_eaten
 		|| !tab->phi_t
 		|| !tab->put_status_lock)
-		return ((int)return_error(tab, ERROR_MALLOC));
+		return ((int)set_error_code(tab, ERROR_MALLOC));
 	i = -1;
 	while (++i < tab->number_of_philosophers)
 		tab->n_times_eaten[i] = 0;
@@ -29,11 +29,11 @@ static int	initialize_more(t_tab *tab)
 	while (++i < tab->number_of_philosophers)
 	{
 		if (pthread_mutex_init(&tab->forks[i].lock, NULL) != 0)
-			return ((int)return_error(tab, ERROR_MUTEX_INIT));
+			return ((int)set_error_code(tab, ERROR_MUTEX_INIT));
 		tab->forks[i].available = 1;
 	}
 	if (pthread_mutex_init(tab->put_status_lock, NULL) != 0)
-		return ((int)return_error(tab, ERROR_MUTEX_INIT));
+		return ((int)set_error_code(tab, ERROR_MUTEX_INIT));
 	tab->mutexes_initialized = 1;
 	return (1);
 }
@@ -49,24 +49,24 @@ int	initialize_variables_and_locks(t_tab *tab, int ac, char **av)
 {
 	initialize_malloc_and_mutex_indicators(tab);
 	if (ac < 5 || ac > 6)
-		return ((int)return_error(tab, ERROR_AC));
+		return ((int)set_error_code(tab, ERROR_AC));
 	tab->number_of_philosophers = ft_atoi(av[1]);
 	tab->time_to_die = ft_atoi(av[2]);
 	tab->time_to_eat = ft_atoi(av[3]);
 	tab->time_to_sleep = ft_atoi(av[4]);
 	if (tab->number_of_philosophers < 2 || tab->time_to_die < 1
 		|| tab->time_to_eat < 1 || tab->time_to_sleep < 1)
-		return ((int)return_error(tab, ERROR_BAD_ARGS));
+		return ((int)set_error_code(tab, ERROR_BAD_ARGS));
 	if (ac == 5)
 		tab->number_of_times_each_philosopher_must_eat = -1;
 	else
 	{
 		tab->number_of_times_each_philosopher_must_eat = ft_atoi(av[5]);
 		if (tab->number_of_times_each_philosopher_must_eat < 1)
-			return ((int)return_error(tab, ERROR_BAD_ARGS));
+			return ((int)set_error_code(tab, ERROR_BAD_ARGS));
 	}
 	tab->phi_died = 0;
-	tab->error_encountered = 0;
+	tab->error_code = 0;
 	tab->start_time = get_current_time(tab);
 	if (!tab->start_time)
 		return (0);

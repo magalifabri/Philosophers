@@ -54,7 +54,7 @@ typedef struct s_tab
 	t_frk			*forks;
 	int				phi_died;
 	int				*n_times_eaten;
-	int				error_encountered;
+	int				error_code;
 	pthread_t		*phi_t;
 	int				mutexes_initialized;
 	pthread_mutex_t	*put_status_lock;
@@ -71,8 +71,8 @@ void				initialize_variables_phi_f(t_tab *tab,
 						t_thread_var_struct *s);
 
 // main.c
-void				*return_error(t_tab *tab, int error_num);
-
+int					return_error(t_tab *tab, int error_num);
+void				*set_error_code(t_tab *tab, int error_code);
 // phi_f_eating_to_thinking.c
 int					eating_to_thinking(t_tab *tab, t_thread_var_struct *s);
 

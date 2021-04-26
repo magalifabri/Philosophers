@@ -1,30 +1,35 @@
 #include "../philo_one.h"
 
-void	*return_error(t_tab *tab, int error_num)
+int	exit_error(t_tab *tab)
 {
-	tab->error_encountered = 1;
 	write(2, B_RED"ERROR: "RESET, 19);
-	if (error_num == ERROR_MUTEX_LOCK)
+	if (tab->error_code == ERROR_MUTEX_LOCK)
 		write(2, "pthread_mutex_lock() returned -1\n", 34);
-	if (error_num == ERROR_MUTEX_UNLOCK)
+	else if (tab->error_code == ERROR_MUTEX_UNLOCK)
 		write(2, "pthread_mutex_unlock() returned -1\n", 36);
-	if (error_num == ERROR_MUTEX_INIT)
+	else if (tab->error_code == ERROR_MUTEX_INIT)
 		write(2, "pthread_mutex_init() didn't return 0\n", 38);
-	if (error_num == ERROR_MUTEX_DESTROY)
+	else if (tab->error_code == ERROR_MUTEX_DESTROY)
 		write(2, "pthread_mutex_destroy() didn't return 0\n", 41);
-	if (error_num == ERROR_PTHREAD_CREATE)
+	else if (tab->error_code == ERROR_PTHREAD_CREATE)
 		write(2, "pthread_create() didn't return 0\n", 34);
-	else if (error_num == ERROR_GETTIMEOFDAY)
+	else if (tab->error_code == ERROR_GETTIMEOFDAY)
 		write(2, "gettimeofday() returned -1\n", 28);
-	else if (error_num == ERROR_MALLOC)
+	else if (tab->error_code == ERROR_MALLOC)
 		write(2, "malloc() returned NULL\n", 24);
-	else if (error_num == ERROR_BAD_ARGS)
+	else if (tab->error_code == ERROR_BAD_ARGS)
 		write(2, "bad arguments. Try again.\n", 27);
-	else if (error_num == ERROR_AC)
+	else if (tab->error_code == ERROR_AC)
 		write(2, "too few or too many arguments\n", 31);
 	if (tab->mutexes_initialized)
 		destroy_locks(tab);
 	free_malloced_variables(tab);
+	return (1);
+}
+
+void	*set_error_code(t_tab *tab, int error_code)
+{
+	tab->error_code = error_code;
 	return (NULL);
 }
 
@@ -67,11 +72,11 @@ int	monitor_philosophers(t_tab *tab)
 	while (1)
 	{
 		if (usleep(1000) == -1)
-			return ((int)return_error(tab, ERROR_USLEEP));
+			return ((int)set_error_code(tab, ERROR_USLEEP));
 		tab->current_time = get_current_time(tab);
 		if (!tab->current_time)
 			return (0);
-		if (tab->error_encountered)
+		if (tab->error_code)
 			return (0);
 		if (tab->phi_died)
 		{
@@ -97,17 +102,18 @@ int	create_philosophers(t_tab *tab)
 	int	i;
 
 	i = -1;
-	while (++i < tab->number_of_philosophers)
+	while (++i < tab->number_of_philosophers
+	&& !tab->phi_died && !tab->error_code)
 	{
 		tab->current_time = get_current_time(tab);
 		if (!tab->current_time)
 			return (0);
 		tab->phi_n = i;
 		if (pthread_create(&tab->phi_t[i], NULL, phi_f, tab) != 0)
-			return ((int)return_error(tab, ERROR_PTHREAD_CREATE));
+			return ((int)set_error_code(tab, ERROR_PTHREAD_CREATE));
 		pthread_detach(tab->phi_t[i]);
 		if (usleep(100) == -1)
-			return ((int)return_error(tab, ERROR_USLEEP));
+			return ((int)set_error_code(tab, ERROR_USLEEP));
 	}
 	return (1);
 }
@@ -117,13 +123,13 @@ int	main(int ac, char **av)
 	t_tab	tab;
 
 	if (!initialize_variables_and_locks(&tab, ac, av))
-		return (1);
+		return (exit_error(&tab));
 	if (!create_philosophers(&tab))
-		return (1);
+		return (exit_error(&tab));
 	if (!monitor_philosophers(&tab))
-		return (1);
+		return (exit_error(&tab));
 	if (!destroy_locks(&tab))
-		return (1);
+		return (exit_error(&tab));
 	free_malloced_variables(&tab);
 	return (0);
 }

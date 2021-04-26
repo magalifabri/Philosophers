@@ -10,7 +10,7 @@ static int	grab_forks_if_available(t_tab *tab, t_thread_var_struct *s)
 		left_fork_i = s->phi_n - 1;
 	if (pthread_mutex_lock(&tab->forks[s->phi_n].lock) == -1
 		|| pthread_mutex_lock(&tab->forks[left_fork_i].lock) == -1)
-		return ((int)return_error(tab, ERROR_MUTEX_LOCK));
+		return ((int)set_error_code(tab, ERROR_MUTEX_LOCK));
 	if (tab->forks[s->phi_n].available == 1
 		&& tab->forks[left_fork_i].available == 1)
 	{
@@ -24,7 +24,7 @@ static int	grab_forks_if_available(t_tab *tab, t_thread_var_struct *s)
 	}
 	if (pthread_mutex_unlock(&tab->forks[s->phi_n].lock) == -1
 		|| pthread_mutex_unlock(&tab->forks[left_fork_i].lock) == -1)
-		return ((int)return_error(tab, ERROR_MUTEX_UNLOCK));
+		return ((int)set_error_code(tab, ERROR_MUTEX_UNLOCK));
 	return (1);
 }
 
@@ -43,7 +43,7 @@ static int	queue(t_tab *tab, t_thread_var_struct *s)
 {
 	while (s->time_last_meal + (tab->time_to_eat * 2) + 5 > tab->current_time)
 		if (usleep(1000) == -1)
-			return ((int)return_error(tab, ERROR_USLEEP));
+			return ((int)set_error_code(tab, ERROR_USLEEP));
 	if (!check_vitality(tab, s))
 		return (0);
 	return (1);
@@ -74,9 +74,9 @@ static int	thinking_to_eating(t_tab *tab, t_thread_var_struct *s)
 		time_done_eating = tab->current_time + tab->time_to_eat;
 		while (time_done_eating > tab->current_time)
 			if (usleep(1000) == -1)
-				return ((int)return_error(tab, ERROR_USLEEP));
+				return ((int)set_error_code(tab, ERROR_USLEEP));
 	}
-	if (tab->phi_died || tab->error_encountered)
+	if (tab->phi_died || tab->error_code)
 		return (0);
 	return (1);
 }
@@ -93,7 +93,7 @@ static int	thinking_to_eating(t_tab *tab, t_thread_var_struct *s)
 ** return values: When a philosopher dies, tab.phi_died is set to 1, which
 **     signals to the other threads and the main process, that a philosopher
 **     has died and things ought to be wrapped up. The same happens if an error
-**     is occurred via the variable tab.error_encountered. In both cases, NULL
+**     is occurred via the variable tab.error_code. In both cases, NULL
 **     is returned. When a philosopher has reached
 **     number_of_times_each_philosopher_must_eat, it also returns NULL.
 */
