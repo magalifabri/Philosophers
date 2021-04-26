@@ -31,7 +31,19 @@ static int	eating(t_tab *tab, t_thread_var_struct *s)
 	if (tab->number_of_times_each_philosopher_must_eat != -1
 		&& tab->n_times_eaten && tab->n_times_eaten[s->phi_n]
 		>= tab->number_of_times_each_philosopher_must_eat)
+	{
+		if (sem_wait(tab->fat_sem) == -1)
+			return ((int)set_error_code(tab, ERROR_SEM_WAIT));
 		put_status_msg(tab, s, B_GREEN"is fat"RESET);
+		tab->number_of_fat_philosophers++;
+		if (tab->number_of_fat_philosophers == tab->number_of_philosophers)
+		{
+			tab->all_fat = 1;
+			printf(B_GREEN"They're all fat. Good job!\n"RESET);
+		}
+		if (sem_post(tab->fat_sem) == -1)
+			return ((int)set_error_code(tab, ERROR_SEM_POST));
+	}
 	return (1);
 }
 

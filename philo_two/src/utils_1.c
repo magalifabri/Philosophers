@@ -2,7 +2,7 @@
 
 void	put_status_msg(t_tab *tab, t_thread_var_struct *s, char *msg)
 {
-	if (!tab->phi_died && !tab->error_code)
+	if (!tab->phi_died && !tab->error_code && !tab->all_fat)
 		printf("%lld %d %s\n",
 			(tab->current_time - tab->start_time), s->phi_n + 1, msg);
 }
@@ -56,4 +56,5 @@ void	wrap_up(t_tab *tab)
 	sem_unlink("fork_availability");
 	sem_unlink("starving_sem");
 	sem_unlink("id_sem");
+	sem_unlink("fat_sem");
 }

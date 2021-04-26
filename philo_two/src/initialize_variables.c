@@ -22,11 +22,13 @@ static int	initialize_more(t_tab *tab)
 	sem_unlink("fork_availability");
 	sem_unlink("starving_sem");
 	sem_unlink("id_sem");
+	sem_unlink("fat_sem");
 	tab->fork_availability = sem_open("fork_availability", O_CREAT, 0644,
 			tab->number_of_philosophers / 2);
 	tab->starving_sem = sem_open("starving_sem", O_CREAT, 0644, 1);
 	tab->id_sem = sem_open("id_sem", O_CREAT, 0644, 1);
-	if (tab->fork_availability == SEM_FAILED
+	tab->fat_sem = sem_open("fat_sem", O_CREAT, 0644, 1);
+	if (tab->fork_availability == SEM_FAILED || tab->fat_sem == SEM_FAILED
 		|| tab->starving_sem == SEM_FAILED || tab->id_sem == SEM_FAILED)
 		return ((int)set_error_code(tab, ERROR_SEM_OPEN));
 	return (1);
@@ -41,9 +43,6 @@ static int	initialize_more(t_tab *tab)
 
 int	initialize_variables(t_tab *tab, int ac, char **av)
 {
-	tab->n_times_eaten = NULL;
-	if (ac < 5 || ac > 6)
-		return ((int)set_error_code(tab, ERROR_AC));
 	tab->number_of_philosophers = ft_atoi(av[1]);
 	tab->time_to_die = ft_atoi(av[2]);
 	tab->time_to_eat = ft_atoi(av[3]);
@@ -60,6 +59,8 @@ int	initialize_variables(t_tab *tab, int ac, char **av)
 			return ((int)set_error_code(tab, ERROR_BAD_ARGS));
 	}
 	tab->phi_died = 0;
+	tab->number_of_fat_philosophers = 0;
+	tab->all_fat = 0;
 	tab->error_code = 0;
 	tab->start_time = get_current_time();
 	if (tab->start_time == -1)

@@ -59,6 +59,11 @@ void	free_malloced_variables(t_tab *tab)
 		free(tab->n_times_eaten);
 }
 
+/*
+Reason for usleep(): gives threads the time to exit (so no mutex locks are
+being used) before destroying the mutexes.
+*/
+
 int	destroy_locks(t_tab *tab)
 {
 	int	i;
