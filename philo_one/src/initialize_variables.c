@@ -27,8 +27,8 @@ static int	initialize_more(t_tab *tab)
 	}
 	if (pthread_mutex_init(&tab->put_status_lock, NULL) != 0)
 		return ((int)set_error_code(tab, ERROR_MUTEX_INIT));
-	if (pthread_mutex_init(&tab->id_lock, NULL) != 0)
-		return ((int)set_error_code(tab, ERROR_MUTEX_INIT));
+	// if (pthread_mutex_init(&tab->id_lock, NULL) != 0)
+	// 	return ((int)set_error_code(tab, ERROR_MUTEX_INIT));
 	if (pthread_mutex_init(&tab->death_lock, NULL) != 0)
 		return ((int)set_error_code(tab, ERROR_MUTEX_INIT));
 	tab->mutexes_initialized = 1;
