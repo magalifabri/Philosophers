@@ -75,7 +75,8 @@ int	destroy_locks(t_tab *tab)
 			return ((int)set_error_code(tab, ERROR_MUTEX_DESTROY));
 	if (pthread_mutex_destroy(&tab->put_status_lock) != 0
 		|| pthread_mutex_destroy(&tab->id_lock) != 0
-		|| pthread_mutex_destroy(&tab->death_lock) != 0)
+		|| pthread_mutex_destroy(&tab->death_lock) != 0
+		|| pthread_mutex_destroy(&tab->fat_lock) != 0)
 		return ((int)set_error_code(tab, ERROR_MUTEX_DESTROY));
 	return (1);
 }
