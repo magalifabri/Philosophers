@@ -68,7 +68,7 @@ int	destroy_locks(t_tab *tab)
 {
 	int	i;
 
-	usleep(10000);
+	// usleep(10000);
 	i = -1;
 	while (++i < tab->number_of_philosophers)
 		if (pthread_mutex_destroy(&tab->forks[i].lock) != 0)
