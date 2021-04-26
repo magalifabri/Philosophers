@@ -57,9 +57,9 @@ typedef struct s_tab
 	int				*n_times_eaten;
 	int				error_code;
 	int				mutexes_initialized;
-	pthread_mutex_t	*put_status_lock;
-	pthread_mutex_t	*id_lock;
-	pthread_mutex_t	*death_lock;
+	pthread_mutex_t	put_status_lock;
+	pthread_mutex_t	id_lock;
+	pthread_mutex_t	death_lock;
 }					t_tab;
 
 // ft_atoi.c
@@ -69,7 +69,7 @@ int					ft_atoi(const char *str);
 void				initialize_malloc_and_mutex_indicators(t_tab *tab);
 int					initialize_variables_and_locks(t_tab *tab, int ac,
 						char **av);
-void				initialize_variables_phi_f(t_tab *tab,
+int					initialize_variables_phi_f(t_tab *tab,
 						t_thread_var_struct *s);
 
 // main.c

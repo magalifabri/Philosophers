@@ -42,10 +42,12 @@ chance and drop dead.
 static int	queue(t_tab *tab, t_thread_var_struct *s)
 {
 	while (s->time_last_meal + (tab->time_to_eat * 2) + 5 > tab->current_time)
+	{
 		if (usleep(1000) == -1)
 			return ((int)set_error_code(tab, ERROR_USLEEP));
-	if (!check_vitality(tab, s))
-		return (0);
+		if (!check_vitality(tab, s))
+			return (0);
+	}
 	return (1);
 }
 
@@ -104,14 +106,8 @@ void	*phi_f(void *arg)
 	t_thread_var_struct	s;
 
 	tab = (t_tab *)arg;
-
-	if (pthread_mutex_lock(tab->id_lock) == -1)
-		return (set_error_code(tab, ERROR_MUTEX_LOCK));
-	s.phi_n = tab->phi_n_c++;
-	if (pthread_mutex_unlock(tab->id_lock) == -1)
-		return (set_error_code(tab, ERROR_MUTEX_UNLOCK));
-	
-	initialize_variables_phi_f(tab, &s);
+	if (!initialize_variables_phi_f(tab, &s))
+		return (NULL);
 	while (1)
 	{
 		if (!check_vitality(tab, &s))
