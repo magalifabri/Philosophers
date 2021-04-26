@@ -56,10 +56,10 @@ typedef struct s_tab
 	int				phi_died;
 	int				*n_times_eaten;
 	int				error_code;
-	// pthread_t		*phi_t;
 	int				mutexes_initialized;
 	pthread_mutex_t	*put_status_lock;
 	pthread_mutex_t	*id_lock;
+	pthread_mutex_t	*death_lock;
 }					t_tab;
 
 // ft_atoi.c

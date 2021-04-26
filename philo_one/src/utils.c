@@ -24,9 +24,13 @@ int	check_vitality(t_tab *tab, t_thread_var_struct *s)
 {
 	if (s->time_last_meal + tab->time_to_die <= tab->current_time)
 	{
-		if (!put_status(tab, s->phi_n + 1, B_RED"died"RESET))
-			return (0);
+		if (pthread_mutex_lock(tab->death_lock) == -1)
+			return ((int)set_error_code(tab, ERROR_MUTEX_LOCK));
 		tab->phi_died = 1;
+		// if (!put_status(tab, s->phi_n + 1, B_RED"died"RESET))
+		// 	return (0);
+		printf("%lld %d "B_RED"died"RESET"\n",
+			(tab->current_time - tab->start_time), s->phi_n + 1);
 		return (0);
 	}
 	return (1);
@@ -51,10 +55,10 @@ void	free_malloced_variables(t_tab *tab)
 		free(tab->forks);
 	if (tab->n_times_eaten)
 		free(tab->n_times_eaten);
-	// if (tab->phi_t)
-	// 	free(tab->phi_t);
 	if (tab->put_status_lock)
 		free(tab->put_status_lock);
+	if (tab->id_lock)
+		free(tab->id_lock);
 }
 
 /*
@@ -74,6 +78,8 @@ int	destroy_locks(t_tab *tab)
 		if (pthread_mutex_destroy(&tab->forks[i].lock) != 0)
 			return ((int)set_error_code(tab, ERROR_MUTEX_DESTROY));
 	if (pthread_mutex_destroy(tab->put_status_lock) != 0)
+		return ((int)set_error_code(tab, ERROR_MUTEX_DESTROY));
+	if (pthread_mutex_destroy(tab->id_lock) != 0)
 		return ((int)set_error_code(tab, ERROR_MUTEX_DESTROY));
 	return (1);
 }
