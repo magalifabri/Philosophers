@@ -23,7 +23,7 @@ int	check_vitality(t_tab *tab, t_thread_var_struct *s)
 	{
 		if (pthread_mutex_lock(&tab->death_lock) == -1)
 			return ((int)set_error_code(tab, ERROR_MUTEX_LOCK));
-		if (!tab->phi_died)
+		if (!tab->phi_died && !tab->error_code && !tab->all_fat)
 		{
 			tab->phi_died = 1;
 			printf("%lld %d "B_RED"died"RESET"\n",
