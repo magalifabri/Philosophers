@@ -59,17 +59,11 @@ void	free_malloced_variables(t_tab *tab)
 		free(tab->n_times_eaten);
 }
 
-/*
-** Note(s) on destroy_locks():
-** 
-** Reason for usleep(): give threads the time to exit (so no mutex locks are
-** being used) before destroying the mutexes.
-*/
-
 int	destroy_locks(t_tab *tab)
 {
 	int	i;
 
+	usleep(10000);
 	i = -1;
 	while (++i < tab->number_of_philosophers)
 		if (pthread_mutex_destroy(&tab->forks[i].lock) != 0)

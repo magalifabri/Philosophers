@@ -68,14 +68,6 @@ int	monitor_philosophers(t_tab *tab)
 	return (0);
 }
 
-/*
-** Note(s) on create_philosophers():
-** 
-** Reason for usleep(): tab.phi_n needs to be copied over in each phi_f thread
-** to tell the thread the number of the philosopher it represents. So we want
-** to give each thread a bit of time to copy this value.
-*/
-
 static int	create_philosophers(t_tab *tab)
 {
 	pthread_t	philosopher_thread;
