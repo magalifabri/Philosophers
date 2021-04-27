@@ -51,7 +51,7 @@ void	free_malloced_variables(t_tab *tab)
 
 void	wrap_up(t_tab *tab)
 {
-	usleep(1000);
+	usleep(10000);
 	free_malloced_variables(tab);
 	sem_unlink("fork_availability");
 	sem_unlink("starving_sem");
