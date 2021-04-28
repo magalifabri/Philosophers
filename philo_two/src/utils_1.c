@@ -61,6 +61,5 @@ void	wrap_up(t_tab *tab)
 	sem_unlink("fork_availability");
 	sem_unlink("starving_sem");
 	sem_unlink("id_sem");
-	sem_unlink("fat_sem");
 	sem_unlink("put_status_msg_sem");
 }

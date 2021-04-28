@@ -39,7 +39,6 @@ typedef struct s_tab
 	sem_t		*fork_availability;
 	sem_t		*starving_sem;
 	sem_t		*id_sem;
-	sem_t		*fat_sem;
 	sem_t		*put_status_msg_sem;
 	int			phi_n_c;
 	int			number_of_fat_philosophers;

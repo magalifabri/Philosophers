@@ -22,15 +22,13 @@ static int	initialize_more(t_tab *tab)
 	sem_unlink("fork_availability");
 	sem_unlink("starving_sem");
 	sem_unlink("id_sem");
-	sem_unlink("fat_sem");
 	sem_unlink("put_status_msg_sem");
 	tab->fork_availability = sem_open("fork_availability", O_CREAT, 0644,
 			tab->number_of_philosophers / 2);
 	tab->starving_sem = sem_open("starving_sem", O_CREAT, 0644, 1);
 	tab->id_sem = sem_open("id_sem", O_CREAT, 0644, 1);
-	tab->fat_sem = sem_open("fat_sem", O_CREAT, 0644, 1);
 	tab->put_status_msg_sem = sem_open("put_status_msg_sem", O_CREAT, 0644, 1);
-	if (tab->fork_availability == SEM_FAILED || tab->fat_sem == SEM_FAILED
+	if (tab->fork_availability == SEM_FAILED
 		|| tab->starving_sem == SEM_FAILED || tab->id_sem == SEM_FAILED
 		|| tab->put_status_msg_sem == SEM_FAILED)
 		return ((int)set_exit_code(tab, ERROR_SEM_OPEN));
