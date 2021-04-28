@@ -64,7 +64,10 @@ static int	monitor_philosophers(t_tab *tab)
 			return (1);
 		}
 		if (tab->all_fat)
+		{
+			printf(B_GREEN"They're all fat. Good job!\n"RESET);
 			return (1);
+		}
 		// if (check_if_all_are_fat(tab))
 		// 	return (1);
 	}
