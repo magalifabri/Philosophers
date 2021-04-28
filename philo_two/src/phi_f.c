@@ -10,7 +10,33 @@ void	*starving(t_tab *tab, t_thread_var_struct *s)
 		printf("%lld %d "B_RED"died"RESET"\n",
 			(tab->current_time - tab->start_time), s->phi_n + 1);
 	}
+	if (sem_post(tab->starving_sem) == -1)
+		return (set_exit_code(tab, ERROR_SEM_WAIT));
 	return (NULL);
+}
+
+static int	check_fatness(t_tab *tab, t_thread_var_struct *s)
+{
+	if (tab->n_times_eaten)
+		tab->n_times_eaten[s->phi_n]++;
+	if (tab->number_of_times_each_philosopher_must_eat != -1
+		&& tab->n_times_eaten && tab->n_times_eaten[s->phi_n]
+		== tab->number_of_times_each_philosopher_must_eat)
+	{
+		if (sem_wait(tab->put_status_msg_sem) == -1)
+			return ((int)set_exit_code(tab, ERROR_SEM_WAIT));
+		printf("%lld %d "B_GREEN"is fat"RESET"\n",
+			(tab->current_time - tab->start_time), s->phi_n + 1);
+		tab->number_of_fat_philosophers++;
+		if (tab->number_of_fat_philosophers == tab->number_of_philosophers)
+		{
+			tab->exit_code = ALL_FAT;
+			return (0);
+		}
+		if (sem_post(tab->put_status_msg_sem) == -1)
+			return ((int)set_exit_code(tab, ERROR_SEM_POST));
+	}
+	return (1);
 }
 
 static int	eating(t_tab *tab, t_thread_var_struct *s)
@@ -35,26 +61,7 @@ static int	eating(t_tab *tab, t_thread_var_struct *s)
 			return ((int)set_exit_code(tab, ERROR_USLEEP));
 	if (tab->exit_code)
 		return (0);
-	if (tab->n_times_eaten)
-		tab->n_times_eaten[s->phi_n]++;
-	if (tab->number_of_times_each_philosopher_must_eat != -1
-		&& tab->n_times_eaten && tab->n_times_eaten[s->phi_n]
-		== tab->number_of_times_each_philosopher_must_eat)
-	{
-		if (sem_wait(tab->put_status_msg_sem) == -1)
-			return ((int)set_exit_code(tab, ERROR_SEM_WAIT));
-		printf("%lld %d "B_GREEN"is fat"RESET"\n",
-			(tab->current_time - tab->start_time), s->phi_n + 1);
-		tab->number_of_fat_philosophers++;
-		if (tab->number_of_fat_philosophers == tab->number_of_philosophers)
-		{
-			tab->exit_code = ALL_FAT;
-			return (0);
-		}
-		if (sem_post(tab->put_status_msg_sem) == -1)
-			return ((int)set_exit_code(tab, ERROR_SEM_POST));
-	}
-	return (1);
+	return (check_fatness(tab, s));
 }
 
 static int	sleeping(t_tab *tab, t_thread_var_struct *s)
