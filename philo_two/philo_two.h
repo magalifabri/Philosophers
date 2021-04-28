@@ -44,7 +44,6 @@ typedef struct s_tab
 	int			number_of_fat_philosophers;
 	int			*n_times_eaten;
 	int			exit_code;
-	int			returned;
 }				t_tab;
 
 // struct for variables used in phi_f() (the threads)
