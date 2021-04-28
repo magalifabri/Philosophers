@@ -6,8 +6,12 @@ void	*grimreaper(void *arg)
 
 	s = (t_thread_var_struct *)arg;
 	while (s->time_last_meal + s->tab->time_to_die > s->tab->current_time)
+	{
 		if (usleep(1000) == -1)
 			return (set_exit_code(s->tab, ERROR_USLEEP));
+		if (s->tab->exit_code)
+			return (NULL);
+	}
 	return (starving(s->tab, s));
 }
 
