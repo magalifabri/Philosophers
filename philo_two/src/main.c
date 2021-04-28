@@ -13,27 +13,6 @@ long long	get_current_time(void)
 	return (passed_time);
 }
 
-// static int	check_if_all_are_fat(t_tab *tab)
-// {
-// 	int	i;
-// 	int	number_of_fat_philosophers;
-
-// 	i = -1;
-// 	number_of_fat_philosophers = 0;
-// 	while (++i < tab->number_of_philosophers)
-// 	{
-// 		if (tab->n_times_eaten[i]
-// 			== tab->number_of_times_each_philosopher_must_eat)
-// 			number_of_fat_philosophers++;
-// 		if (number_of_fat_philosophers == tab->number_of_philosophers)
-// 		{
-// 			printf(B_GREEN"They're all fat. Good job!\n"RESET);
-// 			return (1);
-// 		}
-// 	}
-// 	return (0);
-// }
-
 /*
 ** Note(s) on monitor_philosophers():
 ** 
@@ -68,15 +47,12 @@ static int	monitor_philosophers(t_tab *tab)
 		}
 		else if (tab->exit_code)
 			return (0);
-		// if (check_if_all_are_fat(tab))
-		// 	return (1);
 	}
 	return (0);
 }
 
 static int	create_philosophers(t_tab *tab)
 {
-	pthread_t	philosopher_thread;
 	int			i;
 
 	tab->phi_n_c = 0;
@@ -84,11 +60,9 @@ static int	create_philosophers(t_tab *tab)
 	tab->current_time = get_current_time();
 	if (tab->current_time == -1)
 		return ((int)set_exit_code(tab, ERROR_GETTIMEOFDAY));
-	while (++i < tab->number_of_philosophers
-		&& !tab->exit_code)
-		if (pthread_create(&philosopher_thread, NULL, phi_f, tab) != 0)
+	while (++i < tab->number_of_philosophers && !tab->exit_code)
+		if (pthread_create(&tab->philosopher_thread, NULL, phi_f, tab) != 0)
 			return ((int)set_exit_code(tab, ERROR_PTHREAD_CREATE));
-	pthread_detach(philosopher_thread);
 	return (1);
 }
 

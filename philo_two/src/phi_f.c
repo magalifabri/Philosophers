@@ -2,7 +2,7 @@
 
 void	*starving(t_tab *tab, t_thread_var_struct *s)
 {
-	if (sem_wait(tab->starving_sem) == -1)
+	if (sem_wait(tab->print_sem) == -1)
 		return (set_exit_code(tab, ERROR_SEM_WAIT));
 	if (!tab->exit_code)
 	{
@@ -10,7 +10,7 @@ void	*starving(t_tab *tab, t_thread_var_struct *s)
 		printf("%lld %d "B_RED"died"RESET"\n",
 			(tab->current_time - tab->start_time), s->phi_n + 1);
 	}
-	if (sem_post(tab->starving_sem) == -1)
+	if (sem_post(tab->print_sem) == -1)
 		return (set_exit_code(tab, ERROR_SEM_WAIT));
 	return (NULL);
 }
@@ -23,17 +23,17 @@ static int	check_fatness(t_tab *tab, t_thread_var_struct *s)
 		&& tab->n_times_eaten && tab->n_times_eaten[s->phi_n]
 		== tab->number_of_times_each_philosopher_must_eat)
 	{
-		if (sem_wait(tab->put_status_msg_sem) == -1)
+		if (sem_wait(tab->print_sem) == -1)
 			return ((int)set_exit_code(tab, ERROR_SEM_WAIT));
-		printf("%lld %d "B_GREEN"is fat"RESET"\n",
-			(tab->current_time - tab->start_time), s->phi_n + 1);
-		tab->number_of_fat_philosophers++;
-		if (tab->number_of_fat_philosophers == tab->number_of_philosophers)
+		if (!tab->exit_code)
 		{
-			tab->exit_code = ALL_FAT;
-			return (0);
+			printf("%lld %d "B_GREEN"is fat"RESET"\n",
+				(tab->current_time - tab->start_time), s->phi_n + 1);
+			tab->number_of_fat_philosophers++;
+			if (tab->number_of_fat_philosophers == tab->number_of_philosophers)
+				tab->exit_code = ALL_FAT;
 		}
-		if (sem_post(tab->put_status_msg_sem) == -1)
+		if (sem_post(tab->print_sem) == -1)
 			return ((int)set_exit_code(tab, ERROR_SEM_POST));
 	}
 	return (1);
@@ -43,9 +43,7 @@ static int	eating(t_tab *tab, t_thread_var_struct *s)
 {
 	long long	time_done_eating;
 
-	// printf("eating: %lld %d\n",
-	// 	(tab->current_time - tab->start_time), s->phi_n + 1);
-	if (sem_wait(tab->fork_availability) == -1)
+	if (sem_wait(tab->fork_sem) == -1)
 		return ((int)set_exit_code(tab, ERROR_SEM_WAIT));
 	if (!put_status_msg(tab, s, "has taken a fork")
 		|| !put_status_msg(tab, s, "has taken a fork"))
@@ -59,8 +57,6 @@ static int	eating(t_tab *tab, t_thread_var_struct *s)
 	while (time_done_eating > tab->current_time && !tab->exit_code)
 		if (usleep(1000) == -1)
 			return ((int)set_exit_code(tab, ERROR_USLEEP));
-	if (tab->exit_code)
-		return (0);
 	return (check_fatness(tab, s));
 }
 
@@ -68,11 +64,9 @@ static int	sleeping(t_tab *tab, t_thread_var_struct *s)
 {
 	long long	waking_time;
 
-	// printf("sleeping: %lld %d\n",
-	// 	(tab->current_time - tab->start_time), s->phi_n + 1);
 	if (!put_status_msg(tab, s, "is sleeping"))
 		return (0);
-	if (sem_post(tab->fork_availability) == -1)
+	if (sem_post(tab->fork_sem) == -1)
 		return ((int)set_exit_code(tab, ERROR_SEM_POST));
 	waking_time = tab->current_time + tab->time_to_sleep;
 	while (waking_time > tab->current_time && !tab->exit_code)
@@ -106,7 +100,6 @@ void	*phi_f(void *arg)
 	s->tab = tab;
 	if (pthread_create(&grimreaper_thread, NULL, grimreaper, s) != 0)
 		return (NULL);
-	pthread_detach(grimreaper_thread);
 	while (1)
 		if (!eating(tab, s) || !sleeping(tab, s))
 			return (NULL);

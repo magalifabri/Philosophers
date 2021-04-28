@@ -36,14 +36,15 @@ typedef struct s_tab
 	int			time_to_eat;
 	int			time_to_sleep;
 	int			number_of_times_each_philosopher_must_eat;
-	sem_t		*fork_availability;
-	sem_t		*starving_sem;
+	pthread_t	philosopher_thread;
+	sem_t		*fork_sem;
 	sem_t		*id_sem;
-	sem_t		*put_status_msg_sem;
+	sem_t		*print_sem;
 	int			phi_n_c;
 	int			number_of_fat_philosophers;
 	int			*n_times_eaten;
 	int			exit_code;
+	int			returned;
 }				t_tab;
 
 // struct for variables used in phi_f() (the threads)

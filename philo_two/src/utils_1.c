@@ -2,14 +2,19 @@
 
 int	put_status_msg(t_tab *tab, t_thread_var_struct *s, char *msg)
 {
-	sem_wait(tab->put_status_msg_sem);
+	int ret;
+
+	ret = 1;
+	if (sem_wait(tab->print_sem) == -1)
+		return ((int)set_exit_code(tab, ERROR_SEM_WAIT));
 	if (!tab->exit_code)
 		printf("%lld %d %s\n",
 			(tab->current_time - tab->start_time), s->phi_n + 1, msg);
 	else
-		return (0);
-	sem_post(tab->put_status_msg_sem);
-	return (1);
+		ret = 0;
+	if (sem_post(tab->print_sem) == -1)
+		return ((int)set_exit_code(tab, ERROR_SEM_WAIT));
+	return (ret);
 }
 
 int	exit_error(t_tab *tab)
@@ -56,10 +61,11 @@ void	free_malloced_variables(t_tab *tab)
 
 void	wrap_up(t_tab *tab)
 {
+	if (pthread_join(tab->philosopher_thread, NULL) != 0)
+		printf(B_RED"ERROR: "RESET"pthread_join() didn't return 0\n");
 	usleep(10000);
 	free_malloced_variables(tab);
-	sem_unlink("fork_availability");
-	sem_unlink("starving_sem");
+	sem_unlink("fork_sem");
 	sem_unlink("id_sem");
-	sem_unlink("put_status_msg_sem");
+	sem_unlink("print_sem");
 }

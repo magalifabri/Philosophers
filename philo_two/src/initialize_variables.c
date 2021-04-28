@@ -3,8 +3,8 @@
 /*
 ** Note(s) on initialize_variables_part_2():
 ** 
-** "sem_unlink("fork_availability");" is required in case the program was
-** exited badly the previous time and the semaphore wasn't unlinked. Possible
+** "sem_unlink(x);" is required in case the program was
+** exited badly the previous time and the semaphores weren't unlinked. Possible
 ** errors are irrelevant enough to ignore them.
 */
 
@@ -19,18 +19,15 @@ static int	initialize_more(t_tab *tab)
 	while (++i < tab->number_of_philosophers)
 		tab->n_times_eaten[i] = 0;
 	i = -1;
-	sem_unlink("fork_availability");
-	sem_unlink("starving_sem");
+	sem_unlink("fork_sem");
 	sem_unlink("id_sem");
-	sem_unlink("put_status_msg_sem");
-	tab->fork_availability = sem_open("fork_availability", O_CREAT, 0644,
+	sem_unlink("print_sem");
+	tab->fork_sem = sem_open("fork_sem", O_CREAT, 0644,
 			tab->number_of_philosophers / 2);
-	tab->starving_sem = sem_open("starving_sem", O_CREAT, 0644, 1);
 	tab->id_sem = sem_open("id_sem", O_CREAT, 0644, 1);
-	tab->put_status_msg_sem = sem_open("put_status_msg_sem", O_CREAT, 0644, 1);
-	if (tab->fork_availability == SEM_FAILED
-		|| tab->starving_sem == SEM_FAILED || tab->id_sem == SEM_FAILED
-		|| tab->put_status_msg_sem == SEM_FAILED)
+	tab->print_sem = sem_open("print_sem", O_CREAT, 0644, 1);
+	if (tab->fork_sem == SEM_FAILED || tab->id_sem == SEM_FAILED
+		|| tab->print_sem == SEM_FAILED)
 		return ((int)set_exit_code(tab, ERROR_SEM_OPEN));
 	return (1);
 }
