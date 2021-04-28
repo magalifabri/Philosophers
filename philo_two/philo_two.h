@@ -22,6 +22,8 @@
 # define ERROR_SEM_UNLINK 8
 # define ERROR_SEM_WAIT 9
 # define ERROR_SEM_POST 10
+# define DEATH 11
+# define ALL_FAT 12
 
 // main struct for variables used all throughout the source code
 typedef struct s_tab
@@ -40,11 +42,9 @@ typedef struct s_tab
 	sem_t		*fat_sem;
 	sem_t		*put_status_msg_sem;
 	int			phi_n_c;
-	int			phi_died;
 	int			number_of_fat_philosophers;
-	int			all_fat;
 	int			*n_times_eaten;
-	int			error_code;
+	int			exit_code;
 }				t_tab;
 
 // struct for variables used in phi_f() (the threads)
@@ -68,7 +68,7 @@ void			*phi_f(void *arg);
 // utils_1.c
 int				put_status_msg(t_tab *tab, t_thread_var_struct *s, char *msg);
 int				exit_error(t_tab *tab);
-void			*set_error_code(t_tab *tab, int error_code);
+void			*set_exit_code(t_tab *tab, int exit_code);
 void			free_malloced_variables(t_tab *tab);
 void			wrap_up(t_tab *tab);
 

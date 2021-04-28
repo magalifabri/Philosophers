@@ -52,22 +52,22 @@ static int	monitor_philosophers(t_tab *tab)
 	while (1)
 	{
 		if (usleep(1000) == -1)
-			return ((int)set_error_code(tab, ERROR_USLEEP));
+			return ((int)set_exit_code(tab, ERROR_USLEEP));
 		tab->current_time = get_current_time();
 		if (tab->current_time == -1)
-			return ((int)set_error_code(tab, ERROR_GETTIMEOFDAY));
-		if (tab->error_code)
-			return (0);
-		if (tab->phi_died == 1)
+			return ((int)set_exit_code(tab, ERROR_GETTIMEOFDAY));
+		if (tab->exit_code == DEATH)
 		{
 			printf(B_RED"A philosopher has starved! Game over."RESET"\n");
 			return (1);
 		}
-		if (tab->all_fat)
+		else if (tab->exit_code == ALL_FAT)
 		{
 			printf(B_GREEN"They're all fat. Good job!\n"RESET);
 			return (1);
 		}
+		else if (tab->exit_code)
+			return (0);
 		// if (check_if_all_are_fat(tab))
 		// 	return (1);
 	}
@@ -83,11 +83,11 @@ static int	create_philosophers(t_tab *tab)
 	i = -1;
 	tab->current_time = get_current_time();
 	if (tab->current_time == -1)
-		return ((int)set_error_code(tab, ERROR_GETTIMEOFDAY));
+		return ((int)set_exit_code(tab, ERROR_GETTIMEOFDAY));
 	while (++i < tab->number_of_philosophers
-		&& !tab->error_code && !tab->phi_died)
+		&& !tab->exit_code)
 		if (pthread_create(&philosopher_thread, NULL, phi_f, tab) != 0)
-			return ((int)set_error_code(tab, ERROR_PTHREAD_CREATE));
+			return ((int)set_exit_code(tab, ERROR_PTHREAD_CREATE));
 	pthread_detach(philosopher_thread);
 	return (1);
 }
@@ -99,7 +99,7 @@ int	main(int ac, char **av)
 	tab.n_times_eaten = NULL;
 	if (ac < 5 || ac > 6)
 	{
-		set_error_code(&tab, ERROR_AC);
+		set_exit_code(&tab, ERROR_AC);
 		return (exit_error(&tab));
 	}
 	if (!initialize_variables(&tab, ac, av)
