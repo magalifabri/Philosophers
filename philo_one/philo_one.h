@@ -25,22 +25,12 @@
 # define DEATH 11
 # define ALL_FAT 12
 
-// struct for variables used in phi_f() (the threads)
-typedef struct s_thread_variable_struct
-{
-	int				phi_n;
-	int				got_forks;
-	int				phi_state;
-	long long		time_last_meal;
-	long long		time_sleep_start;
-}					t_thread_var_struct;
 
 // struct for variables related to the forks (cutlery)
 typedef struct s_frk
 {
 	int				available;
 	pthread_mutex_t	lock;
-	int				lock_initialized;
 }					t_frk;
 
 // main struct for variables used all throughout the source code
@@ -56,6 +46,7 @@ typedef struct s_tab
 	int				time_to_sleep;
 	int				number_of_times_each_philosopher_must_eat;
 	t_frk			*forks;
+	int				n_fork_locks_initialized;
 	int				number_of_fat_philosophers;
 	int				*n_times_eaten;
 	int				exit_code;
@@ -66,8 +57,14 @@ typedef struct s_tab
 	pthread_t		philosopher_thread;
 }					t_tab;
 
-// ft_atoi.c
-int					ft_atoi(const char *str);
+// struct for variables used in phi_f() (the threads)
+typedef struct s_thread_variable_struct
+{
+	int				phi_n;
+	int				left_fork_i;
+	long long		time_last_meal;
+	t_tab			*tab;
+}					t_thread_var_struct;
 
 // initialize_variables.c
 void				pre_initialisation(t_tab *tab);
@@ -81,18 +78,19 @@ int					initialize_variables_phi_f(t_tab *tab,
 int					return_error(t_tab *tab, int error_num);
 void				*set_exit_code(t_tab *tab, int exit_code);
 
-// phi_f_eating_to_thinking.c
-int					eating_to_thinking(t_tab *tab, t_thread_var_struct *s);
-
 // phi_f.c
 int					check_vitality(t_tab *tab, t_thread_var_struct *s);
 void				*phi_f(void *arg);
 
-// utils.c
+// utils_1.c
 int					put_status(t_tab *tab, int philo_n, char *msg);
 long long			get_current_time(t_tab *tab);
 int					destroy_locks(t_tab *tab);
 void				free_malloced_variables(t_tab *tab);
 void				wrap_up(t_tab *tab);
+
+// utils_2.c
+void				*grimreaper(void *arg);
+int					ft_atoi(const char *str);
 
 #endif

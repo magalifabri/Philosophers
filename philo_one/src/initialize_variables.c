@@ -2,15 +2,12 @@
 
 void	pre_initialisation(t_tab *tab)
 {
-	int i;
-
+	tab->exit_code = 0;
 	tab->forks = NULL;
 	tab->n_times_eaten = NULL;
+	tab->n_fork_locks_initialized = 0;
 	tab->put_status_lock_initialized = 0;
 	tab->id_lock_initialized = 0;
-	i = -1;
-	while (++i < tab->number_of_philosophers)
-		tab->forks[i].lock_initialized = 0;
 }
 
 static int	initialize_more(t_tab *tab)
@@ -30,7 +27,7 @@ static int	initialize_more(t_tab *tab)
 		if (pthread_mutex_init(&tab->forks[i].lock, NULL) != 0)
 			return ((int)set_exit_code(tab, ERROR_MUTEX_INIT));
 		tab->forks[i].available = 1;
-		tab->forks[i].lock_initialized = 1;
+		tab->n_fork_locks_initialized++;
 	}
 	if (pthread_mutex_init(&tab->put_status_lock, NULL) != 0)
 		return ((int)set_exit_code(tab, ERROR_MUTEX_INIT));
@@ -66,7 +63,6 @@ int	initialize_variables_and_locks(t_tab *tab, int ac, char **av)
 			return ((int)set_exit_code(tab, ERROR_BAD_ARGS));
 	}
 	tab->number_of_fat_philosophers = 0;
-	tab->exit_code = 0;
 	tab->start_time = get_current_time(tab);
 	if (!tab->start_time)
 		return (0);
@@ -80,9 +76,11 @@ int	initialize_variables_phi_f(t_tab *tab, t_thread_var_struct *s)
 	s->phi_n = tab->phi_n_c++;
 	if (pthread_mutex_unlock(&tab->id_lock) == -1)
 		return ((int)set_exit_code(tab, ERROR_MUTEX_UNLOCK));
-	s->got_forks = 0;
-	s->phi_state = 't';
-	s->time_sleep_start = tab->start_time;
+	if (s->phi_n == 0)
+		s->left_fork_i = tab->number_of_philosophers - 1;
+	else
+		s->left_fork_i = s->phi_n - 1;
 	s->time_last_meal = tab->start_time;
+	s->tab = tab;
 	return (1);
 }

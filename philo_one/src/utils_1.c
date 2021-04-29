@@ -55,7 +55,7 @@ int	destroy_locks(t_tab *tab)
 	int	i;
 
 	i = -1;
-	while (tab->forks[++i].lock_initialized)
+	while (++i < tab->n_fork_locks_initialized)
 		if (pthread_mutex_destroy(&tab->forks[i].lock) != 0)
 			return ((int)set_exit_code(tab, ERROR_MUTEX_DESTROY));
 	if (tab->put_status_lock_initialized)
