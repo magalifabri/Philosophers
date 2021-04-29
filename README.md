@@ -3,6 +3,7 @@
 
 TO-DO:
 - in philo_one and _three, do philosophers die after time_to_die from the start of their thread or from the start of the program?
+- in p2 and p3, initialize exit_code in pre_initialization
 
 - problem (2): Invalid free: Because threads can call free on a variable that is shared between the threads, this makes it possible for multiple threads to do so at the same time.
 	- solution: Only call free from the main process. return_error() becomes set_error_code() + exit_error()
