@@ -63,14 +63,16 @@ int	monitor_philosophers(t_tab *tab)
 			return (1);
 		}
 		if (tab->all_fat)
+		{
+			printf(B_GREEN"They're all fat. Good job!\n"RESET);
 			return (1);
+		}
 	}
 	return (0);
 }
 
 static int	create_philosophers(t_tab *tab)
 {
-	pthread_t	philosopher_thread;
 	int			i;
 
 	tab->phi_n_c = 0;
@@ -80,9 +82,8 @@ static int	create_philosophers(t_tab *tab)
 		return (0);
 	while (++i < tab->number_of_philosophers
 		&& !tab->error_code && !tab->phi_died)
-		if (pthread_create(&philosopher_thread, NULL, phi_f, tab) != 0)
+		if (pthread_create(&tab->philosopher_thread, NULL, phi_f, tab) != 0)
 			return ((int)set_error_code(tab, ERROR_PTHREAD_CREATE));
-	pthread_detach(philosopher_thread);
 	return (1);
 }
 
@@ -104,6 +105,7 @@ int	main(int ac, char **av)
 		return (exit_error(&tab));
 	if (!destroy_locks(&tab))
 		return (exit_error(&tab));
+	pthread_join(tab.philosopher_thread, NULL);
 	free_malloced_variables(&tab);
 	return (0);
 }
