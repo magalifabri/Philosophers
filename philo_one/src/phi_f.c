@@ -71,18 +71,17 @@ static int	sleeping_thinking(t_tab *tab, t_thread_var_struct *s)
 		return (0);
 	if (!put_status(tab, s->phi_n + 1, "is sleeping"))
 		return (0);
-	long long	waking_time;
-
-	waking_time = tab->current_time + tab->time_to_sleep;
-	while (waking_time > tab->current_time && !tab->exit_code)
-	{
-		if (!check_vitality(tab, s))
-			return (0);
-		if (usleep(1000) == -1)
-			return ((int)set_exit_code(tab, ERROR_USLEEP));
-	}
-	// if (usleep(1000 * tab->time_to_sleep) == -1)
-	// 	return ((int)set_exit_code(tab, ERROR_USLEEP));
+	// long long	waking_time;
+	// waking_time = tab->current_time + tab->time_to_sleep;
+	// while (waking_time > tab->current_time && !tab->exit_code)
+	// {
+	// 	if (!check_vitality(tab, s))
+	// 		return (0);
+	// 	if (usleep(1000) == -1)
+	// 		return ((int)set_exit_code(tab, ERROR_USLEEP));
+	// }
+	if (usleep(1000 * tab->time_to_sleep) == -1)
+		return ((int)set_exit_code(tab, ERROR_USLEEP));
 	if (!put_status(tab, s->phi_n + 1, "is thinking"))
 		return (0);
 	return (1);
@@ -103,23 +102,27 @@ static int	eating(t_tab *tab, t_thread_var_struct *s)
 		return (0);
 	}
 	s->time_last_meal = tab->current_time;
-	// if (usleep(1000 * tab->time_to_eat) == -1)
-	long long	time_done_eating;
-
-	time_done_eating = tab->current_time + tab->time_to_eat;
-	while (time_done_eating > tab->current_time && !tab->exit_code)
+	// long long	time_done_eating;
+	// time_done_eating = tab->current_time + tab->time_to_eat;
+	// while (time_done_eating > tab->current_time && !tab->exit_code)
+	// {
+		// if (usleep(1000) == -1)
+		// {
+		// 	pthread_mutex_unlock(&tab->forks[s->phi_n].lock);
+		// 	pthread_mutex_unlock(&tab->forks[s->left_fork_i].lock);
+		// 	return ((int)set_exit_code(tab, ERROR_USLEEP));
+		// }
+	// }
+	if (usleep(1000 * tab->time_to_eat) == -1)
 	{
-		if (usleep(1000) == -1)
-		{
-			pthread_mutex_unlock(&tab->forks[s->phi_n].lock);
-			pthread_mutex_unlock(&tab->forks[s->left_fork_i].lock);
-			return ((int)set_exit_code(tab, ERROR_USLEEP));
-		}
+		pthread_mutex_unlock(&tab->forks[s->phi_n].lock);
+		pthread_mutex_unlock(&tab->forks[s->left_fork_i].lock);
+		return ((int)set_exit_code(tab, ERROR_USLEEP));
 	}
 	if (pthread_mutex_unlock(&tab->forks[s->phi_n].lock) == -1
 		|| pthread_mutex_unlock(&tab->forks[s->left_fork_i].lock) == -1)
 		return ((int)set_exit_code(tab, ERROR_MUTEX_LOCK));
-	put_status(tab, s->phi_n + 1, "is done eating");
+	// put_status(tab, s->phi_n + 1, "is done eating");
 	return (1);
 }
 
