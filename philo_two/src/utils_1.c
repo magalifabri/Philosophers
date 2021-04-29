@@ -26,7 +26,9 @@ int	put_status_msg(t_tab *tab, t_thread_var_struct *s, char *msg)
 
 void	*set_exit_code(t_tab *tab, int exit_code)
 {
-	if (exit_code == 0 || exit_code == DEATH || exit_code == ALL_FAT)
+	if (tab->exit_code == 0
+		|| tab->exit_code == DEATH
+		|| tab->exit_code == ALL_FAT)
 		tab->exit_code = exit_code;
 	return (NULL);
 }
