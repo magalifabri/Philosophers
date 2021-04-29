@@ -63,6 +63,7 @@ typedef struct s_tab
 	pthread_mutex_t	id_lock;
 	pthread_mutex_t	death_lock;
 	pthread_mutex_t	fat_lock;
+	pthread_t		philosopher_thread;
 }					t_tab;
 
 // ft_atoi.c
