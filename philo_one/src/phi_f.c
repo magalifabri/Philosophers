@@ -119,6 +119,7 @@ static int	eating(t_tab *tab, t_thread_var_struct *s)
 	if (pthread_mutex_unlock(&tab->forks[s->phi_n].lock) == -1
 		|| pthread_mutex_unlock(&tab->forks[s->left_fork_i].lock) == -1)
 		return ((int)set_exit_code(tab, ERROR_MUTEX_LOCK));
+	put_status(tab, s->phi_n + 1, "is done eating");
 	return (1);
 }
 
