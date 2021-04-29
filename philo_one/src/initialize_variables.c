@@ -77,7 +77,7 @@ int	initialize_variables_phi_f(t_tab *tab, t_thread_var_struct *s)
 		return ((int)set_error_code(tab, ERROR_MUTEX_UNLOCK));
 	s->got_forks = 0;
 	s->phi_state = 't';
-	s->time_sleep_start = tab->current_time;
-	s->time_last_meal = tab->current_time;
+	s->time_sleep_start = tab->start_time;
+	s->time_last_meal = tab->start_time;
 	return (1);
 }
