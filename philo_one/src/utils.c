@@ -9,14 +9,19 @@ has died, an error has occurred or all philosophers are fat.
 
 int	put_status(t_tab *tab, int philo_n, char *msg)
 {
+	int ret;
+
+	ret = 1;
 	if (pthread_mutex_lock(&tab->put_status_lock) == -1)
 		return ((int)set_error_code(tab, ERROR_MUTEX_LOCK));
 	if (!tab->phi_died && !tab->error_code && !tab->all_fat)
 		printf("%lld %d %s\n",
 			(tab->current_time - tab->start_time), philo_n, msg);
+	else
+		ret = 0;
 	if (pthread_mutex_unlock(&tab->put_status_lock) == -1)
 		return ((int)set_error_code(tab, ERROR_MUTEX_UNLOCK));
-	return (1);
+	return (ret);
 }
 
 int	check_vitality(t_tab *tab, t_thread_var_struct *s)

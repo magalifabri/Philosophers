@@ -15,11 +15,15 @@ static int	grab_forks_if_available(t_tab *tab, t_thread_var_struct *s)
 		&& tab->forks[left_fork_i].available == 1)
 	{
 		tab->forks[s->phi_n].available = 0;
-		if (!put_status(tab, s->phi_n + 1, "has taken a fork"))
-			return (0);
 		tab->forks[left_fork_i].available = 0;
-		if (!put_status(tab, s->phi_n + 1, "has taken a fork"))
+		if (!put_status(tab, s->phi_n + 1, "has taken a fork")
+			|| !put_status(tab, s->phi_n + 1, "has taken a fork"))
+		{
+			if (pthread_mutex_unlock(&tab->forks[s->phi_n].lock) == -1
+				|| pthread_mutex_unlock(&tab->forks[left_fork_i].lock) == -1)
+				return ((int)set_error_code(tab, ERROR_MUTEX_UNLOCK));
 			return (0);
+		}
 		s->got_forks = 1;
 	}
 	if (pthread_mutex_unlock(&tab->forks[s->phi_n].lock) == -1
@@ -41,13 +45,16 @@ chance and drop dead.
 
 static int	queue(t_tab *tab, t_thread_var_struct *s)
 {
-	while (s->time_last_meal + (tab->time_to_eat * 2) + 5 > tab->current_time)
+	while (s->time_last_meal + (tab->time_to_eat * 2) + 5 > tab->current_time
+		&& !tab->all_fat && !tab->phi_died && !tab->error_code)
 	{
 		if (usleep(1000) == -1)
 			return ((int)set_error_code(tab, ERROR_USLEEP));
 		if (!check_vitality(tab, s))
 			return (0);
 	}
+	if (tab->phi_died || tab->error_code || tab->all_fat)
+		return (0);
 	return (1);
 }
 
@@ -74,11 +81,12 @@ static int	thinking_to_eating(t_tab *tab, t_thread_var_struct *s)
 		if (!put_status(tab, s->phi_n + 1, "is eating"))
 			return (0);
 		time_done_eating = tab->current_time + tab->time_to_eat;
-		while (time_done_eating > tab->current_time)
+		while (time_done_eating > tab->current_time
+			&& !tab->all_fat && !tab->error_code && !tab->phi_died)
 			if (usleep(1000) == -1)
 				return ((int)set_error_code(tab, ERROR_USLEEP));
 	}
-	if (tab->phi_died || tab->error_code)
+	if (tab->phi_died || tab->error_code || tab->all_fat)
 		return (0);
 	return (1);
 }
