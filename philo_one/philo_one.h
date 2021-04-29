@@ -40,6 +40,7 @@ typedef struct s_frk
 {
 	int				available;
 	pthread_mutex_t	lock;
+	int				lock_initialized;
 }					t_frk;
 
 // main struct for variables used all throughout the source code
@@ -58,11 +59,10 @@ typedef struct s_tab
 	int				number_of_fat_philosophers;
 	int				*n_times_eaten;
 	int				exit_code;
-	int				mutexes_initialized;
 	pthread_mutex_t	put_status_lock;
+	int				put_status_lock_initialized;
 	pthread_mutex_t	id_lock;
-	pthread_mutex_t	death_lock;
-	pthread_mutex_t	fat_lock;
+	int				id_lock_initialized;
 	pthread_t		philosopher_thread;
 }					t_tab;
 
@@ -85,13 +85,14 @@ void				*set_exit_code(t_tab *tab, int exit_code);
 int					eating_to_thinking(t_tab *tab, t_thread_var_struct *s);
 
 // phi_f.c
+int					check_vitality(t_tab *tab, t_thread_var_struct *s);
 void				*phi_f(void *arg);
 
 // utils.c
 int					put_status(t_tab *tab, int philo_n, char *msg);
-int					check_vitality(t_tab *tab, t_thread_var_struct *s);
 long long			get_current_time(t_tab *tab);
 int					destroy_locks(t_tab *tab);
 void				free_malloced_variables(t_tab *tab);
+void				wrap_up(t_tab *tab);
 
 #endif

@@ -24,25 +24,6 @@ int	put_status(t_tab *tab, int philo_n, char *msg)
 	return (ret);
 }
 
-int	check_vitality(t_tab *tab, t_thread_var_struct *s)
-{
-	if (s->time_last_meal + tab->time_to_die <= tab->current_time)
-	{
-		if (pthread_mutex_lock(&tab->death_lock) == -1)
-			return ((int)set_exit_code(tab, ERROR_MUTEX_LOCK));
-		if (!tab->exit_code)
-		{
-			tab->exit_code = DEATH;
-			printf("%lld %d "B_RED"died"RESET"\n",
-				(tab->current_time - tab->start_time), s->phi_n + 1);
-		}
-		if (pthread_mutex_unlock(&tab->death_lock) == -1)
-			return ((int)set_exit_code(tab, ERROR_MUTEX_UNLOCK));
-		return (0);
-	}
-	return (1);
-}
-
 long long	get_current_time(t_tab *tab)
 {
 	struct timeval	tp;
@@ -73,15 +54,23 @@ int	destroy_locks(t_tab *tab)
 {
 	int	i;
 
-	usleep(10000);
 	i = -1;
-	while (++i < tab->number_of_philosophers)
+	while (tab->forks[++i].lock_initialized)
 		if (pthread_mutex_destroy(&tab->forks[i].lock) != 0)
 			return ((int)set_exit_code(tab, ERROR_MUTEX_DESTROY));
-	if (pthread_mutex_destroy(&tab->put_status_lock) != 0
-		|| pthread_mutex_destroy(&tab->id_lock) != 0
-		|| pthread_mutex_destroy(&tab->death_lock) != 0
-		|| pthread_mutex_destroy(&tab->fat_lock) != 0)
-		return ((int)set_exit_code(tab, ERROR_MUTEX_DESTROY));
+	if (tab->put_status_lock_initialized)
+		if (pthread_mutex_destroy(&tab->put_status_lock) != 0)
+			return ((int)set_exit_code(tab, ERROR_MUTEX_DESTROY));
+	if (tab->id_lock_initialized)
+		if (pthread_mutex_destroy(&tab->id_lock) != 0)
+			return ((int)set_exit_code(tab, ERROR_MUTEX_DESTROY));
 	return (1);
+}
+
+void	wrap_up(t_tab *tab)
+{
+	usleep(10000);
+	pthread_join(tab->philosopher_thread, NULL);
+	destroy_locks(tab);
+	free_malloced_variables(tab);
 }

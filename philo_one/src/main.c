@@ -21,9 +21,7 @@ int	exit_error(t_tab *tab)
 		write(2, "bad arguments. Try again.\n", 27);
 	else if (tab->exit_code == ERROR_AC)
 		write(2, "too few or too many arguments\n", 31);
-	if (tab->mutexes_initialized)
-		destroy_locks(tab);
-	free_malloced_variables(tab);
+	wrap_up(tab);
 	return (1);
 }
 
@@ -114,9 +112,6 @@ int	main(int ac, char **av)
 		return (exit_error(&tab));
 	if (!monitor_philosophers(&tab))
 		return (exit_error(&tab));
-	if (!destroy_locks(&tab))
-		return (exit_error(&tab));
-	pthread_join(tab.philosopher_thread, NULL);
-	free_malloced_variables(&tab);
+	wrap_up(&tab);
 	return (0);
 }

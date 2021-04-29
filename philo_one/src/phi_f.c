@@ -1,5 +1,24 @@
 #include "../philo_one.h"
 
+int	check_vitality(t_tab *tab, t_thread_var_struct *s)
+{
+	if (s->time_last_meal + tab->time_to_die <= tab->current_time)
+	{
+		if (pthread_mutex_lock(&tab->put_status_lock) == -1)
+			return ((int)set_exit_code(tab, ERROR_MUTEX_LOCK));
+		if (!tab->exit_code)
+		{
+			tab->exit_code = DEATH;
+			printf("%lld %d "B_RED"died"RESET"\n",
+				(tab->current_time - tab->start_time), s->phi_n + 1);
+		}
+		if (pthread_mutex_unlock(&tab->put_status_lock) == -1)
+			return ((int)set_exit_code(tab, ERROR_MUTEX_UNLOCK));
+		return (0);
+	}
+	return (1);
+}
+
 static int	grab_forks_if_available(t_tab *tab, t_thread_var_struct *s)
 {
 	int	left_fork_i;

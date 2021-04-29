@@ -2,9 +2,15 @@
 
 void	pre_initialisation(t_tab *tab)
 {
+	int i;
+
 	tab->forks = NULL;
 	tab->n_times_eaten = NULL;
-	tab->mutexes_initialized = 0;
+	tab->put_status_lock_initialized = 0;
+	tab->id_lock_initialized = 0;
+	i = -1;
+	while (++i < tab->number_of_philosophers)
+		tab->forks[i].lock_initialized = 0;
 }
 
 static int	initialize_more(t_tab *tab)
@@ -24,13 +30,14 @@ static int	initialize_more(t_tab *tab)
 		if (pthread_mutex_init(&tab->forks[i].lock, NULL) != 0)
 			return ((int)set_exit_code(tab, ERROR_MUTEX_INIT));
 		tab->forks[i].available = 1;
+		tab->forks[i].lock_initialized = 1;
 	}
-	if (pthread_mutex_init(&tab->put_status_lock, NULL) != 0
-		|| pthread_mutex_init(&tab->id_lock, NULL) != 0
-		|| pthread_mutex_init(&tab->death_lock, NULL) != 0
-		|| pthread_mutex_init(&tab->fat_lock, NULL) != 0)
+	if (pthread_mutex_init(&tab->put_status_lock, NULL) != 0)
 		return ((int)set_exit_code(tab, ERROR_MUTEX_INIT));
-	tab->mutexes_initialized = 1;
+	tab->put_status_lock_initialized = 1;
+	if (pthread_mutex_init(&tab->id_lock, NULL) != 0)
+		return ((int)set_exit_code(tab, ERROR_MUTEX_INIT));
+	tab->id_lock_initialized = 1;
 	return (1);
 }
 

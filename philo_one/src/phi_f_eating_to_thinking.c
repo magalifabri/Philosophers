@@ -31,7 +31,7 @@ static int	finish_eating_and_obesity_check(t_tab *tab, t_thread_var_struct *s)
 		&& tab->n_times_eaten[s->phi_n]
 		== tab->number_of_times_each_philosopher_must_eat)
 	{
-		if (pthread_mutex_lock(&tab->fat_lock) == -1)
+		if (pthread_mutex_lock(&tab->put_status_lock) == -1)
 			return ((int)set_exit_code(tab, ERROR_MUTEX_LOCK));
 		if (!tab->exit_code)
 		{
@@ -41,7 +41,7 @@ static int	finish_eating_and_obesity_check(t_tab *tab, t_thread_var_struct *s)
 			if (tab->number_of_fat_philosophers == tab->number_of_philosophers)
 				tab->exit_code = ALL_FAT;
 		}
-		if (pthread_mutex_unlock(&tab->fat_lock) == -1)
+		if (pthread_mutex_unlock(&tab->put_status_lock) == -1)
 			return ((int)set_exit_code(tab, ERROR_MUTEX_UNLOCK));
 	}
 	return (1);
