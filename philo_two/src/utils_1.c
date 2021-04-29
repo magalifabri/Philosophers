@@ -9,7 +9,7 @@ int	return_sem_post(t_tab *tab, sem_t *sem, int return_value)
 
 int	put_status_msg(t_tab *tab, t_thread_var_struct *s, char *msg)
 {
-	int ret;
+	int	ret;
 
 	ret = 1;
 	if (sem_wait(tab->print_sem) == -1)
