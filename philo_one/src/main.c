@@ -3,23 +3,23 @@
 int	exit_error(t_tab *tab)
 {
 	write(2, B_RED"ERROR: "RESET, 19);
-	if (tab->error_code == ERROR_MUTEX_LOCK)
+	if (tab->exit_code == ERROR_MUTEX_LOCK)
 		write(2, "pthread_mutex_lock() returned -1\n", 34);
-	else if (tab->error_code == ERROR_MUTEX_UNLOCK)
+	else if (tab->exit_code == ERROR_MUTEX_UNLOCK)
 		write(2, "pthread_mutex_unlock() returned -1\n", 36);
-	else if (tab->error_code == ERROR_MUTEX_INIT)
+	else if (tab->exit_code == ERROR_MUTEX_INIT)
 		write(2, "pthread_mutex_init() didn't return 0\n", 38);
-	else if (tab->error_code == ERROR_MUTEX_DESTROY)
+	else if (tab->exit_code == ERROR_MUTEX_DESTROY)
 		write(2, "pthread_mutex_destroy() didn't return 0\n", 41);
-	else if (tab->error_code == ERROR_PTHREAD_CREATE)
+	else if (tab->exit_code == ERROR_PTHREAD_CREATE)
 		write(2, "pthread_create() didn't return 0\n", 34);
-	else if (tab->error_code == ERROR_GETTIMEOFDAY)
+	else if (tab->exit_code == ERROR_GETTIMEOFDAY)
 		write(2, "gettimeofday() returned -1\n", 28);
-	else if (tab->error_code == ERROR_MALLOC)
+	else if (tab->exit_code == ERROR_MALLOC)
 		write(2, "malloc() returned NULL\n", 24);
-	else if (tab->error_code == ERROR_BAD_ARGS)
+	else if (tab->exit_code == ERROR_BAD_ARGS)
 		write(2, "bad arguments. Try again.\n", 27);
-	else if (tab->error_code == ERROR_AC)
+	else if (tab->exit_code == ERROR_AC)
 		write(2, "too few or too many arguments\n", 31);
 	if (tab->mutexes_initialized)
 		destroy_locks(tab);
@@ -27,9 +27,19 @@ int	exit_error(t_tab *tab)
 	return (1);
 }
 
-void	*set_error_code(t_tab *tab, int error_code)
+/*
+Only set or replace the currently stored exit code if it's 0 (initialisation
+value) or an exit code that doesn't indicate an error (DEATH or ALL_FAT).
+Otherwise, if the currently stored exit code already indicates an idea,
+don't replace it, as the initial error is the most important.
+*/
+
+void	*set_exit_code(t_tab *tab, int exit_code)
 {
-	tab->error_code = error_code;
+	if (tab->exit_code == 0
+		|| tab->exit_code == DEATH
+		|| tab->exit_code == ALL_FAT)
+		tab->exit_code = exit_code;
 	return (NULL);
 }
 
@@ -51,22 +61,22 @@ int	monitor_philosophers(t_tab *tab)
 	while (1)
 	{
 		if (usleep(1000) == -1)
-			return ((int)set_error_code(tab, ERROR_USLEEP));
+			return ((int)set_exit_code(tab, ERROR_USLEEP));
 		tab->current_time = get_current_time(tab);
 		if (!tab->current_time)
 			return (0);
-		if (tab->error_code)
-			return (0);
-		if (tab->phi_died)
+		if (tab->exit_code == DEATH)
 		{
 			printf(B_RED"A philosopher has starved! Game over.\n"RESET);
 			return (1);
 		}
-		if (tab->all_fat)
+		else if (tab->exit_code == ALL_FAT)
 		{
 			printf(B_GREEN"They're all fat. Good job!\n"RESET);
 			return (1);
 		}
+		else if (tab->exit_code)
+			return (0);
 	}
 	return (0);
 }
@@ -80,10 +90,11 @@ static int	create_philosophers(t_tab *tab)
 	tab->current_time = get_current_time(tab);
 	if (!tab->current_time)
 		return (0);
-	while (++i < tab->number_of_philosophers
-		&& !tab->error_code && !tab->phi_died)
+	while (++i < tab->number_of_philosophers && !tab->exit_code)
 		if (pthread_create(&tab->philosopher_thread, NULL, phi_f, tab) != 0)
-			return ((int)set_error_code(tab, ERROR_PTHREAD_CREATE));
+			return ((int)set_exit_code(tab, ERROR_PTHREAD_CREATE));
+	if (tab->exit_code)
+		return (0);
 	return (1);
 }
 
@@ -94,7 +105,7 @@ int	main(int ac, char **av)
 	pre_initialisation(&tab);
 	if (ac < 5 || ac > 6)
 	{
-		set_error_code(&tab, ERROR_AC);
+		set_exit_code(&tab, ERROR_AC);
 		return (exit_error(&tab));
 	}
 	if (!initialize_variables_and_locks(&tab, ac, av))

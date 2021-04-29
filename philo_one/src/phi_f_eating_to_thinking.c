@@ -9,15 +9,15 @@ static int	lay_down_forks(t_tab *tab, t_thread_var_struct *s)
 	else
 		left_fork_i = s->phi_n - 1;
 	if (pthread_mutex_lock(&tab->forks[s->phi_n].lock) == -1)
-		return ((int)set_error_code(tab, ERROR_MUTEX_LOCK));
+		return ((int)set_exit_code(tab, ERROR_MUTEX_LOCK));
 	tab->forks[s->phi_n].available = 1;
 	if (pthread_mutex_unlock(&tab->forks[s->phi_n].lock) == -1)
-		return ((int)set_error_code(tab, ERROR_MUTEX_UNLOCK));
+		return ((int)set_exit_code(tab, ERROR_MUTEX_UNLOCK));
 	if (pthread_mutex_lock(&tab->forks[left_fork_i].lock) == -1)
-		return ((int)set_error_code(tab, ERROR_MUTEX_LOCK));
+		return ((int)set_exit_code(tab, ERROR_MUTEX_LOCK));
 	tab->forks[left_fork_i].available = 1;
 	if (pthread_mutex_unlock(&tab->forks[left_fork_i].lock) == -1)
-		return ((int)set_error_code(tab, ERROR_MUTEX_UNLOCK));
+		return ((int)set_exit_code(tab, ERROR_MUTEX_UNLOCK));
 	return (1);
 }
 
@@ -32,18 +32,17 @@ static int	finish_eating_and_obesity_check(t_tab *tab, t_thread_var_struct *s)
 		== tab->number_of_times_each_philosopher_must_eat)
 	{
 		if (pthread_mutex_lock(&tab->fat_lock) == -1)
-			return ((int)set_error_code(tab, ERROR_MUTEX_LOCK));
-		if (!tab->phi_died && !tab->all_fat && !tab->error_code)
+			return ((int)set_exit_code(tab, ERROR_MUTEX_LOCK));
+		if (!tab->exit_code)
 		{
 			printf("%lld %d "B_GREEN"is fat"RESET"\n",
 				(tab->current_time - tab->start_time), s->phi_n + 1);
 			tab->number_of_fat_philosophers++;
-			if (!tab->phi_died && !tab->error_code
-				&& tab->number_of_fat_philosophers == tab->number_of_philosophers)
-				tab->all_fat = 1;
+			if (tab->number_of_fat_philosophers == tab->number_of_philosophers)
+				tab->exit_code = ALL_FAT;
 		}
 		if (pthread_mutex_unlock(&tab->fat_lock) == -1)
-			return ((int)set_error_code(tab, ERROR_MUTEX_UNLOCK));
+			return ((int)set_exit_code(tab, ERROR_MUTEX_UNLOCK));
 	}
 	return (1);
 }
@@ -67,7 +66,7 @@ int	eating_to_thinking(t_tab *tab, t_thread_var_struct *s)
 		if (!check_vitality(tab, s))
 			return (0);
 		if (usleep(1000) == -1)
-			return ((int)set_error_code(tab, ERROR_USLEEP));
+			return ((int)set_exit_code(tab, ERROR_USLEEP));
 	}
 	s->phi_state = 't';
 	if (!put_status(tab, s->phi_n + 1, "is thinking"))

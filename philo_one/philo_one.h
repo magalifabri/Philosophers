@@ -22,6 +22,8 @@
 # define ERROR_BAD_ARGS 5
 # define ERROR_AC 6
 # define ERROR_USLEEP 7
+# define DEATH 11
+# define ALL_FAT 12
 
 // struct for variables used in phi_f() (the threads)
 typedef struct s_thread_variable_struct
@@ -53,11 +55,9 @@ typedef struct s_tab
 	int				time_to_sleep;
 	int				number_of_times_each_philosopher_must_eat;
 	t_frk			*forks;
-	int				phi_died;
 	int				number_of_fat_philosophers;
-	int				all_fat;
 	int				*n_times_eaten;
-	int				error_code;
+	int				exit_code;
 	int				mutexes_initialized;
 	pthread_mutex_t	put_status_lock;
 	pthread_mutex_t	id_lock;
@@ -79,7 +79,7 @@ int					initialize_variables_phi_f(t_tab *tab,
 
 // main.c
 int					return_error(t_tab *tab, int error_num);
-void				*set_error_code(t_tab *tab, int error_code);
+void				*set_exit_code(t_tab *tab, int exit_code);
 
 // phi_f_eating_to_thinking.c
 int					eating_to_thinking(t_tab *tab, t_thread_var_struct *s);
