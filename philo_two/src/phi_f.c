@@ -47,16 +47,22 @@ static int	eating(t_tab *tab, t_thread_var_struct *s)
 		return ((int)set_exit_code(tab, ERROR_SEM_WAIT));
 	if (!put_status_msg(tab, s, "has taken a fork")
 		|| !put_status_msg(tab, s, "has taken a fork"))
-		return (0);
+		return (return_sem_post(tab, tab->fork_sem, 0));
 	if (s->time_last_meal + tab->time_to_die <= tab->current_time)
+	{
+		if (sem_post(tab->fork_sem) == -1)
+			return ((int)set_exit_code(tab, ERROR_SEM_POST));
 		return ((int)starving(tab, s));
+	}
 	s->time_last_meal = tab->current_time;
 	if (!put_status_msg(tab, s, "is eating"))
-		return (0);
+		return (return_sem_post(tab, tab->fork_sem, 0));
 	time_done_eating = tab->current_time + tab->time_to_eat;
 	while (time_done_eating > tab->current_time && !tab->exit_code)
 		if (usleep(1000) == -1)
 			return ((int)set_exit_code(tab, ERROR_USLEEP));
+	if (tab->exit_code)
+		return (return_sem_post(tab, tab->fork_sem, 0));
 	return (check_fatness(tab, s));
 }
 
@@ -65,7 +71,7 @@ static int	sleeping(t_tab *tab, t_thread_var_struct *s)
 	long long	waking_time;
 
 	if (!put_status_msg(tab, s, "is sleeping"))
-		return (0);
+		return (return_sem_post(tab, tab->fork_sem, 0));
 	if (sem_post(tab->fork_sem) == -1)
 		return ((int)set_exit_code(tab, ERROR_SEM_POST));
 	waking_time = tab->current_time + tab->time_to_sleep;
@@ -100,7 +106,8 @@ void	*phi_f(void *arg)
 	s->tab = tab;
 	if (pthread_create(&grimreaper_thread, NULL, grimreaper, s) != 0)
 		return (NULL);
-	while (1)
-		if (!eating(tab, s) || !sleeping(tab, s))
-			return (NULL);
+	while (eating(tab, s) && sleeping(tab, s))
+		;
+	pthread_join(grimreaper_thread, NULL);
+	return (NULL);
 }

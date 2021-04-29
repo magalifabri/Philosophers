@@ -1,5 +1,32 @@
 #include "../philo_two.h"
 
+static int	exit_error(t_tab *tab)
+{
+	write(2, B_RED"ERROR: "RESET, 19);
+	if (tab->exit_code == ERROR_AC)
+		write(2, "too few or too many arguments\n", 31);
+	else if (tab->exit_code == ERROR_BAD_ARGS)
+		write(2, "bad arguments. Try again.\n", 27);
+	else if (tab->exit_code == ERROR_MALLOC)
+		write(2, "malloc() returned NULL\n", 24);
+	else if (tab->exit_code == ERROR_GETTIMEOFDAY)
+		write(2, "gettimeofday() returned -1\n", 28);
+	else if (tab->exit_code == ERROR_USLEEP)
+		write(2, "usleep() returned -1\n", 22);
+	else if (tab->exit_code == ERROR_PTHREAD_CREATE)
+		write(2, "pthread_create() didn't return 0\n", 34);
+	else if (tab->exit_code == ERROR_SEM_OPEN)
+		write(2, "sem_open() failed\n", 19);
+	else if (tab->exit_code == ERROR_SEM_UNLINK)
+		write(2, "sem_unlink() returned -1\n", 26);
+	else if (tab->exit_code == ERROR_SEM_WAIT)
+		write(2, "sem_wait() returned -1\n", 24);
+	else if (tab->exit_code == ERROR_SEM_POST)
+		write(2, "sem_post() returned -1\n", 24);
+	wrap_up(tab);
+	return (1);
+}
+
 long long	get_current_time(void)
 {
 	struct timeval	tp;

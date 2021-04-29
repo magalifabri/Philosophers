@@ -65,8 +65,8 @@ void			*starving(t_tab *tab, t_thread_var_struct *s);
 void			*phi_f(void *arg);
 
 // utils_1.c
+int				return_sem_post(t_tab *tab, sem_t *sem, int return_value);
 int				put_status_msg(t_tab *tab, t_thread_var_struct *s, char *msg);
-int				exit_error(t_tab *tab);
 void			*set_exit_code(t_tab *tab, int exit_code);
 void			free_malloced_variables(t_tab *tab);
 void			wrap_up(t_tab *tab);
