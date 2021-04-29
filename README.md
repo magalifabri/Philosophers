@@ -19,15 +19,16 @@ TO-DO:
 - problem (2): A philosopher can surpass time_to_die but not drop dead because of sem_wait.
 	- solution: Create a thread (grim_reaper) within the threads (philosophers) that checks if a philosopher should die and causing that to happen if so.
 
-TESTING
+TESTING (on guacamole)
 5 800 200 200 : infinite
-5 800 200 200 3 : all fat
+5 800 200 200 3 : all fat at ± 1610
 4 410 200 200 : infinite
-4 410 200 200 3 : all fat
+4 410 200 200 3 : all fat at ± 1205
 4 310 200 100 : death at ± 310
 4 310 200 200 : death at ± 310 (interrupts sleeping)
 200 200 200 200 : death at ± 200
-200 240 100 100 : death at ± 240
+200 220 100 100 : infinite
+200 210 100 100 : death at ?
 4 200 210 100 :  death at ± 200
 5 610 200 60 : infinite
 4 60 60 60 : death at ± 60
