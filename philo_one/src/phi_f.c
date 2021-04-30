@@ -102,9 +102,17 @@ static int	eating(t_tab *tab, t_thread_var_struct *s)
 Note on:
 	if (s.phi_n % 2 == 0)
 		usleep(5000);
-The philosophers eat in two turns. Half the philosophers (every other one) is halted for just a moment at the starting line. This is to ensure no conflicts occur surrounding the forks' mutex locks and they get off to a time efficient start.
+The philosophers eat in two turns. Half the philosophers (every other
+one) is halted for just a moment at the starting line. This is to ensure
+no conflicts occur surrounding the forks' mutex locks and they get off
+to a time efficient start.
 
-Note on grimreaper_thread: When a philosopher thread is waiting for a mutex lock to become available, it can't do anything else in the meantime. Thus it also can't check if the philosopher has died and report on its death in a timely manner. This task is outsourced to a separate thread: the grimreaper. This thread continually checks if the philosopher is still alive and reports on their death when required.
+Note on grimreaper_thread: When a philosopher thread is waiting for a mutex
+lock to become available, it can't do anything else in the meantime. Thus it
+also can't check if the philosopher has died and report on its death in a
+timely manner. This task is outsourced to a separate thread: the grimreaper.
+This thread continually checks if the philosopher is still alive and reports
+on their death when required.
 */
 
 void	*phi_f(void *arg)
