@@ -67,17 +67,18 @@ philosopher might die in its sleep, and we need to be able to check that.
 
 static int	sleeping_thinking(t_tab *tab, t_thread_var_struct *s)
 {
+	long long	waking_time;
+
 	if (!check_fatness(tab, s))
 		return (0);
+	waking_time = tab->current_time + tab->time_to_sleep;
 	if (!put_status(tab, s->phi_n + 1, "is sleeping"))
 		return (0);
-	long long	waking_time;
-	waking_time = tab->current_time + tab->time_to_sleep;
 	while (waking_time > tab->current_time && !tab->exit_code)
-		if (usleep(1000) == -1)
+		if (usleep(500) == -1)
 			return ((int)set_exit_code(tab, ERROR_USLEEP));
-	if (tab->exit_code)
-		return (0);
+	// if (tab->exit_code)
+	// 	return (0);
 	if (!put_status(tab, s->phi_n + 1, "is thinking"))
 		return (0);
 	return (1);
@@ -91,12 +92,12 @@ static int	eating(t_tab *tab, t_thread_var_struct *s)
 		|| pthread_mutex_lock(&tab->forks[s->left_fork_i].lock) == -1)
 		return ((int)set_exit_code(tab, ERROR_MUTEX_LOCK));
 	s->time_last_meal = tab->current_time;
+	time_done_eating = tab->current_time + tab->time_to_eat;
 	if (!put_status(tab, s->phi_n + 1, "e"))
 		return (mutex_unlock__return_0(tab, &tab->forks[s->phi_n].lock,
 			&tab->forks[s->left_fork_i].lock, 0));
-	time_done_eating = tab->current_time + tab->time_to_eat;
 	while (time_done_eating > tab->current_time && !tab->exit_code)
-		if (usleep(1000) == -1)
+		if (usleep(500) == -1)
 			return (mutex_unlock__return_0(tab, &tab->forks[s->phi_n].lock,
 				&tab->forks[s->left_fork_i].lock, 0));
 	if (pthread_mutex_unlock(&tab->forks[s->phi_n].lock) == -1

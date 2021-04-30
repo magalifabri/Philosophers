@@ -14,10 +14,6 @@ static int	initialize_more(t_tab *tab)
 {
 	int	i;
 
-	tab->forks = malloc(sizeof(t_frk) * tab->number_of_philosophers);
-	tab->n_times_eaten = malloc(sizeof(int) * tab->number_of_philosophers);
-	if (!tab->forks || !tab->n_times_eaten)
-		return ((int)set_exit_code(tab, ERROR_MALLOC));
 	i = -1;
 	while (++i < tab->number_of_philosophers)
 		tab->n_times_eaten[i] = 0;
@@ -35,6 +31,9 @@ static int	initialize_more(t_tab *tab)
 	if (pthread_mutex_init(&tab->id_lock, NULL) != 0)
 		return ((int)set_exit_code(tab, ERROR_MUTEX_INIT));
 	tab->id_lock_initialized = 1;
+	tab->start_time = get_current_time(tab);
+	if (!tab->start_time)
+		return (0);
 	return (1);
 }
 
@@ -62,10 +61,11 @@ int	initialize_variables_and_locks(t_tab *tab, int ac, char **av)
 		if (tab->number_of_times_each_philosopher_must_eat < 1)
 			return ((int)set_exit_code(tab, ERROR_BAD_ARGS));
 	}
+	tab->forks = malloc(sizeof(t_frk) * tab->number_of_philosophers);
+	tab->n_times_eaten = malloc(sizeof(int) * tab->number_of_philosophers);
+	if (!tab->forks || !tab->n_times_eaten)
+		return ((int)set_exit_code(tab, ERROR_MALLOC));
 	tab->number_of_fat_philosophers = 0;
-	tab->start_time = get_current_time(tab);
-	if (!tab->start_time)
-		return (0);
 	return (initialize_more(tab));
 }
 
