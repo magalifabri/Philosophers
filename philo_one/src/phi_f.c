@@ -25,17 +25,17 @@ would take a couple extra microseconds to return, causing small but
 potentially fatal delays.
 */
 
-// int	mutex_unlock__return_0(t_tab *tab, pthread_mutex_t *lock_1,
-// 	pthread_mutex_t *lock_2, int return_value)
-// {
-// 	if (lock_1)
-// 		if (pthread_mutex_unlock(lock_1) == -1)
-// 			return ((int)set_exit_code(tab, ERROR_MUTEX_UNLOCK));
-// 	if (lock_2)
-// 		if (pthread_mutex_unlock(lock_2) == -1)
-// 			return ((int)set_exit_code(tab, ERROR_MUTEX_UNLOCK));
-// 	return (return_value);
-// }
+int	mutex_unlock__return_0(t_tab *tab, pthread_mutex_t *lock_1,
+	pthread_mutex_t *lock_2, int return_value)
+{
+	if (lock_1)
+		if (pthread_mutex_unlock(lock_1) == -1)
+			return ((int)set_exit_code(tab, ERROR_MUTEX_UNLOCK));
+	if (lock_2)
+		if (pthread_mutex_unlock(lock_2) == -1)
+			return ((int)set_exit_code(tab, ERROR_MUTEX_UNLOCK));
+	return (return_value);
+}
 
 static int	check_fatness(t_tab *tab, t_thread_var_struct *s)
 {
@@ -71,17 +71,13 @@ static int	sleeping_thinking(t_tab *tab, t_thread_var_struct *s)
 		return (0);
 	if (!put_status(tab, s->phi_n + 1, "is sleeping"))
 		return (0);
-	// long long	waking_time;
-	// waking_time = tab->current_time + tab->time_to_sleep;
-	// while (waking_time > tab->current_time && !tab->exit_code)
-	// {
-	// 	if (!check_vitality(tab, s))
-	// 		return (0);
-	// 	if (usleep(1000) == -1)
-	// 		return ((int)set_exit_code(tab, ERROR_USLEEP));
-	// }
-	if (usleep(1000 * tab->time_to_sleep) == -1)
-		return ((int)set_exit_code(tab, ERROR_USLEEP));
+	long long	waking_time;
+	waking_time = tab->current_time + tab->time_to_sleep;
+	while (waking_time > tab->current_time && !tab->exit_code)
+		if (usleep(1000) == -1)
+			return ((int)set_exit_code(tab, ERROR_USLEEP));
+	if (tab->exit_code)
+		return (0);
 	if (!put_status(tab, s->phi_n + 1, "is thinking"))
 		return (0);
 	return (1);
@@ -89,40 +85,23 @@ static int	sleeping_thinking(t_tab *tab, t_thread_var_struct *s)
 
 static int	eating(t_tab *tab, t_thread_var_struct *s)
 {
+	long long	time_done_eating;
+	
 	if (pthread_mutex_lock(&tab->forks[s->phi_n].lock) == -1
 		|| pthread_mutex_lock(&tab->forks[s->left_fork_i].lock) == -1)
 		return ((int)set_exit_code(tab, ERROR_MUTEX_LOCK));
-	if (!put_status(tab, s->phi_n + 1, "has taken a fork")
-		|| !put_status(tab, s->phi_n + 1, "has taken a fork")
-		|| !put_status(tab, s->phi_n + 1, "is eating"))
-	{
-		if (pthread_mutex_unlock(&tab->forks[s->phi_n].lock) == -1
-			|| pthread_mutex_unlock(&tab->forks[s->left_fork_i].lock) == -1)
-			return ((int)set_exit_code(tab, ERROR_MUTEX_LOCK));
-		return (0);
-	}
 	s->time_last_meal = tab->current_time;
-	// long long	time_done_eating;
-	// time_done_eating = tab->current_time + tab->time_to_eat;
-	// while (time_done_eating > tab->current_time && !tab->exit_code)
-	// {
-		// if (usleep(1000) == -1)
-		// {
-		// 	pthread_mutex_unlock(&tab->forks[s->phi_n].lock);
-		// 	pthread_mutex_unlock(&tab->forks[s->left_fork_i].lock);
-		// 	return ((int)set_exit_code(tab, ERROR_USLEEP));
-		// }
-	// }
-	if (usleep(1000 * tab->time_to_eat) == -1)
-	{
-		pthread_mutex_unlock(&tab->forks[s->phi_n].lock);
-		pthread_mutex_unlock(&tab->forks[s->left_fork_i].lock);
-		return ((int)set_exit_code(tab, ERROR_USLEEP));
-	}
+	if (!put_status(tab, s->phi_n + 1, "e"))
+		return (mutex_unlock__return_0(tab, &tab->forks[s->phi_n].lock,
+			&tab->forks[s->left_fork_i].lock, 0));
+	time_done_eating = tab->current_time + tab->time_to_eat;
+	while (time_done_eating > tab->current_time && !tab->exit_code)
+		if (usleep(1000) == -1)
+			return (mutex_unlock__return_0(tab, &tab->forks[s->phi_n].lock,
+				&tab->forks[s->left_fork_i].lock, 0));
 	if (pthread_mutex_unlock(&tab->forks[s->phi_n].lock) == -1
 		|| pthread_mutex_unlock(&tab->forks[s->left_fork_i].lock) == -1)
 		return ((int)set_exit_code(tab, ERROR_MUTEX_LOCK));
-	// put_status(tab, s->phi_n + 1, "is done eating");
 	return (1);
 }
 
@@ -156,8 +135,7 @@ void	*phi_f(void *arg)
 		return (NULL);
 	if (s.phi_n % 2 == 0)
 		usleep(5000);
-	while (check_vitality(tab, &s)
-		&& eating(tab, &s)
+	while (eating(tab, &s)
 		&& sleeping_thinking(tab, &s))
 		;
 	pthread_join(grimreaper_thread, NULL);

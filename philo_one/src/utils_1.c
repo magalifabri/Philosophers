@@ -10,13 +10,23 @@ has died, an error has occurred or all philosophers are fat.
 int	put_status(t_tab *tab, int philo_n, char *msg)
 {
 	int ret;
+	long long timestamp;
 
-	ret = 1;
 	if (pthread_mutex_lock(&tab->put_status_lock) == -1)
 		return ((int)set_exit_code(tab, ERROR_MUTEX_LOCK));
+	ret = 1;
 	if (!tab->exit_code)
-		printf("%lld %d %s\n",
-			(tab->current_time - tab->start_time), philo_n, msg);
+	{
+		timestamp = tab->current_time - tab->start_time;
+		if (msg[0] == 'e')
+		{
+			printf("%lld %d has taken a fork\n%lld %d has taken a fork\n",
+				timestamp, philo_n, timestamp, philo_n);
+			printf("%lld %d is eating\n", timestamp, philo_n);
+		}
+		else
+			printf("%lld %d %s\n", timestamp, philo_n, msg);
+	}
 	else
 		ret = 0;
 	if (pthread_mutex_unlock(&tab->put_status_lock) == -1)
