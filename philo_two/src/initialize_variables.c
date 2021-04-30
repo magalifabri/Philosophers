@@ -29,6 +29,9 @@ static int	initialize_more(t_tab *tab)
 	if (tab->fork_sem == SEM_FAILED || tab->id_sem == SEM_FAILED
 		|| tab->print_sem == SEM_FAILED)
 		return ((int)set_exit_code(tab, ERROR_SEM_OPEN));
+	tab->start_time = get_current_time();
+	if (tab->start_time == -1)
+		return ((int)set_exit_code(tab, ERROR_GETTIMEOFDAY));
 	return (1);
 }
 
@@ -57,9 +60,5 @@ int	initialize_variables(t_tab *tab, int ac, char **av)
 			return ((int)set_exit_code(tab, ERROR_BAD_ARGS));
 	}
 	tab->number_of_fat_philosophers = 0;
-	tab->exit_code = 0;
-	tab->start_time = get_current_time();
-	if (tab->start_time == -1)
-		return ((int)set_exit_code(tab, ERROR_GETTIMEOFDAY));
 	return (initialize_more(tab));
 }

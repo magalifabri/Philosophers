@@ -1,22 +1,34 @@
 #include "../philo_two.h"
 
-int	return_sem_post(t_tab *tab, sem_t *sem, int return_value)
+int	abort_eating(t_tab *tab, sem_t *sem, int return_value, int exit_code)
 {
 	if (sem_post(sem) == -1)
 		return ((int)set_exit_code(tab, ERROR_SEM_POST));
+	if (exit_code)
+		set_exit_code(tab, exit_code);
 	return (return_value);
 }
 
 int	put_status_msg(t_tab *tab, t_thread_var_struct *s, char *msg)
 {
-	int	ret;
+	int			ret;
+	long long	timestamp;
 
 	ret = 1;
 	if (sem_wait(tab->print_sem) == -1)
 		return ((int)set_exit_code(tab, ERROR_SEM_WAIT));
 	if (!tab->exit_code)
-		printf("%lld %d %s\n",
-			(tab->current_time - tab->start_time), s->phi_n + 1, msg);
+	{
+		timestamp = tab->current_time - tab->start_time;
+		if (msg[0] == 'e')
+		{
+			printf("%lld %d has taken a fork\n%lld %d has taken a fork\n",
+				timestamp, s->phi_n + 1, timestamp, s->phi_n + 1);
+			printf("%lld %d is eating\n", timestamp, s->phi_n + 1);
+		}
+		else
+			printf("%lld %d %s\n", timestamp, s->phi_n + 1, msg);
+	}
 	else
 		ret = 0;
 	if (sem_post(tab->print_sem) == -1)
