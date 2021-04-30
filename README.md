@@ -22,16 +22,16 @@ TO-DO:
 
 TESTING (on guacamole)
 5 800 200 200 : infinite
-5 800 200 200 3 : all fat at ± 1610
+5 800 200 200 3 : all fat at ± 1600 - 1610
 4 410 200 200 : infinite
-4 410 200 200 3 : all fat at ± 1205
+4 410 200 200 3 : all fat at ± 1200 - 1205
 4 310 200 100 : death at ± 310
 4 310 200 200 : death at ± 310 (interrupts sleeping)
 200 200 200 200 : death at ± 200
 200 220 100 100 : infinite
 200 210 100 100 : death at ?
-4 200 210 100 :  death at ± 200
-5 610 200 60 : infinite
+4 200 210 100 :  death at ± 200 (interrupts eating)
+5 610 200 60 : infinite (test line skipping)
 4 60 60 60 : death at ± 60
 4 120 60 60 : death at ± 120
 4 125 60 60 : infinite
