@@ -1,31 +1,20 @@
 #include "../philo_one.h"
 
-void	*grimreaper(void *arg)
-{
-	t_thread_var_struct	*s;
+/*
+A little helper function that unlocks two mutex locks and returns 0.
+Created to trim down the length of eating().
+*/
 
-	s = (t_thread_var_struct *)arg;
-	while (s->time_last_meal + s->tab->time_to_die > s->tab->current_time
-		&& !s->tab->exit_code)
-		if (usleep(1000) == -1)
-			return (set_exit_code(s->tab, ERROR_USLEEP));
-	if (s->tab->exit_code)
-		return (NULL);
-	// printf("s->time_last_meal: %lld (%d)\n", s->time_last_meal, s->phi_n + 1);
-	// printf("s->tab->current_time: %lld(%d)\n ", s->tab->current_time, s->phi_n + 1);
-	if (pthread_mutex_lock(&s->tab->put_status_lock) == -1)
-			return (set_exit_code(s->tab, ERROR_MUTEX_LOCK));
-	if (!s->tab->exit_code)
-	{
-		s->tab->exit_code = DEATH;
-		printf("%lld %d "B_RED"died"RESET"\n",
-			(s->tab->current_time - s->tab->start_time), s->phi_n + 1);
-	}
-	if (pthread_mutex_unlock(&s->tab->put_status_lock) == -1)
-		return (set_exit_code(s->tab, ERROR_MUTEX_UNLOCK));
-	// return (0);
-	// check_vitality(s->tab, s);
-	return (NULL);
+int	mutex_unlock__return_0(t_tab *tab, pthread_mutex_t *lock_1,
+	pthread_mutex_t *lock_2, int return_value)
+{
+	if (lock_1)
+		if (pthread_mutex_unlock(lock_1) == -1)
+			return ((int)set_exit_code(tab, ERROR_MUTEX_UNLOCK));
+	if (lock_2)
+		if (pthread_mutex_unlock(lock_2) == -1)
+			return ((int)set_exit_code(tab, ERROR_MUTEX_UNLOCK));
+	return (return_value);
 }
 
 static int	ft_isspace(char c)

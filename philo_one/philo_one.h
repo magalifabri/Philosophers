@@ -25,7 +25,6 @@
 # define DEATH 11
 # define ALL_FAT 12
 
-
 // struct for variables related to the forks (cutlery)
 typedef struct s_frk
 {
@@ -50,8 +49,8 @@ typedef struct s_tab
 	int				number_of_fat_philosophers;
 	int				*n_times_eaten;
 	int				exit_code;
-	pthread_mutex_t	put_status_lock;
-	int				put_status_lock_initialized;
+	pthread_mutex_t	print_lock;
+	int				print_lock_initialized;
 	pthread_mutex_t	id_lock;
 	int				id_lock_initialized;
 	pthread_t		philosopher_thread;
@@ -79,7 +78,6 @@ int					return_error(t_tab *tab, int error_num);
 void				*set_exit_code(t_tab *tab, int exit_code);
 
 // phi_f.c
-int					check_vitality(t_tab *tab, t_thread_var_struct *s);
 void				*phi_f(void *arg);
 
 // utils_1.c
@@ -90,7 +88,8 @@ void				free_malloced_variables(t_tab *tab);
 void				wrap_up(t_tab *tab);
 
 // utils_2.c
-void				*grimreaper(void *arg);
+int					mutex_unlock__return_0(t_tab *tab, pthread_mutex_t *lock_1,
+						pthread_mutex_t *lock_2, int return_value);
 int					ft_atoi(const char *str);
 
 #endif

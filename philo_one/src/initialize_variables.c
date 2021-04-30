@@ -6,7 +6,7 @@ void	pre_initialisation(t_tab *tab)
 	tab->forks = NULL;
 	tab->n_times_eaten = NULL;
 	tab->n_fork_locks_initialized = 0;
-	tab->put_status_lock_initialized = 0;
+	tab->print_lock_initialized = 0;
 	tab->id_lock_initialized = 0;
 }
 
@@ -25,9 +25,9 @@ static int	initialize_more(t_tab *tab)
 		tab->forks[i].available = 1;
 		tab->n_fork_locks_initialized++;
 	}
-	if (pthread_mutex_init(&tab->put_status_lock, NULL) != 0)
+	if (pthread_mutex_init(&tab->print_lock, NULL) != 0)
 		return ((int)set_exit_code(tab, ERROR_MUTEX_INIT));
-	tab->put_status_lock_initialized = 1;
+	tab->print_lock_initialized = 1;
 	if (pthread_mutex_init(&tab->id_lock, NULL) != 0)
 		return ((int)set_exit_code(tab, ERROR_MUTEX_INIT));
 	tab->id_lock_initialized = 1;

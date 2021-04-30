@@ -1,18 +1,19 @@
 #include "../philo_one.h"
 
 /*
-put_status() prints the philosphers' activities to stdout. It uses a mutex
+put_status() prints the philosophers' activities to stdout. It uses a mutex
 lock to make sure only one philosopher (thread) does this at a time. It also
-tries to prevent more status messages from being printed when a philosopher
-has died, an error has occurred or all philosophers are fat.
+prevents more status messages from being printed when a philosopher
+has died, an error has occurred or all philosophers are fat and reports this
+back to the caller function as this means the threads need to exit.
 */
 
 int	put_status(t_tab *tab, int philo_n, char *msg)
 {
-	int ret;
-	long long timestamp;
+	int			ret;
+	long long	timestamp;
 
-	if (pthread_mutex_lock(&tab->put_status_lock) == -1)
+	if (pthread_mutex_lock(&tab->print_lock) == -1)
 		return ((int)set_exit_code(tab, ERROR_MUTEX_LOCK));
 	ret = 1;
 	if (!tab->exit_code)
@@ -29,7 +30,7 @@ int	put_status(t_tab *tab, int philo_n, char *msg)
 	}
 	else
 		ret = 0;
-	if (pthread_mutex_unlock(&tab->put_status_lock) == -1)
+	if (pthread_mutex_unlock(&tab->print_lock) == -1)
 		return ((int)set_exit_code(tab, ERROR_MUTEX_UNLOCK));
 	return (ret);
 }
@@ -55,11 +56,6 @@ void	free_malloced_variables(t_tab *tab)
 		free(tab->n_times_eaten);
 }
 
-/*
-Reason for usleep(): gives threads the time to exit (so no mutex locks are
-being used) before destroying the mutexes.
-*/
-
 int	destroy_locks(t_tab *tab)
 {
 	int	i;
@@ -68,14 +64,23 @@ int	destroy_locks(t_tab *tab)
 	while (++i < tab->n_fork_locks_initialized)
 		if (pthread_mutex_destroy(&tab->forks[i].lock) != 0)
 			return ((int)set_exit_code(tab, ERROR_MUTEX_DESTROY));
-	if (tab->put_status_lock_initialized)
-		if (pthread_mutex_destroy(&tab->put_status_lock) != 0)
+	if (tab->print_lock_initialized)
+		if (pthread_mutex_destroy(&tab->print_lock) != 0)
 			return ((int)set_exit_code(tab, ERROR_MUTEX_DESTROY));
 	if (tab->id_lock_initialized)
 		if (pthread_mutex_destroy(&tab->id_lock) != 0)
 			return ((int)set_exit_code(tab, ERROR_MUTEX_DESTROY));
 	return (1);
 }
+
+/*
+Calls all the functions required to clean up before exiting.
+
+Note on:
+	usleep(10000);
+gives threads the time to exit before starting the clean up. Not doing so can
+result in errors.
+*/
 
 void	wrap_up(t_tab *tab)
 {
