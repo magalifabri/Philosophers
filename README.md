@@ -4,6 +4,7 @@
 TO-DO:
 - in philo_one and _three, do philosophers die after time_to_die from the start of their thread or from the start of the program?
 - in p2 and p3, initialize exit_code in pre_initialization
+- p1, p2: error checking
 
 - problem (2): Invalid free: Because threads can call free on a variable that is shared between the threads, this makes it possible for multiple threads to do so at the same time.
 	- solution: Only call free from the main process. return_error() becomes set_error_code() + exit_error()
@@ -39,6 +40,7 @@ regular (on guacamole)
 5 610 200 60 (infinite - test line skipping)
 
 limits (on guacamole)
+200 410 200 200 (infinite)
 200 200 200 200 (death at ± 200)
 200 220 100 100 (infinite)
 200 210 100 100 (death at ?)
