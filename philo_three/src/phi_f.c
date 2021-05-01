@@ -26,16 +26,14 @@ static int	put_status_msg(t_tab *tab, char *msg)
 }
 
 /*
-** Note(s) on grimreaper():
-** 
-** Philosophers may die of starvation while standing in the "dining room queue"
-** (semaphore) and it's important to report on their unfortunate demise within
-** 10ms of its occurrance (and halt the program immediately afterwards?). But
-** while they are waiting, they are incapable of doing anything else, and the
-** other philosophers and the parent process also aren't aware of whether or
-** not the philosopher has actually starved. Therefore a pthread is created
-** within the child process to keep an eye on things and quit the process if
-** the philosopher doesn't manage to eat in time.
+Philosophers may die of starvation while standing in the "dining room queue"
+(semaphore) and it's important to report on their unfortunate demise within
+10ms of its occurrance (and halt the program immediately afterwards?). But
+while they are waiting, they are incapable of doing anything else, and the
+other philosophers and the parent process also aren't aware of whether or
+not the philosopher has actually starved. Therefore a pthread is created
+within the child process to keep an eye on things and quit the process if
+the philosopher doesn't manage to eat in time.
 */
 
 static void	*grimreaper(void *arg)
@@ -76,8 +74,6 @@ static void	eating(t_tab *tab)
 	tab->time_last_meal = tab->current_time;
 	time_done_eating = tab->current_time + tab->time_to_eat;
 	put_status_msg(tab, "e");
-	// if (usleep(tab->time_to_eat * 1000) == -1)
-	// 	exit(EXIT_ERROR);
 	while (time_done_eating > tab->current_time)
 		if (usleep(500) == -1)
 			exit(EXIT_ERROR);
@@ -101,8 +97,6 @@ static void	sleeping(t_tab *tab)
 	while (waking_time > tab->current_time)
 		if (usleep(500) == -1)
 			exit(EXIT_ERROR);
-	// if (usleep(tab->time_to_sleep * 1000) == -1)
-	// 	exit(EXIT_ERROR);
 	put_status_msg(tab, "is thinking");
 }
 
