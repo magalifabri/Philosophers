@@ -44,6 +44,7 @@ typedef struct s_tab
 	int			number_of_fat_philosophers;
 	int			*n_times_eaten;
 	int			exit_code;
+	int			pthreads_created;
 }				t_tab;
 
 // struct for variables used in phi_f() (the threads)
@@ -72,7 +73,6 @@ void			free_malloced_variables(t_tab *tab);
 void			wrap_up(t_tab *tab);
 
 // utils_2.c
-void			*grimreaper(void *arg);
 int				ft_atoi(const char *str);
 
 #endif

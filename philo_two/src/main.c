@@ -90,6 +90,7 @@ static int	create_philosophers(t_tab *tab)
 	while (++i < tab->number_of_philosophers && !tab->exit_code)
 		if (pthread_create(&tab->philosopher_thread, NULL, phi_f, tab) != 0)
 			return ((int)set_exit_code(tab, ERROR_PTHREAD_CREATE));
+	tab->pthreads_created = 1;
 	if (tab->exit_code)
 		return (0);
 	return (1);
@@ -101,6 +102,7 @@ int	main(int ac, char **av)
 
 	tab.exit_code = 0;
 	tab.n_times_eaten = NULL;
+	tab.pthreads_created = 0;
 	if (ac < 5 || ac > 6)
 	{
 		set_exit_code(&tab, ERROR_AC);

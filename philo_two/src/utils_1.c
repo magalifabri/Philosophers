@@ -56,8 +56,9 @@ void	free_malloced_variables(t_tab *tab)
 
 void	wrap_up(t_tab *tab)
 {
-	if (pthread_join(tab->philosopher_thread, NULL) != 0)
-		printf(B_RED"ERROR: "RESET"pthread_join() didn't return 0\n");
+	if (tab->pthreads_created)
+		if (pthread_join(tab->philosopher_thread, NULL) != 0)
+			printf(B_RED"ERROR: "RESET"pthread_join() didn't return 0\n");
 	free_malloced_variables(tab);
 	sem_unlink("fork_sem");
 	sem_unlink("id_sem");
