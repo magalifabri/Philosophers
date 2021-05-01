@@ -20,21 +20,32 @@ TO-DO:
 - problem (2): A philosopher can surpass time_to_die but not drop dead because of sem_wait.
 	- solution: Create a thread (grim_reaper) within the threads (philosophers) that checks if a philosopher should die and causing that to happen if so.
 
-TESTING (on guacamole)
-5 800 200 200 : infinite
-5 800 200 200 3 : all fat at ± 1600 - 1610
-4 410 200 200 : infinite
-4 410 200 200 3 : all fat at ± 1200 - 1205
-4 310 200 100 : death at ± 310
-4 310 200 200 : death at ± 310 (interrupts sleeping)
-200 200 200 200 : death at ± 200
-200 220 100 100 : infinite
-200 210 100 100 : death at ?
-4 200 210 100 :  death at ± 200 (interrupts eating)
-5 610 200 60 : infinite (test line skipping)
-4 60 60 60 : death at ± 60
-4 120 60 60 : death at ± 120
-4 125 60 60 : infinite
+TESTING
+bad input
+(no args)
+5 800 200 (too few args)
+5 800 200 200 3 3 (too many args)
+5 800 200 200 t (non-number args)
+5 800 200 200 3 t (non-number args)
+
+regular (on guacamole)
+5 800 200 200 (infinite)
+5 800 200 200 3 (all fat at ± 1600 - 1610)
+4 410 200 200 (infinite)
+4 410 200 200 3 (all fat at ± 1200 - 1205)
+4 310 200 100 (death at ± 310)
+4 310 200 200 (death at ± 310 - interrupts sleeping)
+4 200 210 100 (death at ± 200 - interrupts eating)
+5 610 200 60 (infinite - test line skipping)
+
+limits (on guacamole)
+200 200 200 200 (death at ± 200)
+200 220 100 100 (infinite)
+200 210 100 100 (death at ?)
+4 60 60 60 (death at ± 60)
+200 60 60 60 (death at ± 60)
+4 120 60 60 (death at ± 120)
+4 125 60 60 (infinite)
 
 ## Project Description
 
