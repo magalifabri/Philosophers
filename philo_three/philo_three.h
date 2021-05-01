@@ -60,7 +60,6 @@ void			phi_f(void *arg);
 int				ft_atoi(const char *str);
 void			*return_error(t_tab *tab, int error_num);
 long long		get_current_time(t_tab *tab);
-
-int			wrap_up(t_tab *tab);
+int				wrap_up(t_tab *tab);
 
 #endif

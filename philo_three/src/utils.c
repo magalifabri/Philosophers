@@ -50,8 +50,8 @@ long long	get_current_time(t_tab *tab)
 
 int	wrap_up(t_tab *tab)
 {
-	int ret;
-	
+	int	ret;
+
 	ret = 1;
 	if (tab->phi_pid)
 		free(tab->phi_pid);

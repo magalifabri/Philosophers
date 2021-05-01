@@ -54,13 +54,11 @@ static void	*grimreaper(void *arg)
 		{
 			if (sem_wait(tab->print_sem) == -1)
 				exit(EXIT_ERROR);
-            tab->current_time = get_current_time(tab);
-            if (tab->current_time == -1)
-                exit(EXIT_ERROR);
+			tab->current_time = get_current_time(tab);
+			if (tab->current_time == -1)
+				exit(EXIT_ERROR);
 			printf("%lld %d %sdied%s\n", (tab->current_time - tab->start_time),
 				tab->phi_n + 1, B_RED, RESET);
-			// if (sem_post(tab->print_sem) == -1)
-			// 	exit(EXIT_ERROR);
 			exit(EXIT_DEATH);
 		}
 	}
@@ -72,30 +70,24 @@ static void	eating(t_tab *tab)
 
 	if (sem_wait(tab->fork_sem) == -1)
 		exit(EXIT_ERROR);
-    tab->current_time = get_current_time(tab);
-		if (tab->current_time == -1)
-			exit(EXIT_ERROR);
+	tab->current_time = get_current_time(tab);
+	if (tab->current_time == -1)
+		exit(EXIT_ERROR);
 	tab->time_last_meal = tab->current_time;
 	time_done_eating = tab->current_time + tab->time_to_eat;
 	put_status_msg(tab, "e");
-	if (usleep(tab->time_to_eat * 1000) == -1)
-		exit(EXIT_ERROR);
-	// while (time_done_eating > tab->current_time)
-	// 	if (usleep(500) == -1)
-	// 		exit(EXIT_ERROR);
+	// if (usleep(tab->time_to_eat * 1000) == -1)
+	// 	exit(EXIT_ERROR);
+	while (time_done_eating > tab->current_time)
+		if (usleep(500) == -1)
+			exit(EXIT_ERROR);
 	if (sem_post(tab->fork_sem) == -1)
 		exit(EXIT_ERROR);
 	tab->times_eaten++;
 	if (tab->number_of_times_each_philosopher_must_eat != -1
 		&& tab->times_eaten == tab->number_of_times_each_philosopher_must_eat)
 	{
-		// if (sem_wait(tab->print_sem) == -1)
-		// 	exit(EXIT_ERROR);
 		put_status_msg(tab, B_GREEN"is fat"RESET);
-		// printf("%lld %d is %sfat%s\n", (tab->current_time - tab->start_time),
-		// 	tab->phi_n + 1, B_GREEN, RESET);
-		// if (sem_post(tab->print_sem) == -1)
-		// 	exit(EXIT_ERROR);
 		exit(EXIT_EATEN_ENOUGH);
 	}
 }
@@ -106,11 +98,11 @@ static void	sleeping(t_tab *tab)
 
 	put_status_msg(tab, "is sleeping");
 	waking_time = tab->current_time + tab->time_to_sleep;
-	// while (waking_time > tab->current_time)
-	// 	if (usleep(500) == -1)
-	// 		exit(EXIT_ERROR);
-	if (usleep(tab->time_to_sleep * 1000) == -1)
-		exit(EXIT_ERROR);
+	while (waking_time > tab->current_time)
+		if (usleep(500) == -1)
+			exit(EXIT_ERROR);
+	// if (usleep(tab->time_to_sleep * 1000) == -1)
+	// 	exit(EXIT_ERROR);
 	put_status_msg(tab, "is thinking");
 }
 
