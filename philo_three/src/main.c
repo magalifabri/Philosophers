@@ -1,100 +1,38 @@
 #include "../philo_three.h"
 
-/*
-** Note(s) on grimreaper():
-** 
-** Philosophers may die of starvation while standing in the "dining room queue"
-** (semaphore) and it's important to report on their unfortunate demise within
-** 10ms of its occurrance (and halt the program immediately afterwards?). But
-** while they are waiting, they are incapable of doing anything else, and the
-** other philosophers and the parent process also aren't aware of whether or
-** not the philosopher has actually starved. Therefore a pthread is created
-** within the child process to keep an eye on things and quit the process if
-** the philosopher doesn't manage to eat in time.
-*/
-
-void	*grimreaper(void *arg)
+void	*return_error(t_tab *tab, int error_num)
 {
-	t_tab	*tab;
-
-	tab = (t_tab *)arg;
-	while (1)
-	{
-		if (usleep(1000) == -1)
-			exit(EXIT_ERROR);
-		tab->current_time = get_current_time(tab);
-		if (tab->current_time == -1)
-			exit(EXIT_ERROR);
-		if (tab->time_last_meal + tab->time_to_die <= tab->current_time)
-		{
-			printf("%lld %d %sdied%s\n", (tab->current_time - tab->start_time),
-				tab->phi_n + 1, B_RED, RESET);
-			exit(EXIT_DEATH);
-		}
-	}
-}
-
-void	waiting_and_eating(t_tab *tab)
-{
-	if (sem_wait(tab->fork_availability) == -1)
-		exit(EXIT_ERROR);
-	printf("%lld %d has taken a fork\n", (tab->current_time - tab->start_time),
-		tab->phi_n + 1);
-	printf("%lld %d has taken a fork\n", (tab->current_time - tab->start_time),
-		tab->phi_n + 1);
-	printf("%lld %d is eating\n", (tab->current_time - tab->start_time),
-		tab->phi_n + 1);
-	tab->time_last_meal = tab->current_time;
-	if (usleep(tab->time_to_eat * 1000) == -1)
-		exit(EXIT_ERROR);
-	tab->times_eaten++;
-	if (tab->number_of_times_each_philosopher_must_eat != -1
-		&& tab->times_eaten == tab->number_of_times_each_philosopher_must_eat)
-	{
-		printf("%lld %d is %sfat%s\n", (tab->current_time - tab->start_time),
-			tab->phi_n + 1, B_GREEN, RESET);
-		if (sem_post(tab->fork_availability) == -1)
-			exit(EXIT_ERROR);
-		exit(EXIT_EATEN_ENOUGH);
-	}
-}
-
-void	phi_f(void *arg)
-{
-	t_tab		*tab;
-	pthread_t	grimreaper_thread;
-
-	tab = (t_tab *)arg;
-	tab->current_time = get_current_time(tab);
-	if (tab->current_time == -1)
-		exit(EXIT_ERROR);
-	tab->time_last_meal = tab->current_time;
-	if (pthread_create(&grimreaper_thread, NULL, grimreaper, tab) != 0)
-		exit(EXIT_ERROR);
-	while (1)
-	{
-		waiting_and_eating(tab);
-		printf("%lld %d is sleeping\n", (tab->current_time - tab->start_time),
-			tab->phi_n + 1);
-		if (sem_post(tab->fork_availability) == -1)
-			exit(EXIT_ERROR);
-		if (usleep(tab->time_to_sleep * 1000) == -1)
-			exit(EXIT_ERROR);
-		printf("%lld %d is thinking\n", (tab->current_time - tab->start_time),
-			tab->phi_n + 1);
-	}
+	write(2, B_RED"ERROR: "RESET, 19);
+	if (error_num == ERROR_MUTEX)
+		write(2, "pthread_mutex_(un)lock() returned -1\n", 38);
+	else if (error_num == ERROR_GETTIMEOFDAY)
+		write(2, "gettimeofday() returned -1\n", 28);
+	else if (error_num == ERROR_MALLOC)
+		write(2, "malloc() returned NULL\n", 24);
+	else if (error_num == ERROR_BAD_ARGS)
+		write(2, "bad arguments. Try again.\n", 27);
+	else if (error_num == ERROR_FORK)
+		write(2, "fork() returned < 0\n", 21);
+	else if (error_num == ERROR_SEM_OPEN)
+		write(2, "sem_open() failed\n", 19);
+	else if (error_num == ERROR_SEM_UNLINK)
+		write(2, "sem_unlink() returned -1\n", 26);
+	else if (error_num == ERROR_AC)
+		write(2, "too few or too many arguments\n", 31);
+	else if (error_num == ERROR_CHILD)
+		write(2, "something went wrong in child process\n", 31);
+	wrap_up(tab);
+	return (NULL);
 }
 
 /*
-** Note(s) on monitor_child_processes():
-** 
-** As soon as wait() returns with a pid, we know a philospopher has exited,
-** either because he's fat or because he's dead (or because an error occurred).
-** If he's fat, we let the other philosopher's continue; if he's dead (or an
-** error occurred), we kill the other philosophers.
+As soon as wait() returns with a pid, we know a philospopher has exited,
+either because he's fat or because he's dead (or because an error occurred).
+If he's fat, we let the other philosopher's continue; if he's dead (or an
+error occurred), we kill the other philosophers.
 */
 
-int	monitor_child_processes(t_tab *tab)
+static int	monitor_philosophers(t_tab *tab)
 {
 	int		philosophers_left;
 	int		exit_status;
@@ -120,21 +58,41 @@ int	monitor_child_processes(t_tab *tab)
 	return (1);
 }
 
+static int	create_philosophers(t_tab *tab)
+{
+	int		i;
+	pid_t	fork_ret;
+
+	tab->current_time = get_current_time(tab);
+	if (tab->current_time == -1)
+		return ((int)return_error(tab, ERROR_GETTIMEOFDAY));
+	i = -1;
+	while (++i < tab->number_of_philosophers)
+	{
+		tab->phi_n = i;
+		fork_ret = fork();
+		if (fork_ret == 0)
+			phi_f(tab);
+		else if (fork_ret > 0)
+			tab->phi_pid[i] = fork_ret;
+		else
+			return ((int)return_error(tab, ERROR_FORK));
+	}
+	return (1);
+}
+
 int	main(int ac, char **av)
 {
 	t_tab	tab;
 
+	pre_initialisation(&tab);
 	if (!initialize_variables(&tab, ac, av))
 		return (1);
-	if (!initialize_philosophers(&tab))
+	if (!create_philosophers(&tab))
 		return (1);
-	if (!monitor_child_processes(&tab))
+	if (!monitor_philosophers(&tab))
 		return (1);
-	if (sem_unlink("fork_availability") == -1)
-	{
-		return_error(&tab, ERROR_SEM_UNLINK);
+	if (!wrap_up(&tab))
 		return (1);
-	}
-	free_malloced_variables(&tab);
 	return (0);
 }

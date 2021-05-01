@@ -2,9 +2,10 @@ NAME = philo_three
 
 SRC_DIR = ./src/
 SRC_FILES = \
+			initialize_variables.c \
 			main.c \
-			utils.c \
-			initialize_variables.c
+			phi_f.c \
+			utils.c
 
 OBJ_DIR = ./obj/
 OBJ_FILES = $(addprefix $(OBJ_DIR), $(SRC_FILES:.c=.o))

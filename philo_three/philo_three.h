@@ -39,7 +39,10 @@ typedef struct s_tab
 	int			time_to_eat;
 	int			time_to_sleep;
 	int			number_of_times_each_philosopher_must_eat;
-	sem_t		*fork_availability;
+	sem_t		*fork_sem;
+	int			fork_sem_initialised;
+	sem_t		*print_sem;
+	int			print_sem_initialised;
 	int			*phi_pid;
 	int			times_eaten;
 	long long	time_last_meal;
@@ -48,14 +51,16 @@ typedef struct s_tab
 // initialize_variables.c
 int				initialize_philosophers(t_tab *tab);
 int				initialize_variables(t_tab *tab, int ac, char **av);
+void			pre_initialisation(t_tab *tab);
 
-// main.c
+// phi_f.c
 void			phi_f(void *arg);
 
 // utils.c
 int				ft_atoi(const char *str);
 void			*return_error(t_tab *tab, int error_num);
 long long		get_current_time(t_tab *tab);
-void			free_malloced_variables(t_tab *tab);
+
+int			wrap_up(t_tab *tab);
 
 #endif
