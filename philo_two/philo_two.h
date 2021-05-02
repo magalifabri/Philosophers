@@ -18,6 +18,7 @@
 # define ERROR_GETTIMEOFDAY 4
 # define ERROR_USLEEP 5
 # define ERROR_PTHREAD_CREATE 6
+# define ERROR_PTHREAD_JOIN 13
 # define ERROR_SEM_OPEN 7
 # define ERROR_SEM_UNLINK 8
 # define ERROR_SEM_WAIT 9
@@ -69,8 +70,7 @@ int				abort_eating(t_tab *tab, sem_t *sem, int return_value,
 					int exit_code);
 int				put_status_msg(t_tab *tab, t_thread_var_struct *s, char *msg);
 void			*set_exit_code(t_tab *tab, int exit_code);
-void			free_malloced_variables(t_tab *tab);
-void			wrap_up(t_tab *tab);
+int				wrap_up(t_tab *tab);
 
 // utils_2.c
 int				ft_atoi(const char *str);

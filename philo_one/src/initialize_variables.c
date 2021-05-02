@@ -8,6 +8,8 @@ void	pre_initialisation(t_tab *tab)
 	tab->n_fork_locks_initialized = 0;
 	tab->print_lock_initialized = 0;
 	tab->id_lock_initialized = 0;
+	tab->eating_lock_initialized = 0;
+	tab->pthreads_created = 0;
 }
 
 static int	initialize_more(t_tab *tab)
@@ -31,6 +33,9 @@ static int	initialize_more(t_tab *tab)
 	if (pthread_mutex_init(&tab->id_lock, NULL) != 0)
 		return ((int)set_exit_code(tab, ERROR_MUTEX_INIT));
 	tab->id_lock_initialized = 1;
+	if (pthread_mutex_init(&tab->eating_lock, NULL) != 0)
+		return ((int)set_exit_code(tab, ERROR_MUTEX_INIT));
+	tab->eating_lock_initialized = 1;
 	tab->start_time = get_current_time(tab);
 	if (!tab->start_time)
 		return (0);

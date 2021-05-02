@@ -21,6 +21,10 @@ int	exit_error(t_tab *tab)
 		write(2, "bad arguments. Try again.\n", 27);
 	else if (tab->exit_code == ERROR_AC)
 		write(2, "too few or too many arguments\n", 31);
+	else if (tab->exit_code == ERROR_USLEEP)
+		write(2, "usleep() returned -1\n", 22);
+	else if (tab->exit_code == ERROR_PTHREAD_JOIN)
+		write(2, "pthread_join() didn't return 0\n", 32);
 	wrap_up(tab);
 	return (1);
 }
@@ -75,6 +79,7 @@ static int	create_philosophers(t_tab *tab)
 	while (++i < tab->number_of_philosophers && !tab->exit_code)
 		if (pthread_create(&tab->philosopher_thread, NULL, phi_f, tab) != 0)
 			return ((int)set_exit_code(tab, ERROR_PTHREAD_CREATE));
+	tab->pthreads_created = 1;
 	if (tab->exit_code)
 		return (0);
 	return (1);
@@ -96,10 +101,7 @@ int	main(int ac, char **av)
 		return (exit_error(&tab));
 	if (!update_current_time(&tab))
 		return (exit_error(&tab));
-	wrap_up(&tab);
-	if (tab.exit_code == 0
-		|| tab.exit_code == DEATH
-		|| tab.exit_code == ALL_FAT)
-		return (0);
-	return (1);
+	if (!wrap_up(&tab))
+		return (1);
+	return (0);
 }

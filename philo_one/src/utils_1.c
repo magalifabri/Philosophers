@@ -58,34 +58,45 @@ void	free_malloced_variables(t_tab *tab)
 
 int	destroy_locks(t_tab *tab)
 {
+	int	ret;
 	int	i;
 
+	ret = 1;
 	i = -1;
 	while (++i < tab->n_fork_locks_initialized)
 		if (pthread_mutex_destroy(&tab->forks[i].lock) != 0)
-			return ((int)set_exit_code(tab, ERROR_MUTEX_DESTROY));
+			ret = ((int)set_exit_code(tab, ERROR_MUTEX_DESTROY));
 	if (tab->print_lock_initialized)
 		if (pthread_mutex_destroy(&tab->print_lock) != 0)
-			return ((int)set_exit_code(tab, ERROR_MUTEX_DESTROY));
+			ret = ((int)set_exit_code(tab, ERROR_MUTEX_DESTROY));
 	if (tab->id_lock_initialized)
 		if (pthread_mutex_destroy(&tab->id_lock) != 0)
-			return ((int)set_exit_code(tab, ERROR_MUTEX_DESTROY));
-	return (1);
+			ret = ((int)set_exit_code(tab, ERROR_MUTEX_DESTROY));
+	if (tab->eating_lock_initialized)
+		if (pthread_mutex_destroy(&tab->eating_lock) != 0)
+			ret = ((int)set_exit_code(tab, ERROR_MUTEX_DESTROY));
+	return (ret);
 }
 
 /*
 Calls all the functions required to clean up before exiting.
 
-Note on:
-	usleep(10000);
-gives threads the time to exit before starting the clean up. Not doing so can
-result in errors.
+Note on `usleep(10000);` gives threads the time to exit before starting
+the clean up. Not doing so can result in errors.
 */
 
-void	wrap_up(t_tab *tab)
+int	wrap_up(t_tab *tab)
 {
-	usleep(10000);
-	pthread_join(tab->philosopher_thread, NULL);
-	destroy_locks(tab);
+	int	ret;
+
+	ret = 1;
+	if (usleep(1000) == -1)
+		ret = ((int)set_exit_code(tab, ERROR_USLEEP));
+	if (tab->pthreads_created)
+		if (pthread_join(tab->philosopher_thread, NULL) != 0)
+			ret = ((int)set_exit_code(tab, ERROR_PTHREAD_JOIN));
+	if (!destroy_locks(tab))
+		ret = 0;
 	free_malloced_variables(tab);
+	return (ret);
 }

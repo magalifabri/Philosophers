@@ -17,6 +17,7 @@
 # define ERROR_MUTEX_INIT 8
 # define ERROR_MUTEX_DESTROY 10
 # define ERROR_PTHREAD_CREATE 9
+# define ERROR_PTHREAD_JOIN 13
 # define ERROR_GETTIMEOFDAY 3
 # define ERROR_MALLOC 4
 # define ERROR_BAD_ARGS 5
@@ -53,7 +54,10 @@ typedef struct s_tab
 	int				print_lock_initialized;
 	pthread_mutex_t	id_lock;
 	int				id_lock_initialized;
+	pthread_mutex_t	eating_lock;
+	int				eating_lock_initialized;
 	pthread_t		philosopher_thread;
+	int				pthreads_created;
 }					t_tab;
 
 // struct for variables used in phi_f() (the threads)
@@ -63,6 +67,7 @@ typedef struct s_thread_variable_struct
 	int				left_fork_i;
 	long long		time_last_meal;
 	t_tab			*tab;
+	int				eating;
 }					t_thread_var_struct;
 
 // initialize_variables.c
@@ -85,7 +90,7 @@ int					put_status(t_tab *tab, int philo_n, char *msg);
 long long			get_current_time(t_tab *tab);
 int					destroy_locks(t_tab *tab);
 void				free_malloced_variables(t_tab *tab);
-void				wrap_up(t_tab *tab);
+int					wrap_up(t_tab *tab);
 
 // utils_2.c
 int					mutex_unlock__return_0(t_tab *tab, pthread_mutex_t *lock_1,

@@ -81,6 +81,8 @@ static int	eating(t_tab *tab, t_thread_var_struct *s)
 	if (pthread_mutex_lock(&tab->forks[s->phi_n].lock) == -1
 		|| pthread_mutex_lock(&tab->forks[s->left_fork_i].lock) == -1)
 		return ((int)set_exit_code(tab, ERROR_MUTEX_LOCK));
+	if (pthread_mutex_lock(&tab->eating_lock) == -1)
+		return ((int)set_exit_code(tab, ERROR_MUTEX_LOCK));
 	s->time_last_meal = tab->current_time;
 	time_done_eating = tab->current_time + tab->time_to_eat;
 	if (!put_status(tab, s->phi_n + 1, "e"))
@@ -90,6 +92,8 @@ static int	eating(t_tab *tab, t_thread_var_struct *s)
 		if (usleep(500) == -1)
 			return (mutex_unlock__return_0(tab, &tab->forks[s->phi_n].lock,
 					&tab->forks[s->left_fork_i].lock, 0));
+	if (pthread_mutex_unlock(&tab->eating_lock) == -1)
+		return ((int)set_exit_code(tab, ERROR_MUTEX_LOCK));
 	if (pthread_mutex_unlock(&tab->forks[s->phi_n].lock) == -1
 		|| pthread_mutex_unlock(&tab->forks[s->left_fork_i].lock) == -1)
 		return ((int)set_exit_code(tab, ERROR_MUTEX_LOCK));

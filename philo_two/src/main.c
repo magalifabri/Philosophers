@@ -15,6 +15,8 @@ static int	exit_error(t_tab *tab)
 		write(2, "usleep() returned -1\n", 22);
 	else if (tab->exit_code == ERROR_PTHREAD_CREATE)
 		write(2, "pthread_create() didn't return 0\n", 34);
+	else if (tab->exit_code == ERROR_PTHREAD_JOIN)
+		write(2, "pthread_join() didn't return 0\n", 32);
 	else if (tab->exit_code == ERROR_SEM_OPEN)
 		write(2, "sem_open() failed\n", 19);
 	else if (tab->exit_code == ERROR_SEM_UNLINK)
@@ -112,10 +114,7 @@ int	main(int ac, char **av)
 		|| !create_philosophers(&tab)
 		|| !update_current_time(&tab))
 		return (exit_error(&tab));
-	wrap_up(&tab);
-	if (tab.exit_code == 0
-		|| tab.exit_code == DEATH
-		|| tab.exit_code == ALL_FAT)
-		return (0);
-	return (1);
+	if (!wrap_up(&tab))
+		return (1);
+	return (0);
 }
