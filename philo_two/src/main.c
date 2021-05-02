@@ -40,43 +40,43 @@ long long	get_current_time(void)
 	return (passed_time);
 }
 
-/*
-** Note(s) on monitor_philosophers():
-** 
-** Instead of using pthread_join() to make sure the main process doesn't exit
-** before the threads are done, we trap the main process in a loop that it will
-** only exit when the threads are done (a philosopher dies, all are fat or an
-** error occurs).
-** 
-** This function supplies the value to the tab.current_time variable that is
-** used by the threads. This is done so that they don't each have to do this
-** individually.
-*/
-
-static int	monitor_philosophers(t_tab *tab)
+int	update_current_time(t_tab *tab)
 {
-	while (1)
+	while (!tab->exit_code)
 	{
-		if (usleep(1000) == -1)
-			return ((int)set_exit_code(tab, ERROR_USLEEP));
 		tab->current_time = get_current_time();
 		if (tab->current_time == -1)
 			return ((int)set_exit_code(tab, ERROR_GETTIMEOFDAY));
-		if (tab->exit_code == DEATH)
-		{
-			printf(B_RED"A philosopher has starved! Game over."RESET"\n");
-			return (1);
-		}
-		else if (tab->exit_code == ALL_FAT)
-		{
-			printf(B_GREEN"They're all fat. Good job!\n"RESET);
-			return (1);
-		}
-		else if (tab->exit_code)
-			return (0);
+		if (usleep(1000) == -1)
+			return ((int)set_exit_code(tab, ERROR_USLEEP));
 	}
-	return (0);
+	return (1);
 }
+
+// static int	monitor_philosophers(t_tab *tab)
+// {
+// 	while (1)
+// 	{
+// 		if (usleep(1000) == -1)
+// 			return ((int)set_exit_code(tab, ERROR_USLEEP));
+// 		tab->current_time = get_current_time();
+// 		if (tab->current_time == -1)
+// 			return ((int)set_exit_code(tab, ERROR_GETTIMEOFDAY));
+// 		if (tab->exit_code == DEATH)
+// 		{
+// 			printf(B_RED"A philosopher has starved! Game over."RESET"\n");
+// 			return (1);
+// 		}
+// 		else if (tab->exit_code == ALL_FAT)
+// 		{
+// 			printf(B_GREEN"They're all fat. Good job!\n"RESET);
+// 			return (1);
+// 		}
+// 		else if (tab->exit_code)
+// 			return (0);
+// 	}
+// 	return (0);
+// }
 
 static int	create_philosophers(t_tab *tab)
 {
@@ -110,8 +110,12 @@ int	main(int ac, char **av)
 	}
 	if (!initialize_variables(&tab, ac, av)
 		|| !create_philosophers(&tab)
-		|| !monitor_philosophers(&tab))
+		|| !update_current_time(&tab))
 		return (exit_error(&tab));
 	wrap_up(&tab);
-	return (0);
+	if (tab.exit_code == 0
+		|| tab.exit_code == DEATH
+		|| tab.exit_code == ALL_FAT)
+		return (0);
+	return (1);
 }

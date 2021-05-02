@@ -2,9 +2,11 @@
 ## ***WORK IN PROGRESS***
 
 TO-DO:
-- in philo_one and _three, do philosophers die after time_to_die from the start of their thread or from the start of the program?
-- in p2 and p3, initialize exit_code in pre_initialization
 - p1, p2: error checking
+- have ./philo_* return 1 on wrap_up error
+- p1: remove monitor_philosophers?
+
+In the subject pdf it is written that "Each time a philosopher has finished eating, he will drop his forks and start sleeping." So first he drops his forks, and only after does he fall asleep. Therefore mutex_lock() or sem_post() should be called before printing that the philosopher is sleeping.
 
 - problem (2): Invalid free: Because threads can call free on a variable that is shared between the threads, this makes it possible for multiple threads to do so at the same time.
 	- solution: Only call free from the main process. return_error() becomes set_error_code() + exit_error()

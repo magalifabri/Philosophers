@@ -35,13 +35,6 @@ static int	initialize_more(t_tab *tab)
 	return (1);
 }
 
-/*
-** Note(s) on initialize_variables_and_locks():
-** 
-** "tab->number_of_times_each_philosopher_must_eat = -1": -1 is a sentinel
-** value for an absence of value (a value for it wasn't supplied with av)
-*/
-
 int	initialize_variables(t_tab *tab, int ac, char **av)
 {
 	tab->number_of_philosophers = ft_atoi(av[1]);

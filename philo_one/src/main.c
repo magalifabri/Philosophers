@@ -26,9 +26,12 @@ int	exit_error(t_tab *tab)
 }
 
 /*
+A helper function, usually called in a return statement, that allows us to set
+an exit code, indicating the reason for exiting the process, and return 0.
+
 Only set or replace the currently stored exit code if it's 0 (initialisation
 value) or an exit code that doesn't indicate an error (DEATH or ALL_FAT).
-Otherwise, if the currently stored exit code already indicates an idea,
+Otherwise, if the currently stored exit code already indicates an error,
 don't replace it, as the initial error is the most important.
 */
 
@@ -42,41 +45,22 @@ void	*set_exit_code(t_tab *tab, int exit_code)
 }
 
 /*
-** Note(s) on monitor_philosophers():
-** 
-** Instead of using pthread_join() to make sure the main process doesn't exit
-** before the threads are done, we trap the main process in a loop that it will
-** only exit when the threads are done (a philosopher dies, all are fat or an
-** error occurs).
-** 
-** This function supplies the value to the tab.current_time variable that is
-** used by the threads. This is done so that they don't each have to do this
-** individually.
+This function supplies the value to the tab.current_time variable that is
+used by the threads. This is done so that they don't each have to do this
+individually.
 */
 
-int	monitor_philosophers(t_tab *tab)
+int	update_current_time(t_tab *tab)
 {
-	while (1)
+	while (!tab->exit_code)
 	{
-		if (usleep(1000) == -1)
-			return ((int)set_exit_code(tab, ERROR_USLEEP));
 		tab->current_time = get_current_time(tab);
 		if (!tab->current_time)
 			return (0);
-		if (tab->exit_code == DEATH)
-		{
-			printf(B_RED"A philosopher has starved! Game over.\n"RESET);
-			return (1);
-		}
-		else if (tab->exit_code == ALL_FAT)
-		{
-			printf(B_GREEN"They're all fat. Good job!\n"RESET);
-			return (1);
-		}
-		else if (tab->exit_code)
-			return (0);
+		if (usleep(1000) == -1)
+			return ((int)set_exit_code(tab, ERROR_USLEEP));
 	}
-	return (0);
+	return (1);
 }
 
 static int	create_philosophers(t_tab *tab)
@@ -110,8 +94,12 @@ int	main(int ac, char **av)
 		return (exit_error(&tab));
 	if (!create_philosophers(&tab))
 		return (exit_error(&tab));
-	if (!monitor_philosophers(&tab))
+	if (!update_current_time(&tab))
 		return (exit_error(&tab));
 	wrap_up(&tab);
-	return (0);
+	if (tab.exit_code == 0
+		|| tab.exit_code == DEATH
+		|| tab.exit_code == ALL_FAT)
+		return (0);
+	return (1);
 }
