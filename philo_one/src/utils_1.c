@@ -1,5 +1,22 @@
 #include "../philo_one.h"
 
+void	eat_or_die(t_tab *tab, t_thread_var_struct *s, long long timestamp)
+{
+	if (s->time_last_meal + s->tab->time_to_die < s->tab->current_time)
+	{
+		s->tab->exit_code = DEATH;
+		printf("%lld %d "B_RED"died"RESET"\n",
+			(s->tab->current_time - s->tab->start_time), s->phi_n + 1);
+	}
+	else
+	{
+		s->time_last_meal = tab->current_time;
+		printf("%lld %d has taken a fork\n%lld %d has taken a fork\n",
+			timestamp, s->phi_n + 1, timestamp, s->phi_n + 1);
+		printf("%lld %d is eating\n", timestamp, s->phi_n + 1);
+	}
+}
+
 /*
 put_status() prints the philosophers' activities to stdout. It uses a mutex
 lock to make sure only one philosopher (thread) does this at a time. It also
@@ -8,7 +25,7 @@ has died, an error has occurred or all philosophers are fat and reports this
 back to the caller function as this means the threads need to exit.
 */
 
-int	put_status(t_tab *tab, int philo_n, char *msg)
+int	put_status(t_tab *tab, t_thread_var_struct *s, char *msg)
 {
 	int			ret;
 	long long	timestamp;
@@ -21,12 +38,23 @@ int	put_status(t_tab *tab, int philo_n, char *msg)
 		timestamp = tab->current_time - tab->start_time;
 		if (msg[0] == 'e')
 		{
-			printf("%lld %d has taken a fork\n%lld %d has taken a fork\n",
-				timestamp, philo_n, timestamp, philo_n);
-			printf("%lld %d is eating\n", timestamp, philo_n);
+			eat_or_die(tab, s, timestamp);
+			// if (s->time_last_meal + s->tab->time_to_die < s->tab->current_time)
+			// {
+			// 	s->tab->exit_code = DEATH;
+			// 	printf("%lld %d "B_RED"died"RESET"\n",
+			// 		(s->tab->current_time - s->tab->start_time), s->phi_n + 1);
+			// }
+			// else
+			// {
+			// 	s->time_last_meal = tab->current_time;
+			// 	printf("%lld %d has taken a fork\n%lld %d has taken a fork\n",
+			// 		timestamp, s->phi_n + 1, timestamp, s->phi_n + 1);
+			// 	printf("%lld %d is eating\n", timestamp, s->phi_n + 1);
+			// }
 		}
 		else
-			printf("%lld %d %s\n", timestamp, philo_n, msg);
+			printf("%lld %d %s\n", timestamp, s->phi_n + 1, msg);
 	}
 	else
 		ret = 0;
@@ -72,9 +100,6 @@ int	destroy_locks(t_tab *tab)
 	if (tab->id_lock_initialized)
 		if (pthread_mutex_destroy(&tab->id_lock) != 0)
 			ret = ((int)set_exit_code(tab, ERROR_MUTEX_DESTROY));
-	if (tab->eating_lock_initialized)
-		if (pthread_mutex_destroy(&tab->eating_lock) != 0)
-			ret = ((int)set_exit_code(tab, ERROR_MUTEX_DESTROY));
 	return (ret);
 }
 
@@ -90,7 +115,7 @@ int	wrap_up(t_tab *tab)
 	int	ret;
 
 	ret = 1;
-	if (usleep(1000) == -1)
+	if (usleep(10000) == -1)
 		ret = ((int)set_exit_code(tab, ERROR_USLEEP));
 	if (tab->pthreads_created)
 		if (pthread_join(tab->philosopher_thread, NULL) != 0)
