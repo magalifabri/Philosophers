@@ -1,9 +1,5 @@
 #include "../philo_one.h"
 
-/*
-A philosopher could start eating and still die just after if there is a time gap between grimreaper() checking if time_to_die has expired and announcing the death. Therefore it is checked twice: once before grabbing the mutex lock to print it, and once more before printing to make sure the philosopher hasn't started eating in the meantime.
-*/
-
 static void	*grimreaper(void *arg)
 {
 	t_thread_var_struct	*s;
@@ -20,7 +16,6 @@ static void	*grimreaper(void *arg)
 				s->tab->exit_code = DEATH;
 				printf("%lld %d "B_RED"died!"RESET"\n",
 					(s->tab->current_time - s->tab->start_time), s->phi_n + 1);
-				// return (NULL);
 			}
 			if (pthread_mutex_unlock(&s->tab->print_lock) == -1)
 				return (set_exit_code(s->tab, ERROR_MUTEX_UNLOCK));
@@ -30,29 +25,6 @@ static void	*grimreaper(void *arg)
 	}
 	return (NULL);
 }
-// static void	*grimreaper(void *arg)
-// {
-// 	t_thread_var_struct	*s;
-
-// 	s = (t_thread_var_struct *)arg;
-// 	while (s->time_last_meal + s->tab->time_to_die > s->tab->current_time
-// 		&& !s->tab->exit_code)
-// 		if (usleep(1000) == -1)
-// 			return (set_exit_code(s->tab, ERROR_USLEEP));
-// 	if (s->tab->exit_code)
-// 		return (NULL);
-// 	if (pthread_mutex_lock(&s->tab->print_lock) == -1)
-// 		return (set_exit_code(s->tab, ERROR_MUTEX_LOCK));
-// 	if (!s->tab->exit_code)
-// 	{
-// 		s->tab->exit_code = DEATH;
-// 		printf("%lld %d "B_RED"died"RESET"\n",
-// 			(s->tab->current_time - s->tab->start_time), s->phi_n + 1);
-// 	}
-// 	if (pthread_mutex_unlock(&s->tab->print_lock) == -1)
-// 		return (set_exit_code(s->tab, ERROR_MUTEX_UNLOCK));
-// 	return (NULL);
-// }
 
 /*
 For whatever reason one big usleep() is slower than a bunch of small ones.
@@ -111,7 +83,6 @@ static int	eating(t_tab *tab, t_thread_var_struct *s)
 	if (pthread_mutex_lock(&tab->forks[s->phi_n].lock) == -1
 		|| pthread_mutex_lock(&tab->forks[s->left_fork_i].lock) == -1)
 		return ((int)set_exit_code(tab, ERROR_MUTEX_LOCK));
-	// s->time_last_meal = tab->current_time;
 	time_done_eating = tab->current_time + tab->time_to_eat;
 	if (!put_status(tab, s, "e"))
 		return (mutex_unlock__return_0(tab, &tab->forks[s->phi_n].lock,

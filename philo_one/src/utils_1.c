@@ -1,5 +1,10 @@
 #include "../philo_one.h"
 
+/*
+Helper function to trim down the length of put_status().
+It checks when a philosopher is about to eat, if it shouldn't be dead instead.
+*/
+
 void	eat_or_die(t_tab *tab, t_thread_var_struct *s, long long timestamp)
 {
 	if (s->time_last_meal + s->tab->time_to_die < s->tab->current_time)
@@ -37,22 +42,7 @@ int	put_status(t_tab *tab, t_thread_var_struct *s, char *msg)
 	{
 		timestamp = tab->current_time - tab->start_time;
 		if (msg[0] == 'e')
-		{
 			eat_or_die(tab, s, timestamp);
-			// if (s->time_last_meal + s->tab->time_to_die < s->tab->current_time)
-			// {
-			// 	s->tab->exit_code = DEATH;
-			// 	printf("%lld %d "B_RED"died"RESET"\n",
-			// 		(s->tab->current_time - s->tab->start_time), s->phi_n + 1);
-			// }
-			// else
-			// {
-			// 	s->time_last_meal = tab->current_time;
-			// 	printf("%lld %d has taken a fork\n%lld %d has taken a fork\n",
-			// 		timestamp, s->phi_n + 1, timestamp, s->phi_n + 1);
-			// 	printf("%lld %d is eating\n", timestamp, s->phi_n + 1);
-			// }
-		}
 		else
 			printf("%lld %d %s\n", timestamp, s->phi_n + 1, msg);
 	}
@@ -61,19 +51,6 @@ int	put_status(t_tab *tab, t_thread_var_struct *s, char *msg)
 	if (pthread_mutex_unlock(&tab->print_lock) == -1)
 		return ((int)set_exit_code(tab, ERROR_MUTEX_UNLOCK));
 	return (ret);
-}
-
-long long	get_current_time(t_tab *tab)
-{
-	struct timeval	tp;
-	long long		passed_time;
-
-	if (gettimeofday(&tp, 0) == -1)
-		return ((long long)set_exit_code(tab, ERROR_GETTIMEOFDAY));
-	passed_time = tp.tv_sec;
-	passed_time *= 1000;
-	passed_time += (tp.tv_usec / 1000);
-	return (passed_time);
 }
 
 void	free_malloced_variables(t_tab *tab)

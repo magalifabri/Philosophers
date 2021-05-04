@@ -1,5 +1,18 @@
 #include "../philo_one.h"
 
+long long	get_current_time(t_tab *tab)
+{
+	struct timeval	tp;
+	long long		passed_time;
+
+	if (gettimeofday(&tp, 0) == -1)
+		return ((long long)set_exit_code(tab, ERROR_GETTIMEOFDAY));
+	passed_time = tp.tv_sec;
+	passed_time *= 1000;
+	passed_time += (tp.tv_usec / 1000);
+	return (passed_time);
+}
+
 /*
 A little helper function that unlocks two mutex locks and returns 0.
 Created to trim down the length of eating().
