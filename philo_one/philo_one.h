@@ -54,8 +54,6 @@ typedef struct s_tab
 	int				print_lock_initialized;
 	pthread_mutex_t	id_lock;
 	int				id_lock_initialized;
-	pthread_mutex_t	eating_lock;
-	int				eating_lock_initialized;
 	pthread_t		philosopher_thread;
 	int				pthreads_created;
 }					t_tab;
@@ -86,7 +84,7 @@ void				*set_exit_code(t_tab *tab, int exit_code);
 void				*phi_f(void *arg);
 
 // utils_1.c
-int					put_status(t_tab *tab, int philo_n, char *msg);
+int					put_status(t_tab *tab, t_thread_var_struct *s, char *msg);
 long long			get_current_time(t_tab *tab);
 int					destroy_locks(t_tab *tab);
 void				free_malloced_variables(t_tab *tab);
