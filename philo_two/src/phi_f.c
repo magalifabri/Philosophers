@@ -5,24 +5,49 @@ static void	*grimreaper(void *arg)
 	t_thread_var_struct	*s;
 
 	s = (t_thread_var_struct *)arg;
-	while (s->time_last_meal + s->tab->time_to_die > s->tab->current_time
-		&& !s->tab->exit_code)
+	while (!s->tab->exit_code)
+	{
+		if (s->time_last_meal + s->tab->time_to_die < s->tab->current_time)
+		{
+			if (sem_wait(s->tab->print_sem) == -1)
+				return (set_exit_code(s->tab, ERROR_SEM_WAIT));
+			if (!s->tab->exit_code)
+			{
+				s->tab->exit_code = DEATH;
+				printf("%lld %d "B_RED"died!"RESET"\n",
+					(s->tab->current_time - s->tab->start_time), s->phi_n + 1);
+			}
+			if (sem_post(s->tab->print_sem) == -1)
+				return (set_exit_code(s->tab, ERROR_SEM_WAIT));
+		}
 		if (usleep(1000) == -1)
 			return (set_exit_code(s->tab, ERROR_USLEEP));
-	if (s->tab->exit_code)
-		return (NULL);
-	if (sem_wait(s->tab->print_sem) == -1)
-		return (set_exit_code(s->tab, ERROR_SEM_WAIT));
-	if (!s->tab->exit_code)
-	{
-		s->tab->exit_code = DEATH;
-		printf("%lld %d "B_RED"died"RESET"\n",
-			(s->tab->current_time - s->tab->start_time), s->phi_n + 1);
 	}
-	if (sem_post(s->tab->print_sem) == -1)
-		return (set_exit_code(s->tab, ERROR_SEM_WAIT));
 	return (NULL);
 }
+// static void	*grimreaper(void *arg)
+// {
+// 	t_thread_var_struct	*s;
+
+// 	s = (t_thread_var_struct *)arg;
+// 	while (s->time_last_meal + s->tab->time_to_die > s->tab->current_time
+// 		&& !s->tab->exit_code)
+// 		if (usleep(1000) == -1)
+// 			return (set_exit_code(s->tab, ERROR_USLEEP));
+// 	if (s->tab->exit_code)
+// 		return (NULL);
+// 	if (sem_wait(s->tab->print_sem) == -1)
+// 		return (set_exit_code(s->tab, ERROR_SEM_WAIT));
+// 	if (!s->tab->exit_code)
+// 	{
+// 		s->tab->exit_code = DEATH;
+// 		printf("%lld %d "B_RED"died"RESET"\n",
+// 			(s->tab->current_time - s->tab->start_time), s->phi_n + 1);
+// 	}
+// 	if (sem_post(s->tab->print_sem) == -1)
+// 		return (set_exit_code(s->tab, ERROR_SEM_WAIT));
+// 	return (NULL);
+// }
 
 static int	sleeping_thinking(t_tab *tab, t_thread_var_struct *s)
 {
