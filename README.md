@@ -67,6 +67,21 @@ Each fork is protected by a mutex lock. The mutex is locked only while the avail
 
 Keeping the mutex locked while the fork is in use should result in much less locking and unlocking and with that, shorter and code. So I'll probably do it like that in the future.
 
+Preventing messages from being printed post death etc.
+Every message printed to stdout requires the possession of the same mutex lock: the print_lock. 
+And before printing anything, exit_code is checked: if it's not 0, the message isn't printed. 
+When the first philosopher dies or the last philosopher has eaten enough times, this is printed. While in possession of the lock, the exit_code is also set to a non-0 value. So any successive thread that accesses the print_lock to print something doesn't pass the exit_code check and therefore doesn't get to print anything. Failing the exit_code check also causes the thread to exit.
+This makes it so that the message that reports on the death of a philosopher or the attaining of fatness of the last philosopher is always the last message that is printed before all the threads and the main process exit.
+
+Preventing philosophers from eating when they should be dying
+- philosopher waits for forks (mutex locks)
+- philosopher gets forks and can start eating
+- philosopher waits for print_lock to print message that it is eating
+During any of the aforementioned stages a philosopher's time_last_meal could expire (meaning it should die), potentially also putting grimreaper into motion. But if it's liveliness isn't checked (accurately), it could still manage to print that it's eating. And if grimreaper was triggered, the message of it eating would be quickly followed up by a message of its death.
+To prevent zombie philosophers and the mix up of messages, the liveliness of a philosopher is the final check before printing that it is eating. And only if it passes this check time_last_meal is updated.
+This makes it so that the philosopher dies even if it has technically acquired a pair of forks and is about to dig in.
+
+
 ### . . . **philo_two: threads and semaphore**
 
 We use a semaphore to limit the number of threads or processes that are able to access certain parts of the code.

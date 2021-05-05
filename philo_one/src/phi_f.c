@@ -111,7 +111,7 @@ to a time efficient start.
 Note on grimreaper_thread: When a philosopher thread is waiting for a mutex
 lock to become available, it can't do anything else in the meantime. Thus it
 also can't check if the philosopher has died and report on its death in a
-timely manner. This task is outsourced to a separate thread: the grimreaper.
+timely manner. This task is outsourced to a separate thread: grimreaper.
 This thread continually checks if the philosopher is still alive and reports
 on their death when required.
 */
