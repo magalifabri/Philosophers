@@ -44,17 +44,15 @@ static int	monitor_philosophers(t_tab *tab)
 		if (WEXITSTATUS(exit_status) == EXIT_DEATH
 			|| WEXITSTATUS(exit_status) == EXIT_ERROR)
 		{
-			if (WEXITSTATUS(exit_status) == EXIT_DEATH)
-				printf(B_RED"Well.. that's a bit unfortunate..\n"RESET);
-			else if (WEXITSTATUS(exit_status) == EXIT_ERROR)
+			if (WEXITSTATUS(exit_status) == EXIT_ERROR)
 				return ((int)return_error(tab, ERROR_CHILD));
-			while (tab->number_of_philosophers--)
-				kill(tab->phi_pid[tab->number_of_philosophers], SIGKILL);
+			// while (tab->number_of_philosophers--)
+			// 	kill(tab->phi_pid[tab->number_of_philosophers], SIGKILL);
 			break ;
 		}
 	}
-	if (philosophers_left == -1)
-		printf(B_GREEN"Good job! They're all fat.\n"RESET);
+	// if (philosophers_left == -1)
+	// 	printf(B_GREEN"Good job! They're all fat.\n"RESET);
 	return (1);
 }
 
