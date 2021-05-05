@@ -29,7 +29,7 @@ void	*return_error(t_tab *tab, int error_num)
 As soon as wait() returns with a pid, we know a philospopher has exited,
 either because he's fat or because he's dead (or because an error occurred).
 If he's fat, we let the other philosopher's continue; if he's dead (or an
-error occurred), we kill the other philosophers.
+error occurred), we begin exiting by killing the other philosophers.
 */
 
 static int	monitor_philosophers(t_tab *tab)
@@ -44,15 +44,13 @@ static int	monitor_philosophers(t_tab *tab)
 		if (WEXITSTATUS(exit_status) == EXIT_DEATH
 			|| WEXITSTATUS(exit_status) == EXIT_ERROR)
 		{
+			while (tab->number_of_philosophers--)
+				kill(tab->phi_pid[tab->number_of_philosophers], SIGKILL);
 			if (WEXITSTATUS(exit_status) == EXIT_ERROR)
 				return ((int)return_error(tab, ERROR_CHILD));
-			// while (tab->number_of_philosophers--)
-			// 	kill(tab->phi_pid[tab->number_of_philosophers], SIGKILL);
 			break ;
 		}
 	}
-	// if (philosophers_left == -1)
-	// 	printf(B_GREEN"Good job! They're all fat.\n"RESET);
 	return (1);
 }
 
