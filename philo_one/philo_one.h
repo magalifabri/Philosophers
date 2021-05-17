@@ -77,7 +77,6 @@ int					initialize_variables_phi_f(t_tab *tab,
 						t_thread_var_struct *s);
 
 // main.c
-int					return_error(t_tab *tab, int error_num);
 void				*set_exit_code(t_tab *tab, int exit_code);
 
 // phi_f.c
@@ -85,12 +84,10 @@ void				*phi_f(void *arg);
 
 // utils_1.c
 int					put_status(t_tab *tab, t_thread_var_struct *s, char *msg);
-long long			get_current_time(t_tab *tab);
-int					destroy_locks(t_tab *tab);
-void				free_malloced_variables(t_tab *tab);
 int					wrap_up(t_tab *tab);
 
 // utils_2.c
+long long			get_current_time(t_tab *tab);
 int					mutex_unlock__return_0(t_tab *tab, pthread_mutex_t *lock_1,
 						pthread_mutex_t *lock_2, int return_value);
 int					ft_atoi(const char *str);

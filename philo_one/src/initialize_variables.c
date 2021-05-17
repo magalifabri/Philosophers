@@ -39,10 +39,10 @@ static int	initialize_more(t_tab *tab)
 }
 
 /*
-** Note(s) on initialize_variables_and_locks():
-** 
-** "tab->number_of_times_each_philosopher_must_eat = -1": -1 is a sentinel
-** value for an absence of value (a value for it wasn't supplied with av)
+Note(s) on initialize_variables_and_locks():
+
+"tab->number_of_times_each_philosopher_must_eat = -1": -1 is a sentinel
+value for an absence of value (a value for it wasn't supplied with av)
 */
 
 int	initialize_variables_and_locks(t_tab *tab, int ac, char **av)

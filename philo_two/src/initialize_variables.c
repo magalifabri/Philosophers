@@ -1,11 +1,11 @@
 #include "../philo_two.h"
 
 /*
-** Note(s) on initialize_variables_part_2():
-** 
-** "sem_unlink(x);" is required in case the program was
-** exited badly the previous time and the semaphores weren't unlinked. Possible
-** errors are irrelevant enough to ignore them.
+Note(s) on initialize_variables_part_2():
+
+"sem_unlink(x);" is required in case the program was
+exited badly the previous time and the semaphores weren't unlinked. Possible
+errors are irrelevant enough to ignore them.
 */
 
 static int	initialize_more(t_tab *tab)

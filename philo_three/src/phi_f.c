@@ -1,16 +1,5 @@
 #include "../philo_three.h"
 
-/*
-Philosophers may die of starvation while standing in the "dining room queue"
-(semaphore) and it's important to report on their unfortunate demise within
-10ms of its occurrance (and halt the program immediately afterwards?). But
-while they are waiting, they are incapable of doing anything else, and the
-other philosophers and the parent process also aren't aware of whether or
-not the philosopher has actually starved. Therefore a pthread is created
-within the child process to keep an eye on things and quit the process if
-the philosopher doesn't manage to eat in time.
-*/
-
 static void	*grimreaper(void *arg)
 {
 	t_tab	*tab;

@@ -5,7 +5,7 @@ Helper function to trim down the length of put_status().
 It checks when a philosopher is about to eat, if it shouldn't be dead instead.
 */
 
-void	eat_or_die(t_tab *tab, t_thread_var_struct *s, long long timestamp)
+static void	eat_or_die(t_tab *tab, t_thread_var_struct *s, long long timestamp)
 {
 	if (s->time_last_meal + s->tab->time_to_die < s->tab->current_time)
 	{
@@ -53,7 +53,7 @@ int	put_status(t_tab *tab, t_thread_var_struct *s, char *msg)
 	return (ret);
 }
 
-void	free_malloced_variables(t_tab *tab)
+static void	free_malloced_variables(t_tab *tab)
 {
 	if (tab->forks)
 		free(tab->forks);
@@ -61,7 +61,7 @@ void	free_malloced_variables(t_tab *tab)
 		free(tab->n_times_eaten);
 }
 
-int	destroy_locks(t_tab *tab)
+static int	destroy_locks(t_tab *tab)
 {
 	int	ret;
 	int	i;

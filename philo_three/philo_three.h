@@ -54,7 +54,6 @@ int				initialize_variables(t_tab *tab, int ac, char **av);
 void			pre_initialisation(t_tab *tab);
 
 // phi_f.c
-// int				wrap_up(t_tab *tab);
 void			phi_f(void *arg);
 
 // utils.c

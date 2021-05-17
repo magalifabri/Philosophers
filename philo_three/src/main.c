@@ -1,6 +1,6 @@
 #include "../philo_three.h"
 
-int	wrap_up(t_tab *tab)
+static int	wrap_up(t_tab *tab)
 {
 	int	ret;
 
@@ -48,7 +48,7 @@ void	*return_error(t_tab *tab, int error_num)
 }
 
 /*
-As soon as wait() returns with a pid, we know a philospopher has exited,
+As soon as waitpid() returns with a pid, we know a philospopher has exited,
 either because he's fat or because he's dead (or because an error occurred).
 If he's fat, we let the other philosopher's continue; if he's dead (or an
 error occurred), we begin exiting by killing the other philosophers.

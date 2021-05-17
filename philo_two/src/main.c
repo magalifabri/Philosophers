@@ -42,7 +42,7 @@ long long	get_current_time(void)
 	return (passed_time);
 }
 
-int	update_current_time(t_tab *tab)
+static int	update_current_time(t_tab *tab)
 {
 	while (!tab->exit_code)
 	{
@@ -54,31 +54,6 @@ int	update_current_time(t_tab *tab)
 	}
 	return (1);
 }
-
-// static int	monitor_philosophers(t_tab *tab)
-// {
-// 	while (1)
-// 	{
-// 		if (usleep(1000) == -1)
-// 			return ((int)set_exit_code(tab, ERROR_USLEEP));
-// 		tab->current_time = get_current_time();
-// 		if (tab->current_time == -1)
-// 			return ((int)set_exit_code(tab, ERROR_GETTIMEOFDAY));
-// 		if (tab->exit_code == DEATH)
-// 		{
-// 			printf(B_RED"A philosopher has starved! Game over."RESET"\n");
-// 			return (1);
-// 		}
-// 		else if (tab->exit_code == ALL_FAT)
-// 		{
-// 			printf(B_GREEN"They're all fat. Good job!\n"RESET);
-// 			return (1);
-// 		}
-// 		else if (tab->exit_code)
-// 			return (0);
-// 	}
-// 	return (0);
-// }
 
 static int	create_philosophers(t_tab *tab)
 {
