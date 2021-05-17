@@ -11,7 +11,6 @@ SRC_FILES =	\
 OBJ_DIR = ./obj/
 OBJ_FILES = $(addprefix $(OBJ_DIR), $(SRC_FILES:.c=.o))
 
-# INCLUDE_DIR = ./
 INCLUDE_FILES = philo_one.h
 
 CC = gcc
@@ -23,15 +22,13 @@ RMDIR = /bin/rm -rf
 all: $(NAME)
 
 $(NAME): $(OBJ_DIR) $(OBJ_FILES) $(INCLUDE_FILES)
-	$(CC) $(FLAGS) -I$(INCLUDE_FILES) $(OBJ_FILES) -o $(NAME)
+	$(CC) $(FLAGS) $(OBJ_FILES) -o $(NAME)
 
-# make OBJ_DIR for NAME dependency
 $(OBJ_DIR):
 	mkdir $(OBJ_DIR)
 
-# make .o files for NAME dependency
 $(OBJ_DIR)%.o: $(SRC_DIR)%.c
-	$(CC) $(FLAGS) -I$(INCLUDE_FILES) -c -o $@ $<
+	$(CC) $(FLAGS) -c -o $@ $<
 
 clean:
 	$(RM) $(OBJ_FILES)

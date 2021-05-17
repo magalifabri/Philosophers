@@ -45,11 +45,14 @@ limits (on guacamole)
 200 410 200 200 (infinite)
 200 200 200 200 (death at ± 200)
 200 220 100 100 (infinite)
-200 210 100 100 (death at ?)
+200 210 100 100 (infinite)
 4 60 60 60 (death at ± 60)
 200 60 60 60 (death at ± 60)
 4 120 60 60 (death at ± 120)
 4 125 60 60 (infinite)
+
+philo_three
+check if no philo_three processes remain after exiting the program
 
 ## Project Description
 
