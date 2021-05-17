@@ -40,7 +40,7 @@ static int	monitor_philosophers(t_tab *tab)
 	philosophers_left = tab->number_of_philosophers;
 	while (philosophers_left--)
 	{
-		wait(&exit_status);
+		waitpid(-1, &exit_status, 0);
 		if (WEXITSTATUS(exit_status) == EXIT_DEATH
 			|| WEXITSTATUS(exit_status) == EXIT_ERROR)
 		{
