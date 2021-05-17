@@ -48,24 +48,40 @@ long long	get_current_time(t_tab *tab)
 	return (passed_time);
 }
 
-int	wrap_up(t_tab *tab)
+static void	eat_or_die(t_tab *tab, long long timestamp)
 {
-	int	ret;
+	if (tab->time_last_meal + tab->time_to_die < tab->current_time)
+	{
+		printf("%lld %d "B_RED"died"RESET"\n",
+			(tab->current_time - tab->start_time), tab->phi_n + 1);
+		exit(EXIT_DEATH);
+	}
+	else
+	{
+		tab->time_last_meal = tab->current_time;
+		printf("%lld %d has taken a fork\n%lld %d has taken a fork\n",
+			timestamp, tab->phi_n + 1, timestamp, tab->phi_n + 1);
+		printf("%lld %d is eating\n", timestamp, tab->phi_n + 1);
+	}
+}
+
+int	put_status_msg(t_tab *tab, char *msg)
+{
+	int			ret;
+	long long	timestamp;
 
 	ret = 1;
-	if (tab->phi_pid)
-		free(tab->phi_pid);
-	if (tab->fork_sem_initialised)
-	{
-		if (sem_unlink("fork_sem") == -1)
-			printf(B_RED"ERROR: "RESET"sem_unlink(fork_sem) returned -1\n");
-		ret = 0;
-	}
-	if (tab->print_sem_initialised)
-	{
-		if (sem_unlink("print_sem") == -1)
-			printf(B_RED"ERROR: "RESET"sem_unlink(print_sem) returned -1\n");
-		ret = 0;
-	}
+	if (sem_wait(tab->print_sem) == -1)
+		exit(EXIT_ERROR);
+	tab->current_time = get_current_time(tab);
+	if (tab->current_time == -1)
+		exit(EXIT_ERROR);
+	timestamp = tab->current_time - tab->start_time;
+	if (msg[0] == 'e')
+		eat_or_die(tab, timestamp);
+	else
+		printf("%lld %d %s\n", timestamp, tab->phi_n + 1, msg);
+	if (sem_post(tab->print_sem) == -1)
+		exit(EXIT_ERROR);
 	return (ret);
 }

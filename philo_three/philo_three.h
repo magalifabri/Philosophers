@@ -54,12 +54,13 @@ int				initialize_variables(t_tab *tab, int ac, char **av);
 void			pre_initialisation(t_tab *tab);
 
 // phi_f.c
+// int				wrap_up(t_tab *tab);
 void			phi_f(void *arg);
 
 // utils.c
 int				ft_atoi(const char *str);
 void			*return_error(t_tab *tab, int error_num);
 long long		get_current_time(t_tab *tab);
-int				wrap_up(t_tab *tab);
+int				put_status_msg(t_tab *tab, char *msg);
 
 #endif

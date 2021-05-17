@@ -1,5 +1,27 @@
 #include "../philo_three.h"
 
+int	wrap_up(t_tab *tab)
+{
+	int	ret;
+
+	ret = 1;
+	if (tab->phi_pid)
+		free(tab->phi_pid);
+	if (tab->fork_sem_initialised)
+	{
+		if (sem_unlink("fork_sem") == -1)
+			printf(B_RED"ERROR: "RESET"sem_unlink(fork_sem) returned -1\n");
+		ret = 0;
+	}
+	if (tab->print_sem_initialised)
+	{
+		if (sem_unlink("print_sem") == -1)
+			printf(B_RED"ERROR: "RESET"sem_unlink(print_sem) returned -1\n");
+		ret = 0;
+	}
+	return (ret);
+}
+
 void	*return_error(t_tab *tab, int error_num)
 {
 	write(2, B_RED"ERROR: "RESET, 19);
