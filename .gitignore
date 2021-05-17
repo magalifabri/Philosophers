@@ -17,3 +17,4 @@ old
 *.dSYM
 *.git-ign.*
 */src/put_status_msg.c
+README.md
