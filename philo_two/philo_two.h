@@ -53,7 +53,6 @@ typedef struct s_tab
 typedef struct s_thread_variable_struct
 {
 	int			phi_n;
-	// long long	time_last_meal;
 	t_tab		*tab;
 }				t_thread_var_struct;
 

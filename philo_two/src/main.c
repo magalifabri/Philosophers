@@ -31,13 +31,13 @@ static int	exit_error(t_tab *tab)
 
 static int	grimreaper(t_tab *tab)
 {
-	int i;
-	
+	int	i;
+
 	i = -1;
 	while (++i < tab->number_of_philosophers)
 	{
 		if (tab->time_last_meal[i] != 0
-		&& tab->time_last_meal[i] + tab->time_to_die < tab->current_time)
+			&& tab->time_last_meal[i] + tab->time_to_die < tab->current_time)
 		{
 			if (sem_wait(tab->print_sem) == -1)
 				return ((int)set_exit_code(tab, ERROR_SEM_WAIT));
