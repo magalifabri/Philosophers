@@ -46,21 +46,19 @@ typedef struct s_tab
 	int			*n_times_eaten;
 	int			exit_code;
 	int			pthreads_created;
+	long long	*time_last_meal;
 }				t_tab;
 
 // struct for variables used in phi_f() (the threads)
 typedef struct s_thread_variable_struct
 {
 	int			phi_n;
-	long long	time_last_meal;
+	// long long	time_last_meal;
 	t_tab		*tab;
 }				t_thread_var_struct;
 
 // initialize_variables.c
 int				initialize_variables(t_tab *tab, int ac, char **av);
-
-// main.c
-long long		get_current_time(void);
 
 // phi_f.c
 void			*phi_f(void *arg);
@@ -73,6 +71,7 @@ void			*set_exit_code(t_tab *tab, int exit_code);
 int				wrap_up(t_tab *tab);
 
 // utils_2.c
+long long		get_current_time(void);
 int				ft_atoi(const char *str);
 
 #endif

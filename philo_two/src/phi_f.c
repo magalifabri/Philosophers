@@ -1,31 +1,5 @@
 #include "../philo_two.h"
 
-static void	*grimreaper(void *arg)
-{
-	t_thread_var_struct	*s;
-
-	s = (t_thread_var_struct *)arg;
-	while (!s->tab->exit_code)
-	{
-		if (s->time_last_meal + s->tab->time_to_die < s->tab->current_time)
-		{
-			if (sem_wait(s->tab->print_sem) == -1)
-				return (set_exit_code(s->tab, ERROR_SEM_WAIT));
-			if (!s->tab->exit_code)
-			{
-				s->tab->exit_code = DEATH;
-				printf("%lld %d "B_RED"died!"RESET"\n",
-					(s->tab->current_time - s->tab->start_time), s->phi_n + 1);
-			}
-			if (sem_post(s->tab->print_sem) == -1)
-				return (set_exit_code(s->tab, ERROR_SEM_WAIT));
-		}
-		if (usleep(1000) == -1)
-			return (set_exit_code(s->tab, ERROR_USLEEP));
-	}
-	return (NULL);
-}
-
 static int	sleeping_thinking(t_tab *tab, t_thread_var_struct *s)
 {
 	long long	waking_time;
@@ -70,7 +44,6 @@ static int	eating(t_tab *tab, t_thread_var_struct *s)
 
 	if (sem_wait(tab->fork_sem) == -1)
 		return ((int)set_exit_code(tab, ERROR_SEM_WAIT));
-	s->time_last_meal = tab->current_time;
 	time_done_eating = tab->current_time + tab->time_to_eat;
 	if (!put_status_msg(tab, s, "e"))
 		return (abort_eating(tab, tab->fork_sem, 0, 0));
@@ -88,7 +61,6 @@ void	*phi_f(void *arg)
 {
 	t_tab				*tab;
 	t_thread_var_struct	*s;
-	pthread_t			grimreaper_thread;
 
 	tab = (t_tab *)arg;
 	s = malloc(sizeof(t_thread_var_struct));
@@ -99,12 +71,9 @@ void	*phi_f(void *arg)
 	s->phi_n = tab->phi_n_c++;
 	if (sem_post(tab->id_sem) == -1)
 		return (set_exit_code(tab, ERROR_SEM_POST));
-	s->time_last_meal = tab->start_time;
+	tab->time_last_meal[s->phi_n] = tab->start_time;
 	s->tab = tab;
-	if (pthread_create(&grimreaper_thread, NULL, grimreaper, s) != 0)
-		return (NULL);
 	while (eating(tab, s) && sleeping_thinking(tab, s))
 		;
-	pthread_join(grimreaper_thread, NULL);
 	return (NULL);
 }

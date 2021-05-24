@@ -12,13 +12,12 @@ static int	initialize_more(t_tab *tab)
 {
 	int	i;
 
-	tab->n_times_eaten = malloc(sizeof(int) * tab->number_of_philosophers);
-	if (!tab->n_times_eaten)
-		return ((int)set_exit_code(tab, ERROR_MALLOC));
 	i = -1;
 	while (++i < tab->number_of_philosophers)
+	{
 		tab->n_times_eaten[i] = 0;
-	i = -1;
+		tab->time_last_meal[i] = 0;
+	}
 	sem_unlink("fork_sem");
 	sem_unlink("id_sem");
 	sem_unlink("print_sem");
@@ -53,5 +52,10 @@ int	initialize_variables(t_tab *tab, int ac, char **av)
 			return ((int)set_exit_code(tab, ERROR_BAD_ARGS));
 	}
 	tab->number_of_fat_philosophers = 0;
+	tab->n_times_eaten = malloc(sizeof(int) * tab->number_of_philosophers);
+	tab->time_last_meal
+		= malloc(sizeof(long long) * tab->number_of_philosophers);
+	if (!tab->n_times_eaten || !tab->time_last_meal)
+		return ((int)set_exit_code(tab, ERROR_MALLOC));
 	return (initialize_more(tab));
 }

@@ -29,26 +29,40 @@ static int	exit_error(t_tab *tab)
 	return (1);
 }
 
-long long	get_current_time(void)
+static int	grimreaper(t_tab *tab)
 {
-	struct timeval	tp;
-	long long		passed_time;
-
-	if (gettimeofday(&tp, 0) == -1)
-		return (-1);
-	passed_time = tp.tv_sec;
-	passed_time *= 1000;
-	passed_time += (tp.tv_usec / 1000);
-	return (passed_time);
+	int i;
+	
+	i = -1;
+	while (++i < tab->number_of_philosophers)
+	{
+		if (tab->time_last_meal[i] != 0
+		&& tab->time_last_meal[i] + tab->time_to_die < tab->current_time)
+		{
+			if (sem_wait(tab->print_sem) == -1)
+				return ((int)set_exit_code(tab, ERROR_SEM_WAIT));
+			if (!tab->exit_code)
+			{
+				tab->exit_code = DEATH;
+				printf("%lld %d "B_RED"died!"RESET"\n",
+					(tab->current_time - tab->start_time), i + 1);
+			}
+			if (sem_post(tab->print_sem) == -1)
+				return ((int)set_exit_code(tab, ERROR_SEM_WAIT));
+		}
+	}
+	return (1);
 }
 
-static int	update_current_time(t_tab *tab)
+static int	update_current_time__grimreaper(t_tab *tab)
 {
 	while (!tab->exit_code)
 	{
 		tab->current_time = get_current_time();
 		if (tab->current_time == -1)
 			return ((int)set_exit_code(tab, ERROR_GETTIMEOFDAY));
+		if (!grimreaper(tab))
+			return (0);
 		if (usleep(1000) == -1)
 			return ((int)set_exit_code(tab, ERROR_USLEEP));
 	}
@@ -80,6 +94,7 @@ int	main(int ac, char **av)
 	tab.exit_code = 0;
 	tab.n_times_eaten = NULL;
 	tab.pthreads_created = 0;
+	tab.time_last_meal = NULL;
 	if (ac < 5 || ac > 6)
 	{
 		set_exit_code(&tab, ERROR_AC);
@@ -87,7 +102,7 @@ int	main(int ac, char **av)
 	}
 	if (!initialize_variables(&tab, ac, av)
 		|| !create_philosophers(&tab)
-		|| !update_current_time(&tab))
+		|| !update_current_time__grimreaper(&tab))
 		return (exit_error(&tab));
 	if (!wrap_up(&tab))
 		return (1);

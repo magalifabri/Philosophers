@@ -11,7 +11,7 @@ int	abort_eating(t_tab *tab, sem_t *sem, int return_value, int exit_code)
 
 static void	eat_or_die(t_tab *tab, t_thread_var_struct *s, long long timestamp)
 {
-	if (s->time_last_meal + s->tab->time_to_die < s->tab->current_time)
+	if (tab->time_last_meal[s->phi_n] + s->tab->time_to_die < s->tab->current_time)
 	{
 		s->tab->exit_code = DEATH;
 		printf("%lld %d "B_RED"died"RESET"\n",
@@ -19,7 +19,7 @@ static void	eat_or_die(t_tab *tab, t_thread_var_struct *s, long long timestamp)
 	}
 	else
 	{
-		s->time_last_meal = tab->current_time;
+		tab->time_last_meal[s->phi_n] = tab->current_time;
 		printf("%lld %d has taken a fork\n%lld %d has taken a fork\n",
 			timestamp, s->phi_n + 1, timestamp, s->phi_n + 1);
 		printf("%lld %d is eating\n", timestamp, s->phi_n + 1);

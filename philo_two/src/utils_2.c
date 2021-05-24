@@ -1,5 +1,18 @@
 #include "../philo_two.h"
 
+long long	get_current_time(void)
+{
+	struct timeval	tp;
+	long long		passed_time;
+
+	if (gettimeofday(&tp, 0) == -1)
+		return (-1);
+	passed_time = tp.tv_sec;
+	passed_time *= 1000;
+	passed_time += (tp.tv_usec / 1000);
+	return (passed_time);
+}
+
 static int	ft_isspace(char c)
 {
 	return (c == ' ' || c == '\n' || c == '\t' || c == '\v' || c == '\f'
