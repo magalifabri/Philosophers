@@ -9,24 +9,24 @@ int	abort_eating(t_tab *tab, sem_t *sem, int return_value, int exit_code)
 	return (return_value);
 }
 
-static void	eat_or_die(t_tab *tab, t_thread_var_struct *s, long long timestamp)
+static void	eat_or_die(t_tab *tab, int phi_n, long long timestamp)
 {
-	if (tab->time_last_meal[s->phi_n] + s->tab->time_to_die < s->tab->current_time)
+	if (tab->time_last_meal[phi_n] + tab->time_to_die < tab->current_time)
 	{
-		s->tab->exit_code = DEATH;
+		tab->exit_code = DEATH;
 		printf("%lld %d "B_RED"died"RESET"\n",
-			(s->tab->current_time - s->tab->start_time), s->phi_n + 1);
+			(tab->current_time - tab->start_time), phi_n + 1);
 	}
 	else
 	{
-		tab->time_last_meal[s->phi_n] = tab->current_time;
+		tab->time_last_meal[phi_n] = tab->current_time;
 		printf("%lld %d has taken a fork\n%lld %d has taken a fork\n",
-			timestamp, s->phi_n + 1, timestamp, s->phi_n + 1);
-		printf("%lld %d is eating\n", timestamp, s->phi_n + 1);
+			timestamp, phi_n + 1, timestamp, phi_n + 1);
+		printf("%lld %d is eating\n", timestamp, phi_n + 1);
 	}
 }
 
-int	put_status_msg(t_tab *tab, t_thread_var_struct *s, char *msg)
+int	put_status_msg(t_tab *tab, int phi_n, char *msg)
 {
 	int			ret;
 	long long	timestamp;
@@ -38,9 +38,9 @@ int	put_status_msg(t_tab *tab, t_thread_var_struct *s, char *msg)
 	{
 		timestamp = tab->current_time - tab->start_time;
 		if (msg[0] == 'e')
-			eat_or_die(tab, s, timestamp);
+			eat_or_die(tab, phi_n, timestamp);
 		else
-			printf("%lld %d %s\n", timestamp, s->phi_n + 1, msg);
+			printf("%lld %d %s\n", timestamp, phi_n + 1, msg);
 	}
 	else
 		ret = 0;
