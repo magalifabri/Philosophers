@@ -62,6 +62,8 @@ int	wrap_up(t_tab *tab)
 {
 	int	ret;
 
+	if (usleep(10000) == -1)
+		ret = ((int)set_exit_code(tab, ERROR_USLEEP));
 	ret = 1;
 	if (tab->pthreads_created)
 		if (pthread_join(tab->philosopher_thread, NULL) != 0)
