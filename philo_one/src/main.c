@@ -1,6 +1,6 @@
 #include "../philo_one.h"
 
-int	exit_error(t_tab *tab)
+static int	exit_error(t_tab *tab)
 {
 	write(2, B_RED"ERROR: "RESET, 19);
 	if (tab->exit_code == ERROR_MUTEX_LOCK)
@@ -30,22 +30,37 @@ int	exit_error(t_tab *tab)
 }
 
 /*
-A helper function, usually called in a return statement, that allows us to set
-an exit code, indicating the reason for exiting the process, and return 0.
-
-Only set or replace the currently stored exit code if it's 0 (initialisation
-value) or an exit code that doesn't indicate an error (DEATH or ALL_FAT).
-Otherwise, if the currently stored exit code already indicates an error,
-don't replace it, as the initial error is the most important.
+Note on grimreaper: When a philosopher thread is waiting for a mutex
+lock to become available, it can't do anything else in the meantime. Thus it
+also can't check if the philosopher has died and report on its death in a
+timely manner. This task is outsourced to the grimreaper() function.
+It continually checks if the philosophers are still alive and reports
+on their death when required.
 */
 
-void	*set_exit_code(t_tab *tab, int exit_code)
+static int	grimreaper(t_tab *tab)
 {
-	if (tab->exit_code == 0
-		|| tab->exit_code == DEATH
-		|| tab->exit_code == ALL_FAT)
-		tab->exit_code = exit_code;
-	return (NULL);
+	int	i;
+
+	i = -1;
+	while (++i < tab->number_of_philosophers)
+	{
+		if (tab->time_last_meal[i] != 0
+			&& tab->time_last_meal[i] + tab->time_to_die < tab->current_time)
+		{
+			if (pthread_mutex_lock(&tab->print_lock) == -1)
+				return ((int)set_exit_code(tab, ERROR_MUTEX_LOCK));
+			if (!tab->exit_code)
+			{
+				tab->exit_code = DEATH;
+				printf("%lld %d "B_RED"died!"RESET"\n",
+					(tab->current_time - tab->start_time), i + 1);
+			}
+			if (pthread_mutex_unlock(&tab->print_lock) == -1)
+				return ((int)set_exit_code(tab, ERROR_MUTEX_UNLOCK));
+		}
+	}
+	return (1);
 }
 
 /*
@@ -54,12 +69,14 @@ used by the threads. This is done so that they don't each have to do this
 individually.
 */
 
-int	update_current_time(t_tab *tab)
+static int	update_current_time__grimreaper(t_tab *tab)
 {
 	while (!tab->exit_code)
 	{
-		tab->current_time = get_current_time(tab);
-		if (!tab->current_time)
+		tab->current_time = get_current_time();
+		if (tab->current_time == -1)
+			return ((int)set_exit_code(tab, ERROR_GETTIMEOFDAY));
+		if (!grimreaper(tab))
 			return (0);
 		if (usleep(1000) == -1)
 			return ((int)set_exit_code(tab, ERROR_USLEEP));
@@ -73,9 +90,9 @@ static int	create_philosophers(t_tab *tab)
 
 	tab->phi_n_c = 0;
 	i = -1;
-	tab->current_time = get_current_time(tab);
-	if (!tab->current_time)
-		return (0);
+	tab->current_time = get_current_time();
+	if (tab->current_time == -1)
+		return ((int)set_exit_code(tab, ERROR_GETTIMEOFDAY));
 	while (++i < tab->number_of_philosophers && !tab->exit_code)
 		if (pthread_create(&tab->philosopher_thread, NULL, phi_f, tab) != 0)
 			return ((int)set_exit_code(tab, ERROR_PTHREAD_CREATE));
@@ -95,11 +112,9 @@ int	main(int ac, char **av)
 		set_exit_code(&tab, ERROR_AC);
 		return (exit_error(&tab));
 	}
-	if (!initialize_variables_and_locks(&tab, ac, av))
-		return (exit_error(&tab));
-	if (!create_philosophers(&tab))
-		return (exit_error(&tab));
-	if (!update_current_time(&tab))
+	if (!initialize_variables(&tab, ac, av)
+		|| !create_philosophers(&tab)
+		|| !update_current_time__grimreaper(&tab))
 		return (exit_error(&tab));
 	if (!wrap_up(&tab))
 		return (1);
