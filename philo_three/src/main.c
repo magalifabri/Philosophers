@@ -3,10 +3,15 @@
 static int	wrap_up(t_tab *tab)
 {
 	int	ret;
+	int	i;
 
-	ret = 1;
+	i = 0;
+	while (i < tab->number_of_philosophers
+		&& tab->phi_pid[i] != -1)
+		kill(tab->phi_pid[i++], SIGKILL);
 	if (tab->phi_pid)
 		free(tab->phi_pid);
+	ret = 1;
 	if (tab->fork_sem_initialised)
 	{
 		if (sem_unlink("fork_sem") == -1)
@@ -24,6 +29,8 @@ static int	wrap_up(t_tab *tab)
 
 void	*return_error(t_tab *tab, int error_num)
 {
+	if (sem_wait(tab->print_sem) == -1)
+		exit(EXIT_ERROR);
 	write(2, B_RED"ERROR: "RESET, 19);
 	if (error_num == ERROR_MUTEX)
 		write(2, "pthread_mutex_(un)lock() returned -1\n", 38);
@@ -50,8 +57,8 @@ void	*return_error(t_tab *tab, int error_num)
 /*
 As soon as waitpid() returns with a pid, we know a philospopher has exited,
 either because he's fat or because he's dead (or because an error occurred).
-If he's fat, we let the other philosopher's continue; if he's dead (or an
-error occurred), we begin exiting by killing the other philosophers.
+If he's fat, we let the other philosopher's continue; if he's dead or an
+error occurred, we begin exiting.
 */
 
 static int	monitor_philosophers(t_tab *tab)
@@ -63,15 +70,10 @@ static int	monitor_philosophers(t_tab *tab)
 	while (philosophers_left--)
 	{
 		waitpid(-1, &exit_status, 0);
-		if (WEXITSTATUS(exit_status) == EXIT_DEATH
-			|| WEXITSTATUS(exit_status) == EXIT_ERROR)
-		{
-			while (tab->number_of_philosophers--)
-				kill(tab->phi_pid[tab->number_of_philosophers], SIGKILL);
-			if (WEXITSTATUS(exit_status) == EXIT_ERROR)
-				return ((int)return_error(tab, ERROR_CHILD));
-			break ;
-		}
+		if (WEXITSTATUS(exit_status) == EXIT_DEATH)
+			return (1);
+		if (WEXITSTATUS(exit_status) == EXIT_ERROR)
+			return ((int)return_error(tab, ERROR_CHILD));
 	}
 	return (1);
 }
@@ -91,10 +93,12 @@ static int	create_philosophers(t_tab *tab)
 		fork_ret = fork();
 		if (fork_ret == 0)
 			phi_f(tab);
-		else if (fork_ret > 0)
-			tab->phi_pid[i] = fork_ret;
 		else
-			return ((int)return_error(tab, ERROR_FORK));
+		{
+			tab->phi_pid[i] = fork_ret;
+			if (fork_ret == -1)
+				return ((int)return_error(tab, ERROR_FORK));
+		}
 	}
 	return (1);
 }
@@ -105,12 +109,12 @@ int	main(int ac, char **av)
 
 	pre_initialisation(&tab);
 	if (!initialize_variables(&tab, ac, av))
-		return (1);
+		exit(EXIT_FAILURE);
 	if (!create_philosophers(&tab))
-		return (1);
+		exit(EXIT_FAILURE);
 	if (!monitor_philosophers(&tab))
-		return (1);
+		exit(EXIT_FAILURE);
 	if (!wrap_up(&tab))
-		return (1);
-	return (0);
+		exit(EXIT_FAILURE);
+	exit(EXIT_SUCCESS);
 }

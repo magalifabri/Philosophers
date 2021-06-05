@@ -4,10 +4,14 @@
 "sem_unlink("fork_sem");" is required in case the program was
 exited badly the previous time and the semaphore wasn't unlinked. Possible
 errors are irrelevant enough to ignore them.
+
+"tab->phi_pid[i] = -1;" sentinel value.
 */
 
 int	initialize_variables_part_2(t_tab *tab)
 {
+	int	i;
+
 	sem_unlink("fork_sem");
 	tab->fork_sem = sem_open("fork_sem", O_CREAT, 0644,
 			tab->number_of_philosophers / 2);
@@ -23,6 +27,9 @@ int	initialize_variables_part_2(t_tab *tab)
 	tab->phi_pid = malloc(sizeof(int) * tab->number_of_philosophers);
 	if (!tab->phi_pid)
 		return ((int)return_error(tab, ERROR_MALLOC));
+	i = -1;
+	while (++i < tab->number_of_philosophers)
+		tab->phi_pid[i] = -1;
 	tab->start_time = get_current_time(tab);
 	if (tab->start_time == -1)
 		return (0);
