@@ -53,7 +53,6 @@ int	put_status(t_tab *tab, int phi_n, char *msg)
 	return (ret);
 }
 
-
 /*
 A helper function, usually called in a return statement, that allows us to set
 an exit code, indicating the reason for exiting the process, and return 0.
