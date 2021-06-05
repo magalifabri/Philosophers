@@ -1,6 +1,6 @@
 #include "../philo_one.h"
 
-int	exit_error(t_tab *tab)
+static int	exit_error(t_tab *tab)
 {
 	write(2, B_RED"ERROR: "RESET, 19);
 	if (tab->exit_code == ERROR_MUTEX_LOCK)
@@ -27,25 +27,6 @@ int	exit_error(t_tab *tab)
 		write(2, "pthread_join() didn't return 0\n", 32);
 	wrap_up(tab);
 	return (1);
-}
-
-/*
-A helper function, usually called in a return statement, that allows us to set
-an exit code, indicating the reason for exiting the process, and return 0.
-
-Only set or replace the currently stored exit code if it's 0 (initialisation
-value) or an exit code that doesn't indicate an error (DEATH or ALL_FAT).
-Otherwise, if the currently stored exit code already indicates an error,
-don't replace it, as the initial error is the most important.
-*/
-
-void	*set_exit_code(t_tab *tab, int exit_code)
-{
-	if (tab->exit_code == 0
-		|| tab->exit_code == DEATH
-		|| tab->exit_code == ALL_FAT)
-		tab->exit_code = exit_code;
-	return (NULL);
 }
 
 /*

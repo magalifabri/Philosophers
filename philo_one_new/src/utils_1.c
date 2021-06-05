@@ -53,12 +53,24 @@ int	put_status(t_tab *tab, int phi_n, char *msg)
 	return (ret);
 }
 
-static void	free_malloced_variables(t_tab *tab)
+
+/*
+A helper function, usually called in a return statement, that allows us to set
+an exit code, indicating the reason for exiting the process, and return 0.
+
+Only set or replace the currently stored exit code if it's 0 (initialisation
+value) or an exit code that doesn't indicate an error (DEATH or ALL_FAT).
+Otherwise, if the currently stored exit code already indicates an error,
+don't replace it, as the initial error is the most important.
+*/
+
+void	*set_exit_code(t_tab *tab, int exit_code)
 {
-	if (tab->forks)
-		free(tab->forks);
-	if (tab->n_times_eaten)
-		free(tab->n_times_eaten);
+	if (tab->exit_code == 0
+		|| tab->exit_code == DEATH
+		|| tab->exit_code == ALL_FAT)
+		tab->exit_code = exit_code;
+	return (NULL);
 }
 
 static int	destroy_locks(t_tab *tab)
@@ -99,6 +111,9 @@ int	wrap_up(t_tab *tab)
 			ret = ((int)set_exit_code(tab, ERROR_PTHREAD_JOIN));
 	if (!destroy_locks(tab))
 		ret = 0;
-	free_malloced_variables(tab);
+	if (tab->forks)
+		free(tab->forks);
+	if (tab->n_times_eaten)
+		free(tab->n_times_eaten);
 	return (ret);
 }

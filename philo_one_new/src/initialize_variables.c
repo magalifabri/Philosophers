@@ -20,10 +20,6 @@ static int	initialize_more(t_tab *tab)
 	{
 		tab->n_times_eaten[i] = 0;
 		tab->time_last_meal[i] = 0;
-	}
-	i = -1;
-	while (++i < tab->number_of_philosophers)
-	{
 		if (pthread_mutex_init(&tab->forks[i].lock, NULL) != 0)
 			return ((int)set_exit_code(tab, ERROR_MUTEX_INIT));
 		tab->forks[i].available = 1;
