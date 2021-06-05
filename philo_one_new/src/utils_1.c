@@ -1,13 +1,9 @@
-#include "../philo_two.h"
+#include "../philo_one.h"
 
-// int	abort_eating(t_tab *tab, sem_t *sem, int return_value, int exit_code)
-// {
-// 	if (sem_post(sem) == -1)
-// 		return ((int)set_exit_code(tab, ERROR_SEM_POST));
-// 	if (exit_code)
-// 		set_exit_code(tab, exit_code);
-// 	return (return_value);
-// }
+/*
+Helper function to trim down the length of put_status().
+It checks when a philosopher is about to eat, if it shouldn't be dead instead.
+*/
 
 static void	eat_or_die(t_tab *tab, int phi_n, long long timestamp)
 {
@@ -26,13 +22,19 @@ static void	eat_or_die(t_tab *tab, int phi_n, long long timestamp)
 	}
 }
 
+/*
+put_status() prints the philosophers' activities to stdout. It uses a mutex
+lock to make sure only one philosopher (thread) does this at a time. It also
+prevents more status messages from being printed when a philosopher
+has died, an error has occurred or all philosophers are fat and reports this
+back to the caller function as this means the threads need to exit.
+*/
+
 int	put_status(t_tab *tab, int phi_n, char *msg)
 {
 	int			ret;
 	long long	timestamp;
 
-	// if (sem_wait(tab->print_sem) == -1)
-	// 	return ((int)set_exit_code(tab, ERROR_SEM_WAIT));
 	if (pthread_mutex_lock(&tab->print_lock) == -1)
 		return ((int)set_exit_code(tab, ERROR_MUTEX_LOCK));
 	ret = 1;
@@ -46,8 +48,6 @@ int	put_status(t_tab *tab, int phi_n, char *msg)
 	}
 	else
 		ret = 0;
-	// if (sem_post(tab->print_sem) == -1)
-	// 	return ((int)set_exit_code(tab, ERROR_SEM_WAIT));
 	if (pthread_mutex_unlock(&tab->print_lock) == -1)
 		return ((int)set_exit_code(tab, ERROR_MUTEX_UNLOCK));
 	return (ret);
@@ -80,26 +80,25 @@ static int	destroy_locks(t_tab *tab)
 	return (ret);
 }
 
+/*
+Calls all the functions required to clean up before exiting.
+
+Note on `usleep(10000);` gives threads the time to exit before starting
+the clean up. Not doing so can result in errors.
+*/
+
 int	wrap_up(t_tab *tab)
 {
 	int	ret;
 
+	ret = 1;
 	if (usleep(10000) == -1)
 		ret = ((int)set_exit_code(tab, ERROR_USLEEP));
-	ret = 1;
 	if (tab->pthreads_created)
 		if (pthread_join(tab->philosopher_thread, NULL) != 0)
 			ret = ((int)set_exit_code(tab, ERROR_PTHREAD_JOIN));
 	if (!destroy_locks(tab))
 		ret = 0;
 	free_malloced_variables(tab);
-	// if (tab->n_times_eaten)
-	// {
-	// 	free(tab->n_times_eaten);
-	// 	tab->n_times_eaten = NULL;
-	// }
-	// sem_unlink("fork_sem");
-	// sem_unlink("id_sem");
-	// sem_unlink("print_sem");
 	return (ret);
 }

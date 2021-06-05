@@ -1,4 +1,4 @@
-#include "../philo_two.h"
+#include "../philo_one.h"
 
 void	pre_initialisation(t_tab *tab)
 {
@@ -10,14 +10,6 @@ void	pre_initialisation(t_tab *tab)
 	tab->id_lock_initialized = 0;
 	tab->pthreads_created = 0;
 }
-
-/*
-Note(s) on initialize_variables_part_2():
-
-"sem_unlink(x);" is required in case the program was
-exited badly the previous time and the semaphores weren't unlinked. Possible
-errors are irrelevant enough to ignore them.
-*/
 
 static int	initialize_more(t_tab *tab)
 {
@@ -43,21 +35,18 @@ static int	initialize_more(t_tab *tab)
 	if (pthread_mutex_init(&tab->id_lock, NULL) != 0)
 		return ((int)set_exit_code(tab, ERROR_MUTEX_INIT));
 	tab->id_lock_initialized = 1;
-	// sem_unlink("fork_sem");
-	// sem_unlink("id_sem");
-	// sem_unlink("print_sem");
-	// tab->fork_sem = sem_open("fork_sem", O_CREAT, 0644,
-	// 		tab->number_of_philosophers / 2);
-	// tab->id_sem = sem_open("id_sem", O_CREAT, 0644, 1);
-	// tab->print_sem = sem_open("print_sem", O_CREAT, 0644, 1);
-	// if (tab->fork_sem == SEM_FAILED || tab->id_sem == SEM_FAILED
-	// 	|| tab->print_sem == SEM_FAILED)
-	// 	return ((int)set_exit_code(tab, ERROR_SEM_OPEN));
 	tab->start_time = get_current_time();
 	if (tab->start_time == -1)
 		return ((int)set_exit_code(tab, ERROR_GETTIMEOFDAY));
 	return (1);
 }
+
+/*
+Note(s) on initialize_variables():
+
+"tab->number_of_times_each_philosopher_must_eat = -1": -1 is a sentinel
+value for an absence of value (a value for it wasn't supplied with av)
+*/
 
 int	initialize_variables(t_tab *tab, int ac, char **av)
 {

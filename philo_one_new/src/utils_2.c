@@ -1,4 +1,4 @@
-#include "../philo_two.h"
+#include "../philo_one.h"
 
 long long	get_current_time(void)
 {

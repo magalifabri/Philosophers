@@ -1,4 +1,4 @@
-NAME = philo_two
+NAME = philo_one
 
 SRC_DIR = ./src/
 SRC_FILES = \
@@ -11,7 +11,7 @@ SRC_FILES = \
 OBJ_DIR = ./obj/
 OBJ_FILES = $(addprefix $(OBJ_DIR), $(SRC_FILES:.c=.o))
 
-INCLUDE_FILES = philo_two.h
+INCLUDE_FILES = philo_one.h
 
 CC = gcc
 FLAGS = -g -Wall -Wextra -Werror
