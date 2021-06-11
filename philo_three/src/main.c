@@ -53,7 +53,7 @@ void	*return_error(t_tab *tab, int error_num)
 	else if (error_num == ERROR_AC)
 		write(2, "too few or too many arguments\n", 31);
 	else if (error_num == ERROR_CHILD)
-		write(2, "something went wrong in child process\n", 31);
+		write(2, "something went wrong in child process\n", 39);
 	wrap_up(tab);
 	return (NULL);
 }
