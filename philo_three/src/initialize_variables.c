@@ -49,8 +49,10 @@ int	initialize_variables(t_tab *tab, int ac, char **av)
 	tab->time_to_die = ft_atoi(av[2]);
 	tab->time_to_eat = ft_atoi(av[3]);
 	tab->time_to_sleep = ft_atoi(av[4]);
-	if (tab->number_of_philosophers < 2 || tab->time_to_die < 1
-		|| tab->time_to_eat < 1 || tab->time_to_sleep < 1)
+	if (tab->number_of_philosophers < 2 || tab->number_of_philosophers > 300
+		|| tab->time_to_die < 1
+		|| tab->time_to_eat < 1
+		|| tab->time_to_sleep < 1)
 		return ((int)return_error(tab, ERROR_BAD_ARGS));
 	if (ac == 5)
 		tab->number_of_times_each_philosopher_must_eat = -1;
@@ -60,11 +62,6 @@ int	initialize_variables(t_tab *tab, int ac, char **av)
 		if (tab->number_of_times_each_philosopher_must_eat < 1)
 			return ((int)return_error(tab, ERROR_BAD_ARGS));
 	}
-	if (tab->number_of_philosophers < 2
-		|| tab->time_to_die < 1
-		|| tab->time_to_eat < 1
-		|| tab->time_to_sleep < 1)
-		return ((int)return_error(tab, ERROR_BAD_ARGS));
 	return (initialize_variables_part_2(tab));
 }
 
