@@ -81,6 +81,8 @@ static int	update_current_time__grimreaper(t_tab *tab)
 		if (usleep(1000) == -1)
 			return ((int)set_exit_code(tab, ERROR_USLEEP));
 	}
+	if (tab->exit_code != DEATH && tab->exit_code != ALL_FAT)
+		return (0);
 	return (1);
 }
 
