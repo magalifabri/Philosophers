@@ -26,7 +26,7 @@ static int	wrap_up(t_tab *tab)
 			printf(B_RED"ERROR: "RESET"sem_unlink(print_sem) returned -1\n");
 		ret = 0;
 	}
-	system("leaks philo_one > leaks_report.out");
+	system("leaks philo_three > leaks_report.out");
 	return (ret);
 }
 
