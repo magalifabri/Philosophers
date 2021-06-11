@@ -5,12 +5,14 @@ static int	wrap_up(t_tab *tab)
 	int	ret;
 	int	i;
 
-	i = 0;
-	while (i < tab->number_of_philosophers
-		&& tab->phi_pid[i] != -1)
-		kill(tab->phi_pid[i++], SIGKILL);
 	if (tab->phi_pid)
+	{
+		i = 0;
+		while (i < tab->number_of_philosophers
+			&& tab->phi_pid[i] != -1)
+			kill(tab->phi_pid[i++], SIGKILL);
 		free(tab->phi_pid);
+	}
 	ret = 1;
 	if (tab->fork_sem_initialised)
 	{
@@ -29,8 +31,9 @@ static int	wrap_up(t_tab *tab)
 
 void	*return_error(t_tab *tab, int error_num)
 {
-	if (sem_wait(tab->print_sem) == -1)
-		exit(EXIT_ERROR);
+	if (tab->print_sem_initialised)
+		if (sem_wait(tab->print_sem) == -1)
+			exit(EXIT_ERROR);
 	write(2, B_RED"ERROR: "RESET, 19);
 	if (error_num == ERROR_MUTEX)
 		write(2, "pthread_mutex_(un)lock() returned -1\n", 38);
