@@ -76,6 +76,5 @@ int	wrap_up(t_tab *tab)
 	sem_unlink("fork_sem");
 	sem_unlink("id_sem");
 	sem_unlink("print_sem");
-	system("leaks philo_two > leaks_report.out");
 	return (ret);
 }

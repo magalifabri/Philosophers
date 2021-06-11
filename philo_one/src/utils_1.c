@@ -114,6 +114,5 @@ int	wrap_up(t_tab *tab)
 		free(tab->forks);
 	if (tab->n_times_eaten)
 		free(tab->n_times_eaten);
-	system("leaks philo_one > leaks_report.out");
 	return (ret);
 }
